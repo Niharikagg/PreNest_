@@ -1,30 +1,82 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:prenest/features/reports/capture/document_scanner_service.dart';
+import 'package:prenest/features/reports/capture/document_scanner_test_page.dart';
 import 'package:prenest/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('app opens the document scanner test page', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const MyApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Document scanner test'), findsOneWidget);
+    expect(find.text('Scan Report'), findsOneWidget);
+    expect(find.textContaining('gallery import'), findsOneWidget);
   });
+
+  testWidgets('shows a friendly message when scanning is cancelled', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DocumentScannerTestPage(
+          scannerService: _FakeDocumentScannerService(null),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Scan Report'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Scanning cancelled.'), findsOneWidget);
+  });
+
+  testWidgets('reports a result with no image', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DocumentScannerTestPage(
+          scannerService: _FakeDocumentScannerService(
+            DocumentScanResult(images: []),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Scan Report'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No scanned image was returned.'), findsOneWidget);
+  });
+
+  testWidgets('displays scanner failures', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DocumentScannerTestPage(
+          scannerService: _FailingDocumentScannerService(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Scan Report'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Scanner failed for testing.'), findsOneWidget);
+  });
+}
+
+class _FakeDocumentScannerService extends DocumentScannerService {
+  _FakeDocumentScannerService(this.result);
+
+  final DocumentScanResult? result;
+
+  @override
+  Future<DocumentScanResult?> scanDocument() async => result;
+}
+
+class _FailingDocumentScannerService extends DocumentScannerService {
+  @override
+  Future<DocumentScanResult?> scanDocument() async {
+    throw const DocumentScannerException('Scanner failed for testing.');
+  }
 }
