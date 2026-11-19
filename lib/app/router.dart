@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 
 import '../features/records/records_screen.dart';
 import '../features/records/test_detail_screen.dart';
+import '../features/records/vitals_log_screen.dart';
 import '../features/timeline/timeline_screen.dart';
 import '../features/trends/trends_screen.dart';
+import '../features/validity/danger_sign_checker_screen.dart';
 import '../features/verify/verify_screen.dart';
 import 'app_shell.dart';
 
@@ -72,6 +74,18 @@ final appRouter = GoRouter(
           ],
         ),
       ],
+    ),
+    GoRoute(
+      path: '/danger-signs',
+      name: 'dangerSigns',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const DangerSignCheckerScreen(),
+    ),
+    GoRoute(
+      path: '/vitals',
+      name: 'vitals',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const VitalsLogScreen(),
     ),
   ],
 );
