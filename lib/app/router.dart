@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/advisor/chat_screen.dart';
 import '../features/records/records_screen.dart';
 import '../features/records/test_detail_screen.dart';
 import '../features/records/vitals_log_screen.dart';
@@ -86,6 +87,12 @@ final appRouter = GoRouter(
       name: 'vitals',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const VitalsLogScreen(),
+    ),
+    GoRoute(
+      path: '/advisor',
+      name: 'advisor',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const ChatScreen(),
     ),
   ],
 );

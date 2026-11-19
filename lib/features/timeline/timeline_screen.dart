@@ -32,8 +32,10 @@ class TimelineScreen extends ConsumerWidget {
     final completedIds = ref.watch(completedChecklistProvider);
     final theme = Theme.of(context);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -464,6 +466,12 @@ class TimelineScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+    floatingActionButton: FloatingActionButton.extended(
+      onPressed: () => context.push('/advisor'),
+      icon: const Icon(Icons.support_agent),
+      label: const Text('AI Advisor'),
+    ),
+  );
+}
 }
