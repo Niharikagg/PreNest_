@@ -1,22 +1,42 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
+import 'package:prenest/core/security/app_security_service.dart';
+import 'package:prenest/core/security/biometric_authenticator.dart';
+import 'package:prenest/core/security/secure_key_storage.dart';
 import 'package:prenest/features/reports/capture/capture_quality_check_service.dart';
 import 'package:prenest/features/reports/capture/document_scanner_service.dart';
 import 'package:prenest/features/reports/capture/document_scanner_test_page.dart';
 import 'package:prenest/main.dart';
 
 void main() {
-  testWidgets('app opens the document scanner test page', (
+  testWidgets('App shell tabs render behind the root lock gate', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MyApp());
+    final authenticator = MockBiometricAuthenticator(shouldSucceed: false);
+    final service = AppSecurityService(
+      authenticator: authenticator,
+      secureStorage: MemorySecureKeyStorage(),
+    );
+    await tester.pumpWidget(
+      ProviderScope(child: MyApp(securityService: service)),
+    );
+    await tester.pumpAndSettle();
 
-    expect(find.text('Document scanner test'), findsOneWidget);
-    expect(find.text('Scan Report'), findsOneWidget);
-    expect(find.textContaining('gallery import'), findsOneWidget);
+    expect(find.text('Unlock PreNest'), findsOneWidget);
+    expect(find.text('Timeline'), findsNothing);
+
+    authenticator.shouldSucceed = true;
+    await tester.tap(find.text('Unlock PreNest'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Timeline'), findsWidgets);
+    expect(find.text('Records'), findsWidgets);
+    expect(find.text('Verify'), findsWidgets);
+    expect(find.text('Trends'), findsWidgets);
   });
 
   testWidgets('shows a friendly message when scanning is cancelled', (

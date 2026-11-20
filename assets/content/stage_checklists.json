@@ -1,0 +1,146 @@
+[
+  {
+    "id": "plan_folic_acid",
+    "stage": "plan",
+    "title": "Folic Acid Supplementation",
+    "description": "Start daily 400 mcg folic acid at least 1 month prior to conception to prevent neural tube defects.",
+    "isForHim": false,
+    "isForHer": true,
+    "sourceLink": "https://www.who.int/publications/i/item/9789241550086"
+  },
+  {
+    "id": "plan_bp_sugar",
+    "stage": "plan",
+    "title": "Preconception Blood Sugar & BP",
+    "description": "Screen baseline fasting blood glucose and blood pressure to detect pre-existing hypertension or diabetes early.",
+    "isForHim": true,
+    "isForHer": true,
+    "sourceLink": "https://www.cdc.gov/preconception/planning.html"
+  },
+  {
+    "id": "plan_dental_checkup",
+    "stage": "plan",
+    "title": "Comprehensive Dental & Oral Health",
+    "description": "Schedule an oral health checkup; periodontal infections are linked with adverse pregnancy outcomes.",
+    "isForHim": false,
+    "isForHer": true,
+    "sourceLink": "https://www.acog.org/clinical/clinical-guidance/committee-opinion/articles/2013/08/oral-health-care-during-pregnancy-and-through-the-lifespan"
+  },
+  {
+    "id": "plan_male_lifestyle",
+    "stage": "plan",
+    "title": "Sperm Health & Lifestyle Prep",
+    "description": "Avoid smoking, alcohol, and excessive heat exposure (hot tubs, saunas) to optimize sperm count and motility.",
+    "isForHim": true,
+    "isForHer": false,
+    "sourceLink": "https://www.who.int/teams/sexual-and-reproductive-health-and-research"
+  },
+  {
+    "id": "trying_cycle_nutrition",
+    "stage": "trying",
+    "title": "Cycle & Nutrition Tracking",
+    "description": "Log menstrual cycle dates, monitor fertile window, and adopt an antioxidant-rich, balanced Mediterranean diet.",
+    "isForHim": false,
+    "isForHer": true,
+    "sourceLink": "https://www.acog.org/womens-health/faqs/fertility-awareness-based-methods-of-family-planning"
+  },
+  {
+    "id": "trying_ovulation_lh",
+    "stage": "trying",
+    "title": "Ovulation & LH Peak Mapping",
+    "description": "Utilize ovulation predictor kits (OPKs) or basal body temperature to identify peak fertility 24-36h before ovulation.",
+    "isForHim": false,
+    "isForHer": true,
+    "sourceLink": "https://www.nhs.uk/pregnancy/trying-for-a-baby/how-can-i-get-pregnant-faster/"
+  },
+  {
+    "id": "trying_partner_multivitamin",
+    "stage": "trying",
+    "title": "Paternal Micronutrient Optimization",
+    "description": "Ensure adequate zinc, selenium, CoQ10, and vitamin C intake to support DNA integrity in sperm.",
+    "isForHim": true,
+    "isForHer": false,
+    "sourceLink": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6678970/"
+  },
+  {
+    "id": "trying_stress_management",
+    "stage": "trying",
+    "title": "Shared Stress Reduction & Sleep",
+    "description": "Maintain consistent 7-8 hours sleep and active stress reduction to optimize reproductive hormones.",
+    "isForHim": true,
+    "isForHer": true,
+    "sourceLink": "https://www.reproductivefacts.org/resources/educational-videos/videos/stress-and-infertility/"
+  },
+  {
+    "id": "pregnancy_anc_ifa",
+    "stage": "pregnancy",
+    "title": "ANC Visit Planner & IFA Tablets",
+    "description": "Register early antenatal care visits and initiate daily Iron & Folic Acid (IFA) tablets from the second trimester.",
+    "isForHim": false,
+    "isForHer": true,
+    "sourceLink": "https://www.who.int/news-room/fact-sheets/detail/maternal-mortality"
+  },
+  {
+    "id": "pregnancy_kick_counter",
+    "stage": "pregnancy",
+    "title": "Kick Counter",
+    "description": "Track fetal movements starting week 28; expect at least 10 kicks or movements within a 2-hour window during restful periods.",
+    "isForHim": false,
+    "isForHer": true,
+    "sourceLink": "https://www.acog.org/womens-health/faqs/how-your-fetus-grows-during-pregnancy"
+  },
+  {
+    "id": "pregnancy_anomaly_scan",
+    "stage": "pregnancy",
+    "title": "TIFFA / Level-II Ultrasound Scan",
+    "description": "Schedule the Target Imaging for Fetal Anomalies (TIFFA) scan between 18–20 weeks of gestation.",
+    "isForHim": true,
+    "isForHer": true,
+    "sourceLink": "https://www.acog.org/clinical/clinical-guidance/practice-bulletin/articles/2016/12/ultrasound-in-pregnancy"
+  },
+  {
+    "id": "pregnancy_gestational_diabetes",
+    "stage": "pregnancy",
+    "title": "OGTT Gestational Diabetes Screen",
+    "description": "Undergo oral glucose tolerance testing between weeks 24 and 28 to detect gestational diabetes early.",
+    "isForHim": false,
+    "isForHer": true,
+    "sourceLink": "https://diabetes.org/diabetes/gestational-diabetes"
+  },
+  {
+    "id": "pregnancy_birth_preparedness",
+    "stage": "pregnancy",
+    "title": "Birth Preparedness & Emergency Route",
+    "description": "Prepare hospital bag, establish emergency transport route (108/hospital), and choose the accredited birthing facility.",
+    "isForHim": true,
+    "isForHer": true,
+    "sourceLink": "https://www.who.int/publications/i/item/9789241546669"
+  },
+  {
+    "id": "postpartum_pnc_visits",
+    "stage": "postpartum",
+    "title": "Postnatal Visits & Recovery Checks",
+    "description": "Complete maternal checkups within 48 hours, at 7–14 days, and at 6 weeks post-delivery for wound healing and mental health.",
+    "isForHim": false,
+    "isForHer": true,
+    "sourceLink": "https://www.who.int/publications/i/item/9789240045989"
+  },
+  {
+    "id": "postpartum_newborn_vaccines",
+    "stage": "postpartum",
+    "title": "Postnatal Visits & Newborn Vaccines",
+    "description": "Ensure birth-dose immunizations (BCG, OPV-0, and Hepatitis B birth dose) are administered within 24 hours.",
+    "isForHim": true,
+    "isForHer": true,
+    "sourceLink": "https://www.who.int/teams/immunization-vaccines-and-biologicals"
+  },
+  {
+    "id": "postpartum_lactation_support",
+    "stage": "postpartum",
+    "title": "Exclusive Breastfeeding & Partner Support",
+    "description": "Initiate early skin-to-skin, establish latching within 1 hour of birth, and actively support feeding sessions and hydration.",
+    "isForHim": true,
+    "isForHer": true,
+    "sourceLink": "https://www.unicef.org/breastfeeding"
+  }
+]

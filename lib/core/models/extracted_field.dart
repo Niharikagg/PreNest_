@@ -1,10 +1,8 @@
 import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 
-enum ExtractionStatus {
-  auto,
-  needsReview,
-}
+enum ExtractionStatus { auto, needsReview }
 
 @immutable
 class ExtractedField {

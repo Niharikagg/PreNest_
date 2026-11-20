@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/security/app_security_service.dart';
 
 /// Basic lock page for authentication testing and gating app access.
@@ -6,27 +7,40 @@ class LockScreen extends StatefulWidget {
   final AppSecurityService securityService;
   final VoidCallback? onUnlocked;
 
-  const LockScreen({
-    super.key,
-    required this.securityService,
-    this.onUnlocked,
-  });
+  const LockScreen({super.key, required this.securityService, this.onUnlocked});
 
   @override
   State<LockScreen> createState() => _LockScreenState();
 }
 
-class _LockScreenState extends State<LockScreen> {
+class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   bool _isAuthenticating = false;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // Attempt biometric prompt automatically on initial mount
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _triggerAuthentication();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        !widget.securityService.isUnlocked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _triggerAuthentication();
+      });
+    }
   }
 
   Future<void> _triggerAuthentication() async {
@@ -44,7 +58,8 @@ class _LockScreenState extends State<LockScreen> {
           widget.onUnlocked?.call();
         } else {
           setState(() {
-            _errorMessage = 'Authentication cancelled or failed. Tap below to try again.';
+            _errorMessage =
+                'Authentication cancelled or failed. Tap below to try again.';
           });
         }
       }
@@ -136,7 +151,9 @@ class _LockScreenState extends State<LockScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.fingerprint),
-                  label: Text(_isAuthenticating ? 'Authenticating...' : 'Unlock PreNest'),
+                  label: Text(
+                    _isAuthenticating ? 'Authenticating...' : 'Unlock PreNest',
+                  ),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 28,

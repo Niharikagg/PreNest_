@@ -1,9 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-enum VerificationStatus {
-  confirmed,
-  corrected,
-}
+enum VerificationStatus { confirmed, corrected }
 
 @immutable
 class VerifiedResult {

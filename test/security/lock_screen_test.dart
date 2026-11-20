@@ -20,11 +20,11 @@ void main() {
       );
     });
 
-    testWidgets('renders lock screen branding and unlock button', (tester) async {
+    testWidgets('renders lock screen branding and unlock button', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: LockScreen(securityService: securityService),
-        ),
+        MaterialApp(home: LockScreen(securityService: securityService)),
       );
       await tester.pumpAndSettle();
 
@@ -36,7 +36,9 @@ void main() {
       expect(find.byIcon(Icons.fingerprint), findsOneWidget);
     });
 
-    testWidgets('triggers authentication and invokes callback on success', (tester) async {
+    testWidgets('triggers authentication and invokes callback on success', (
+      tester,
+    ) async {
       var unlockedCalled = false;
       authenticator.shouldSucceed = true;
 
@@ -54,21 +56,40 @@ void main() {
       expect(securityService.isUnlocked, isTrue);
     });
 
-    testWidgets('displays error message when authentication fails', (tester) async {
+    testWidgets('displays error message when authentication fails', (
+      tester,
+    ) async {
       authenticator.shouldSucceed = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: LockScreen(securityService: securityService),
-        ),
+        MaterialApp(home: LockScreen(securityService: securityService)),
       );
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Authentication cancelled or failed. Tap below to try again.'),
+        find.text(
+          'Authentication cancelled or failed. Tap below to try again.',
+        ),
         findsOneWidget,
       );
       expect(securityService.isUnlocked, isFalse);
+    });
+
+    testWidgets('retries authentication when the app resumes', (tester) async {
+      authenticator.shouldSucceed = false;
+      await tester.pumpWidget(
+        MaterialApp(home: LockScreen(securityService: securityService)),
+      );
+      await tester.pumpAndSettle();
+      expect(securityService.isUnlocked, isFalse);
+
+      authenticator.shouldSucceed = true;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pump();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(securityService.isUnlocked, isTrue);
     });
   });
 }
