@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/l10n/app_l10n.dart';
 import '../features/profile/profile_provider.dart';
 
 class AppShell extends ConsumerWidget {
@@ -9,24 +10,22 @@ class AppShell extends ConsumerWidget {
 
   const AppShell({super.key, required this.navigationShell});
 
-  String _getTabTitle(int index) {
+  String _getTabTitle(int index, AppLanguage lang) {
     switch (index) {
       case 0:
-        return 'Timeline';
+        return AppStrings.t('Timeline', lang);
       case 1:
-        return 'Records';
+        return AppStrings.t('Records', lang);
       case 2:
-        return 'Verify';
+        return AppStrings.t('Verify', lang);
       case 3:
-        return 'Trends';
+        return AppStrings.t('Trends', lang);
       default:
         return 'PreNest';
     }
   }
 
   void _showProfileSwitcher(BuildContext context, WidgetRef ref) {
-    final couple = ref.read(coupleProvider);
-
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -37,10 +36,11 @@ class AppShell extends ConsumerWidget {
         return Consumer(
           builder: (context, ref, _) {
             final currentCouple = ref.watch(coupleProvider);
+            final currentLang = ref.watch(languageProvider);
             final activeId = currentCouple.activePartnerId;
 
             return SafeArea(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 8,
@@ -125,8 +125,45 @@ class AppShell extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
+
+                    // Language Selector (3-ChoiceChip Row)
                     Text(
-                      'Select Active Partner Profile',
+                      AppStrings.t('Language', currentLang),
+                      style: Theme.of(context).textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: AppLanguage.values.map((lang) {
+                        final isSelected = lang == currentLang;
+                        return ChoiceChip(
+                          avatar: isSelected
+                              ? const Icon(Icons.check, size: 16)
+                              : null,
+                          label: Text(
+                            lang.label,
+                            style: TextStyle(
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) {
+                              ref
+                                  .read(languageProvider.notifier)
+                                  .setLanguage(lang);
+                            }
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    Text(
+                      AppStrings.t('Select Active Partner Profile', currentLang),
                       style: Theme.of(context).textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
@@ -221,6 +258,7 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final couple = ref.watch(coupleProvider);
+    final currentLang = ref.watch(languageProvider);
     final activePartner = couple.activePartner;
     final currentIndex = navigationShell.currentIndex;
     final theme = Theme.of(context);
@@ -269,7 +307,7 @@ class AppShell extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          _getTabTitle(currentIndex),
+                          _getTabTitle(currentIndex, currentLang),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -294,10 +332,45 @@ class AppShell extends ConsumerWidget {
           ],
         ),
         actions: [
+          // Live Language Selector Menu
+          PopupMenuButton<AppLanguage>(
+            icon: const Icon(Icons.translate, size: 20),
+            tooltip: AppStrings.t('Language', currentLang),
+            initialValue: currentLang,
+            onSelected: (AppLanguage lang) {
+              ref.read(languageProvider.notifier).setLanguage(lang);
+            },
+            itemBuilder: (context) => AppLanguage.values.map((lang) {
+              final isSelected = lang == currentLang;
+              return PopupMenuItem<AppLanguage>(
+                value: lang,
+                child: Row(
+                  children: [
+                    Icon(
+                      isSelected ? Icons.check : Icons.circle_outlined,
+                      size: 16,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : Colors.transparent,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      lang.label,
+                      style: TextStyle(
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 14.0),
             child: Tooltip(
-              message: 'Switch Partner Profile (${activePartner.name})',
+              message: '${AppStrings.t('Switch Partner Profile', currentLang)} (${activePartner.name})',
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -378,26 +451,26 @@ class AppShell extends ConsumerWidget {
               initialLocation: index == currentIndex,
             );
           },
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.timeline_outlined),
-              selectedIcon: Icon(Icons.timeline),
-              label: 'Timeline',
+              icon: const Icon(Icons.timeline_outlined),
+              selectedIcon: const Icon(Icons.timeline),
+              label: AppStrings.t('Timeline', currentLang),
             ),
             NavigationDestination(
-              icon: Icon(Icons.description_outlined),
-              selectedIcon: Icon(Icons.description),
-              label: 'Records',
+              icon: const Icon(Icons.description_outlined),
+              selectedIcon: const Icon(Icons.description),
+              label: AppStrings.t('Records', currentLang),
             ),
             NavigationDestination(
-              icon: Icon(Icons.fact_check_outlined),
-              selectedIcon: Icon(Icons.fact_check),
-              label: 'Verify',
+              icon: const Icon(Icons.fact_check_outlined),
+              selectedIcon: const Icon(Icons.fact_check),
+              label: AppStrings.t('Verify', currentLang),
             ),
             NavigationDestination(
-              icon: Icon(Icons.trending_up_outlined),
-              selectedIcon: Icon(Icons.trending_up),
-              label: 'Trends',
+              icon: const Icon(Icons.trending_up_outlined),
+              selectedIcon: const Icon(Icons.trending_up),
+              label: AppStrings.t('Trends', currentLang),
             ),
           ],
         ),

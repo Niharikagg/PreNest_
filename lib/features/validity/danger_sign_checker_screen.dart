@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/app_l10n.dart';
+import '../../core/l10n/tts_service.dart';
+
 class DangerSign {
   final String id;
   final String title;
@@ -101,12 +104,12 @@ final dangerSignsProvider =
 class DangerSignCheckerScreen extends ConsumerWidget {
   const DangerSignCheckerScreen({super.key});
 
-  void _simulateAmbulanceCall(BuildContext context) {
+  void _simulateAmbulanceCall(BuildContext context, AppLanguage currentLang) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         icon: const Icon(Icons.emergency, color: Colors.red, size: 48),
-        title: const Text('Connecting to Emergency (108)...'),
+        title: Text('${AppStrings.t('Call 108', currentLang)}...'),
         content: const Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,7 +135,7 @@ class DangerSignCheckerScreen extends ConsumerWidget {
           FilledButton.icon(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             icon: const Icon(Icons.phone_in_talk),
-            label: const Text('Call 108 (Simulated)'),
+            label: Text(AppStrings.t('Call 108', currentLang)),
             onPressed: () {
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
@@ -152,17 +155,18 @@ class DangerSignCheckerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedSigns = ref.watch(dangerSignsProvider);
+    final currentLang = ref.watch(languageProvider);
     final hasCriticalSigns = selectedSigns.isNotEmpty;
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Danger-Sign Checker'),
+        title: Text(AppStrings.t('Danger-Sign Checker', currentLang)),
         actions: [
           if (hasCriticalSigns)
             TextButton.icon(
               icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Clear'),
+              label: Text(AppStrings.t('Clear', currentLang)),
               onPressed: () {
                 ref.read(dangerSignsProvider.notifier).reset();
               },
@@ -204,8 +208,7 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'CRITICAL WARNING: ${selectedSigns.length} danger sign(s) detected! '
-                                'Go to the nearest emergency health facility or hospital immediately.',
+                                '${AppStrings.t('critical_warning_prefix', currentLang)}${selectedSigns.length} danger sign(s) detected! ${AppStrings.t('critical_warning_body', currentLang)}',
                                 style: const TextStyle(
                                   color: Color(0xFF991B1B),
                                   fontWeight: FontWeight.bold,
@@ -213,6 +216,21 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                                   height: 1.35,
                                 ),
                               ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.volume_up_outlined,
+                                color: Color(0xFFDC2626),
+                              ),
+                              tooltip: AppStrings.t('Read aloud', currentLang),
+                              onPressed: () {
+                                final alertSpeech =
+                                    '${AppStrings.t('critical_warning_prefix', currentLang)} ${AppStrings.t('Seek medical care immediately', currentLang)}. ${AppStrings.t('critical_warning_body', currentLang)}';
+                                ref.read(ttsServiceProvider).speak(
+                                      alertSpeech,
+                                      currentLang,
+                                    );
+                              },
                             ),
                           ],
                         ),
@@ -230,11 +248,12 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                             ),
                           ),
                           icon: const Icon(Icons.phone_in_talk, size: 20),
-                          label: const Text(
-                            'Call Ambulance (108)',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          label: Text(
+                            AppStrings.t('Call Ambulance (108)', currentLang),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          onPressed: () => _simulateAmbulanceCall(context),
+                          onPressed: () =>
+                              _simulateAmbulanceCall(context, currentLang),
                         ),
                       ],
                     ),
@@ -245,11 +264,11 @@ class DangerSignCheckerScreen extends ConsumerWidget {
           else
             Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0FDF4),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF0FDF4),
                 border: Border(
                   bottom: BorderSide(
-                    color: const Color(0xFFDCFCE7),
+                    color: Color(0xFFDCFCE7),
                     width: 1,
                   ),
                 ),
@@ -263,10 +282,13 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                       const Icon(Icons.check_circle_outline,
                           color: Color(0xFF15803D), size: 20),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'No critical danger signs reported. Tap any symptom below if you experience it.',
-                          style: TextStyle(
+                          AppStrings.t(
+                            'No critical danger signs reported',
+                            currentLang,
+                          ),
+                          style: const TextStyle(
                             fontSize: 12.5,
                             color: Color(0xFF166534),
                             fontWeight: FontWeight.w500,
@@ -291,6 +313,13 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final sign = kDangerSigns[index];
                     final isSelected = selectedSigns.contains(sign.id);
+
+                    final title =
+                        AppStrings.t('${sign.id}_title', currentLang);
+                    final desc =
+                        AppStrings.t('${sign.id}_desc', currentLang);
+                    final note =
+                        AppStrings.t('${sign.id}_note', currentLang);
 
                     return Card(
                       elevation: 0,
@@ -331,22 +360,47 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                             size: 20,
                           ),
                         ),
-                        title: Text(
-                          sign.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14.5,
-                            color: isSelected
-                                ? const Color(0xFF991B1B)
-                                : const Color(0xFF0F172A),
-                          ),
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                title,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14.5,
+                                  color: isSelected
+                                      ? const Color(0xFF991B1B)
+                                      : const Color(0xFF0F172A),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.volume_up_outlined,
+                                size: 20,
+                              ),
+                              tooltip: AppStrings.t(
+                                'Read aloud',
+                                currentLang,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () {
+                                ref.read(ttsServiceProvider).speak(
+                                      '$title. $desc. $note',
+                                      currentLang,
+                                    );
+                              },
+                            ),
+                          ],
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
                             Text(
-                              sign.description,
+                              desc,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isSelected
@@ -369,7 +423,7 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  '⚠ ${sign.emergencyNote}',
+                                  '⚠ $note',
                                   style: const TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,

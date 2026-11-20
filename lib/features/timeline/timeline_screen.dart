@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/l10n/app_l10n.dart';
+import '../../core/l10n/tts_service.dart';
 import '../profile/profile_provider.dart';
 import '../stage/checklist_provider.dart';
 import '../stage/stage.dart';
@@ -27,6 +29,7 @@ class TimelineScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final couple = ref.watch(coupleProvider);
     final currentStage = ref.watch(stageProvider);
+    final currentLang = ref.watch(languageProvider);
     final activePartner = couple.activePartner;
     final checklistAsync = ref.watch(filteredChecklistProvider);
     final completedIds = ref.watch(completedChecklistProvider);
@@ -138,7 +141,7 @@ class TimelineScreen extends ConsumerWidget {
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
-                                          '${currentStage.displayName} Phase Focus • ${couple.coupleName}',
+                                          '${AppStrings.t(currentStage.displayName, currentLang)} • ${couple.coupleName}',
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Colors.grey.shade600,
@@ -160,7 +163,7 @@ class TimelineScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Stage Checklist Progress',
+                              AppStrings.t('Stage Checklist Progress', currentLang),
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -168,7 +171,7 @@ class TimelineScreen extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              '$completedCount of $totalCount completed',
+                              '$completedCount / $totalCount',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -225,7 +228,7 @@ class TimelineScreen extends ConsumerWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Active Journey Stage',
+                              AppStrings.t('Active Journey Stage', currentLang),
                               style: theme.textTheme.labelMedium
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
@@ -235,26 +238,26 @@ class TimelineScreen extends ConsumerWidget {
                         SizedBox(
                           width: double.infinity,
                           child: SegmentedButton<PregnancyStage>(
-                            segments: const [
+                            segments: [
                               ButtonSegment(
                                 value: PregnancyStage.plan,
-                                label: Text('Plan'),
-                                icon: Icon(Icons.event_note, size: 16),
+                                label: Text(AppStrings.t('Plan', currentLang)),
+                                icon: const Icon(Icons.event_note, size: 16),
                               ),
                               ButtonSegment(
                                 value: PregnancyStage.trying,
-                                label: Text('Trying'),
-                                icon: Icon(Icons.favorite_border, size: 16),
+                                label: Text(AppStrings.t('Trying', currentLang)),
+                                icon: const Icon(Icons.favorite_border, size: 16),
                               ),
                               ButtonSegment(
                                 value: PregnancyStage.pregnancy,
-                                label: Text('Pregnancy'),
-                                icon: Icon(Icons.child_care, size: 16),
+                                label: Text(AppStrings.t('Pregnancy', currentLang)),
+                                icon: const Icon(Icons.child_care, size: 16),
                               ),
                               ButtonSegment(
                                 value: PregnancyStage.postpartum,
-                                label: Text('Postpartum'),
-                                icon: Icon(Icons.family_restroom, size: 16),
+                                label: Text(AppStrings.t('Postpartum', currentLang)),
+                                icon: const Icon(Icons.family_restroom, size: 16),
                               ),
                             ],
                             selected: {currentStage},
@@ -271,7 +274,7 @@ class TimelineScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 14),
 
-                // 3. Quick-Access Action Cards: "Danger-Sign Checker" & "Vitals Log"
+                // 3. Quick-Access Action Cards: "Danger Signs" & "Vitals Log"
                 Row(
                   children: [
                     // Danger-Sign Checker Card
@@ -318,9 +321,9 @@ class TimelineScreen extends ConsumerWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                                const Text(
-                                  'Danger Signs',
-                                  style: TextStyle(
+                                Text(
+                                  AppStrings.t('Danger Signs', currentLang),
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
                                     color: Color(0xFFB91C1C),
@@ -328,7 +331,7 @@ class TimelineScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  'Critical triage & 108 dispatch',
+                                  AppStrings.t('Critical triage & 108 dispatch', currentLang),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey.shade700,
@@ -385,9 +388,9 @@ class TimelineScreen extends ConsumerWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                                const Text(
-                                  'Vitals Log',
-                                  style: TextStyle(
+                                Text(
+                                  AppStrings.t('Vitals Log', currentLang),
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
                                     color: Color(0xFF0F766E),
@@ -395,7 +398,7 @@ class TimelineScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  'Track BP & weight metrics',
+                                  AppStrings.t('Track BP & weight metrics', currentLang),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey.shade700,
@@ -409,217 +412,6 @@ class TimelineScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                // Pregnancy Stage Action Cards: Kick Counter & Birth Plan
-                if (currentStage == PregnancyStage.pregnancy) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      // Kick Counter Card
-                      Expanded(
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => context.push('/kick-counter'),
-                            borderRadius: BorderRadius.circular(16),
-                            child: Ink(
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF0FDFA),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: const Color(0xFFCCFBF1),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFCCFBF1),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: const Icon(
-                                          Icons.touch_app_outlined,
-                                          color: Color(0xFF0F766E),
-                                          size: 22,
-                                        ),
-                                      ),
-                                      const Icon(
-                                        Icons.arrow_forward_ios,
-                                        size: 13,
-                                        color: Color(0xFF0F766E),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Text(
-                                    'Kick Counter',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: Color(0xFF0F766E),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    'Log movements & timer',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Birth Plan Card
-                      Expanded(
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => context.push('/birth-plan'),
-                            borderRadius: BorderRadius.circular(16),
-                            child: Ink(
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFF7ED),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: const Color(0xFFFFEDD5),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFFFEDD5),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: const Icon(
-                                          Icons.assignment_turned_in_outlined,
-                                          color: Color(0xFFC2410C),
-                                          size: 22,
-                                        ),
-                                      ),
-                                      const Icon(
-                                        Icons.arrow_forward_ios,
-                                        size: 13,
-                                        color: Color(0xFFC2410C),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Text(
-                                    'Birth Plan',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: Color(0xFFC2410C),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    'Facility, transport & JSY',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                // Postpartum Stage Action Card: Postpartum Care (Mood Check & Newborn Vaccines)
-                if (currentStage == PregnancyStage.postpartum) ...[
-                  const SizedBox(height: 12),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => context.push('/postpartum'),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Ink(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFAF5FF),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xFFE9D5FF),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF3E8FF),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.family_restroom,
-                                color: Color(0xFF7E22CE),
-                                size: 26,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Postpartum Care & Support',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14.5,
-                                      color: Color(0xFF6B21A8),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Mood Check (EPDS) & Newborn Vaccines (UIP)',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.purple.shade900
-                                          .withOpacity(0.8),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 14,
-                              color: Color(0xFF7E22CE),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
                 const SizedBox(height: 20),
 
                 // 4. Filtered Checklist Section
@@ -632,7 +424,7 @@ class TimelineScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              '${currentStage.displayName} Checklist',
+                              '${AppStrings.t(currentStage.displayName, currentLang)} ${AppStrings.t('Checklist', currentLang)}',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -656,7 +448,7 @@ class TimelineScreen extends ConsumerWidget {
                                 ),
                               ),
                               child: Text(
-                                '$completedCount of $totalCount completed',
+                                '$completedCount / $totalCount',
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -722,18 +514,43 @@ class TimelineScreen extends ConsumerWidget {
                                   horizontal: 14,
                                   vertical: 4,
                                 ),
-                                title: Text(
-                                  item.title,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    decoration: isDone
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                    color: isDone
-                                        ? const Color(0xFF64748B)
-                                        : const Color(0xFF0F172A),
-                                  ),
+                                title: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item.title,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          decoration: isDone
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                          color: isDone
+                                              ? const Color(0xFF64748B)
+                                              : const Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.volume_up_outlined,
+                                        size: 20,
+                                      ),
+                                      tooltip: AppStrings.t(
+                                        'Read aloud',
+                                        currentLang,
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      visualDensity: VisualDensity.compact,
+                                      onPressed: () {
+                                        ref.read(ttsServiceProvider).speak(
+                                              '${item.title}. ${item.description}',
+                                              currentLang,
+                                            );
+                                      },
+                                    ),
+                                  ],
                                 ),
                                 subtitle: Padding(
                                   padding: const EdgeInsets.only(top: 4.0),
@@ -790,11 +607,11 @@ class TimelineScreen extends ConsumerWidget {
           ),
         ),
       ),
-    floatingActionButton: FloatingActionButton.extended(
-      onPressed: () => context.push('/advisor'),
-      icon: const Icon(Icons.support_agent),
-      label: const Text('AI Advisor'),
-    ),
-  );
-}
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/advisor'),
+        icon: const Icon(Icons.support_agent),
+        label: Text(AppStrings.t('AI Advisor', currentLang)),
+      ),
+    );
+  }
 }
