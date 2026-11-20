@@ -8,6 +8,7 @@ import '../../core/l10n/tts_service.dart';
 import '../couple/couple_hints_provider.dart';
 import '../onboarding/entry_state.dart';
 import '../onboarding/mode_selection_state.dart';
+import '../postpartum/postpartum_provider.dart';
 import '../profile/profile_provider.dart';
 import '../reminders/medicine_reminders_provider.dart';
 import '../security/vault_lock_provider.dart';
@@ -232,11 +233,19 @@ class TimelineScreen extends ConsumerWidget {
         return [
           ModeShortcutItem(
             title: AppStrings.t('Postpartum Care', lang),
-            subtitle: 'EPDS (Tele-MANAS) & UIP',
+            subtitle: 'EPDS, Recovery & UIP',
             icon: Icons.favorite_rounded,
             accentColor: const Color(0xFFD97706),
             containerColor: const Color(0xFFFEF3C7),
             route: '/postpartum',
+          ),
+          const ModeShortcutItem(
+            title: 'Articles & Guides',
+            subtitle: 'Evidence-based library',
+            icon: Icons.menu_book_rounded,
+            accentColor: Color(0xFF0F766E),
+            containerColor: Color(0xFFCCFBF1),
+            route: '/guides',
           ),
           ModeShortcutItem(
             title: AppStrings.t('Danger Signs', lang),
@@ -279,7 +288,10 @@ class TimelineScreen extends ConsumerWidget {
     }
   }
 
-  static String _getGestationalMilestoneTitle(PreNestMode mode) {
+  static String _getGestationalMilestoneTitle(
+    PreNestMode mode, [
+    PostpartumState? postpartumState,
+  ]) {
     switch (mode) {
       case PreNestMode.periodTracker:
         return 'Cycle Day 12';
@@ -288,14 +300,17 @@ class TimelineScreen extends ConsumerWidget {
       case PreNestMode.pregnant:
         return '17 weeks, 1 day';
       case PreNestMode.postpartum:
-        return 'Postpartum Week 3';
+        return postpartumState != null
+            ? 'Postpartum Week ${postpartumState.postpartumWeek}'
+            : 'Postpartum Week 3';
     }
   }
 
   static String _getGestationalMilestoneSubtitle(
     PreNestMode mode,
-    ModeSelectionState modeState,
-  ) {
+    ModeSelectionState modeState, [
+    PostpartumState? postpartumState,
+  ]) {
     switch (mode) {
       case PreNestMode.periodTracker:
         return modeState.irregularCycleMode
@@ -306,11 +321,17 @@ class TimelineScreen extends ConsumerWidget {
       case PreNestMode.pregnant:
         return 'Pregnancy Day 120 • Second Trimester';
       case PreNestMode.postpartum:
-        return 'Mother & Baby • Fourth Trimester Recovery';
+        return postpartumState != null
+            ? 'Baby is ${postpartumState.babyAgeInDays} days old • ${postpartumState.birthType}'
+            : 'Mother & Baby • Fourth Trimester Recovery';
     }
   }
 
-  static Widget _getGestationalBadge(PreNestMode mode, Color stageColor) {
+  static Widget _getGestationalBadge(
+    PreNestMode mode,
+    Color stageColor, [
+    PostpartumState? postpartumState,
+  ]) {
     String emoji;
     String text;
     switch (mode) {
@@ -328,7 +349,9 @@ class TimelineScreen extends ConsumerWidget {
         break;
       case PreNestMode.postpartum:
         emoji = '👶';
-        text = 'Postpartum Week 3 • Mother & Baby';
+        text = postpartumState != null
+            ? postpartumState.babyAgeLabel
+            : 'Postpartum Week 3 • Mother & Baby';
         break;
     }
 
@@ -698,6 +721,15 @@ class TimelineScreen extends ConsumerWidget {
           containerColor: const Color(0xFFFFE4E6),
           route: '/couple-quizzes',
         ),
+        const _DailyInsightData(
+          title: 'Articles & Guides',
+          subtitle: 'Indian maternal & infant library',
+          badge: 'Library',
+          icon: Icons.auto_stories_rounded,
+          accentColor: Color(0xFF0F766E),
+          containerColor: Color(0xFFCCFBF1),
+          route: '/guides',
+        ),
       ];
     } else {
       insights = [
@@ -740,6 +772,15 @@ class TimelineScreen extends ConsumerWidget {
           accentColor: const Color(0xFFE11D48),
           containerColor: const Color(0xFFFFE4E6),
           route: '/couple-quizzes',
+        ),
+        const _DailyInsightData(
+          title: 'Articles & Guides',
+          subtitle: 'Indian maternal & infant library',
+          badge: 'Library',
+          icon: Icons.auto_stories_rounded,
+          accentColor: Color(0xFF0F766E),
+          containerColor: Color(0xFFCCFBF1),
+          route: '/guides',
         ),
       ];
     }
@@ -898,6 +939,7 @@ class TimelineScreen extends ConsumerWidget {
     final completedIds = ref.watch(completedChecklistProvider);
     final reminders = ref.watch(medicineRemindersProvider);
     final hintsState = ref.watch(coupleHintsProvider);
+    final postpartumState = ref.watch(postpartumProvider);
     final theme = Theme.of(context);
 
     final activeMode = modeState.activeMode(currentStage);
@@ -1100,7 +1142,10 @@ class TimelineScreen extends ConsumerWidget {
 
                         // Gestational / Cycle Milestone Header
                         Text(
-                          _getGestationalMilestoneTitle(activeMode),
+                          _getGestationalMilestoneTitle(
+                            activeMode,
+                            postpartumState,
+                          ),
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
@@ -1113,6 +1158,7 @@ class TimelineScreen extends ConsumerWidget {
                           _getGestationalMilestoneSubtitle(
                             activeMode,
                             modeState,
+                            postpartumState,
                           ),
                           style: TextStyle(
                             fontSize: 13,
@@ -1123,7 +1169,11 @@ class TimelineScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
 
                         // Warm Milestone Visual Badge
-                        _getGestationalBadge(activeMode, stageColor),
+                        _getGestationalBadge(
+                          activeMode,
+                          stageColor,
+                          postpartumState,
+                        ),
 
                         // Actionable Daily Partner Support Cue
                         Container(
@@ -1367,6 +1417,94 @@ class TimelineScreen extends ConsumerWidget {
                   medProgress: medProgress,
                   activeHint: activeHint,
                   lang: currentLang,
+                ),
+                const SizedBox(height: 14),
+
+                // Articles & Guides Shortcut Tile
+                Card(
+                  elevation: 0,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: AppTheme.borderLight),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => context.push('/guides'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFCCFBF1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.auto_stories_rounded,
+                              color: AppTheme.primaryTeal,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Text(
+                                      'Articles & Guides Library',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.textDark,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 1.5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFDCFCE7),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Text(
+                                        'WHO • ICMR • MoHFW',
+                                        style: TextStyle(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF15803D),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                const Text(
+                                  'Indian nutrition, recovery, danger signs, PCOS & partner guides',
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    color: AppTheme.textMuted,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 13,
+                            color: AppTheme.primaryTeal,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 14),
 

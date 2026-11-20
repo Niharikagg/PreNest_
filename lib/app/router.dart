@@ -6,6 +6,7 @@ import '../features/couple/couple_quizzes_screen.dart';
 import '../features/cycle/cycle_tracker_screen.dart';
 import '../features/cycle/pcos_lab_panel_screen.dart';
 import '../features/cycle/pcos_self_check_screen.dart';
+import '../features/guides/guides_screen.dart';
 import '../features/onboarding/entry_choice_screen.dart';
 import '../features/onboarding/mode_select_screen.dart';
 import '../features/onboarding/onboarding_finale_screen.dart';
@@ -177,6 +178,12 @@ final appRouter = GoRouter(
       name: 'postpartum',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const PostpartumScreen(),
+    ),
+    GoRoute(
+      path: '/guides',
+      name: 'guides',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const GuidesScreen(),
     ),
     GoRoute(
       path: '/vault',

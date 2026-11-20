@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
+import '../../core/l10n/app_l10n.dart';
+import '../../core/l10n/tts_service.dart';
 import 'postpartum_provider.dart';
 
 class PostpartumScreen extends ConsumerWidget {
@@ -9,34 +11,368 @@ class PostpartumScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentLang = ref.watch(languageProvider);
+
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Postpartum Care & Support'),
+          title: Text(AppStrings.t('Postpartum Care', currentLang)),
           bottom: const TabBar(
             indicatorColor: AppTheme.primaryTeal,
             indicatorWeight: 3,
             labelColor: AppTheme.primaryTeal,
             unselectedLabelColor: AppTheme.textMuted,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
             unselectedLabelStyle: TextStyle(
               fontWeight: FontWeight.w500,
-              fontSize: 13,
+              fontSize: 12.5,
             ),
             tabs: [
               Tab(
-                icon: Icon(Icons.favorite_outline, size: 20),
+                icon: Icon(Icons.favorite_outline, size: 19),
                 text: 'Mood Check (EPDS)',
               ),
               Tab(
-                icon: Icon(Icons.vaccines_outlined, size: 20),
+                icon: Icon(Icons.vaccines_outlined, size: 19),
                 text: 'Newborn Vaccines (UIP)',
+              ),
+              Tab(
+                icon: Icon(Icons.healing_outlined, size: 19),
+                text: 'Recovery & Feeding',
               ),
             ],
           ),
         ),
-        body: const TabBarView(children: [_EpdsTab(), _VaccineTrackerTab()]),
+        body: Column(
+          children: [
+            // Prominent Collapsible Setup & Recovery Header Card
+            const _PostpartumSetupHeader(),
+            const Expanded(
+              child: TabBarView(
+                children: [
+                  _EpdsTab(),
+                  _VaccineTrackerTab(),
+                  _RecoveryAndFeedingTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ==========================================
+// SETUP & RECOVERY HEADER CARD (COMPACT / EXPANDABLE)
+// ==========================================
+class _PostpartumSetupHeader extends ConsumerStatefulWidget {
+  const _PostpartumSetupHeader();
+
+  @override
+  ConsumerState<_PostpartumSetupHeader> createState() =>
+      _PostpartumSetupHeaderState();
+}
+
+class _PostpartumSetupHeaderState
+    extends ConsumerState<_PostpartumSetupHeader> {
+  bool _isExpanded = false;
+
+  String _formatDate(DateTime dt) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
+  Future<void> _selectDeliveryDate(
+    BuildContext context,
+    DateTime currentDate,
+  ) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: currentDate,
+      firstDate: now.subtract(const Duration(days: 365)),
+      lastDate: now,
+      helpText: 'Select Baby\'s Delivery Date',
+      confirmText: 'Save',
+    );
+    if (picked != null) {
+      ref.read(postpartumProvider.notifier).updateDeliveryDate(picked);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(postpartumProvider);
+    final notifier = ref.read(postpartumProvider.notifier);
+    final deliveryDate = state.deliveryDate ?? DateTime.now();
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFFDE68A), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFD97706).withOpacity(0.06),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header Summary Bar with Expand/Collapse Toggle
+              InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
+                  setState(() {
+                    _isExpanded = !_isExpanded;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF3C7),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.child_care_rounded,
+                          color: Color(0xFFD97706),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              state.babyAgeLabel,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF92400E),
+                              ),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              '${state.birthType} • ${state.feedingStyle}',
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                color: AppTheme.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF3C7),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _isExpanded ? 'Hide' : 'Edit Setup',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFB45309),
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            Icon(
+                              _isExpanded
+                                  ? Icons.keyboard_arrow_up_rounded
+                                  : Icons.keyboard_arrow_down_rounded,
+                              size: 16,
+                              color: const Color(0xFFB45309),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Expandable Setup Controls
+              if (_isExpanded) ...[
+                const Divider(height: 1, color: Color(0xFFFEF3C7)),
+                Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1. Delivery Date Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Delivery Date',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textDark,
+                                ),
+                              ),
+                              Text(
+                                'Calculates baby\'s age & recovery stage',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFFB45309),
+                              side: const BorderSide(color: Color(0xFFFDE68A)),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () =>
+                                _selectDeliveryDate(context, deliveryDate),
+                            icon: const Icon(
+                              Icons.calendar_month_rounded,
+                              size: 16,
+                            ),
+                            label: Text(
+                              _formatDate(deliveryDate),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // 2. Birth Type Selector
+                      const Text(
+                        'Birth Type (Adapts Recovery Checklist)',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: double.infinity,
+                        child: SegmentedButton<String>(
+                          segments: const [
+                            ButtonSegment(
+                              value: 'Vaginal Delivery',
+                              label: Text('Vaginal Delivery'),
+                              icon: Icon(Icons.favorite_border, size: 16),
+                            ),
+                            ButtonSegment(
+                              value: 'C-Section',
+                              label: Text('C-Section'),
+                              icon: Icon(Icons.healing_outlined, size: 16),
+                            ),
+                          ],
+                          selected: {state.birthType},
+                          onSelectionChanged: (val) {
+                            notifier.updateBirthType(val.first);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // 3. Feeding Style Chips
+                      const Text(
+                        'Feeding Style Support',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 8,
+                        children:
+                            ['Exclusive Breastfeeding', 'Mixed', 'Formula'].map(
+                              (style) {
+                                final isSelected = state.feedingStyle == style;
+                                return ChoiceChip(
+                                  label: Text(style),
+                                  selected: isSelected,
+                                  onSelected: (_) {
+                                    notifier.updateFeedingStyle(style);
+                                  },
+                                  selectedColor: const Color(0xFFFEF3C7),
+                                  backgroundColor: AppTheme.scaffoldBg,
+                                  labelStyle: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? const Color(0xFF92400E)
+                                        : AppTheme.textDark,
+                                  ),
+                                  side: BorderSide(
+                                    color: isSelected
+                                        ? const Color(0xFFD97706)
+                                        : AppTheme.borderLight,
+                                  ),
+                                );
+                              },
+                            ).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -112,7 +448,6 @@ class _EpdsTab extends ConsumerWidget {
     final answeredCount = state.epdsAnswers.length;
     final totalQuestions = kEpdsQuestions.length;
     final score = state.totalEpdsScore;
-    final isComplete = state.isEpdsComplete;
 
     return Center(
       child: ConstrainedBox(
@@ -273,7 +608,6 @@ class _EpdsTab extends ConsumerWidget {
     int totalQuestions,
     int score,
   ) {
-    // If Question 10 is positive OR total score >= 13 -> High Risk Alert
     if (state.isEpdsHighRisk) {
       return Card(
         elevation: 0,
@@ -358,7 +692,6 @@ class _EpdsTab extends ConsumerWidget {
       );
     }
 
-    // Score 10 - 12: Suggest checking in with a doctor/counsellor soon
     if (state.isEpdsModerateRisk) {
       return Card(
         elevation: 0,
@@ -417,7 +750,6 @@ class _EpdsTab extends ConsumerWidget {
       );
     }
 
-    // Score 0-9: Reassuring message + self-care & partner support tips
     return Card(
       elevation: 0,
       color: const Color(0xFFF0FDF4),
@@ -519,7 +851,6 @@ class _VaccineTrackerTab extends ConsumerWidget {
     final notifier = ref.read(postpartumProvider.notifier);
     final theme = Theme.of(context);
 
-    // Calculate total vaccines count and completed count
     int totalVaccines = 0;
     for (final group in kUipVaccineSchedule) {
       totalVaccines += group.vaccines.length;
@@ -535,7 +866,6 @@ class _VaccineTrackerTab extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Progress Header Card
               Card(
                 elevation: 0,
                 color: const Color(0xFFF0FDFA),
@@ -606,7 +936,6 @@ class _VaccineTrackerTab extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
 
-              // Informational Doctor Note Card
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -639,7 +968,6 @@ class _VaccineTrackerTab extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              // Vaccine Groups by Age
               ...kUipVaccineSchedule.map((group) {
                 final groupDoneCount = group.vaccines
                     .where((v) => state.vaccineRecords.containsKey(v.id))
@@ -654,7 +982,7 @@ class _VaccineTrackerTab extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.schedule_rounded,
                               size: 16,
                               color: AppTheme.primaryTeal,
@@ -787,6 +1115,473 @@ class _VaccineTrackerTab extends ConsumerWidget {
                 );
               }),
               const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ==========================================
+// TAB 3: Recovery & Breastfeeding Guidance
+// ==========================================
+class _RecoveryAndFeedingTab extends ConsumerWidget {
+  const _RecoveryAndFeedingTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(postpartumProvider);
+    final notifier = ref.read(postpartumProvider.notifier);
+    final currentLang = ref.watch(languageProvider);
+    final tts = ref.read(ttsServiceProvider);
+    final theme = Theme.of(context);
+
+    // Filter recovery checklist items based on birth type
+    final isCSection = state.birthType == 'C-Section';
+    final filteredTips = kPostpartumRecoveryTips.where((tip) {
+      if (isCSection && tip.isVaginalOnly) return false;
+      if (!isCSection && tip.isCSectionOnly) return false;
+      return true;
+    }).toList();
+
+    final completedTipsCount = filteredTips
+        .where((t) => state.completedRecoveryTips.contains(t.id))
+        .length;
+    final totalTipsCount = filteredTips.length;
+    final recoveryProgress = totalTipsCount > 0
+        ? (completedTipsCount / totalTipsCount)
+        : 0.0;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // SECTION 1: Tailored Physical Recovery Checklist Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF3C7),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.healing_rounded,
+                          color: Color(0xFFD97706),
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${state.birthType} Checklist',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: completedTipsCount == totalTipsCount
+                          ? const Color(0xFFDCFCE7)
+                          : const Color(0xFFFEF3C7),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: completedTipsCount == totalTipsCount
+                            ? const Color(0xFFA7F3D0)
+                            : const Color(0xFFFDE68A),
+                      ),
+                    ),
+                    child: Text(
+                      '$completedTipsCount / $totalTipsCount Completed',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: completedTipsCount == totalTipsCount
+                            ? const Color(0xFF15803D)
+                            : const Color(0xFFB45309),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Progress bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: recoveryProgress,
+                  minHeight: 6,
+                  backgroundColor: const Color(0xFFFEF3C7),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    completedTipsCount == totalTipsCount
+                        ? AppTheme.successGreen
+                        : const Color(0xFFD97706),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Checklist Cards
+              ...filteredTips.map((tip) {
+                final isDone = state.completedRecoveryTips.contains(tip.id);
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  elevation: 0,
+                  color: isDone ? const Color(0xFFF0FDF4) : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    side: BorderSide(
+                      color: isDone
+                          ? const Color(0xFFBBF7D0)
+                          : AppTheme.borderLight,
+                      width: 1,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Transform.scale(
+                              scale: 0.9,
+                              child: Checkbox(
+                                value: isDone,
+                                activeColor: AppTheme.successGreen,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                onChanged: (_) {
+                                  notifier.toggleRecoveryTip(tip.id);
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          tip.title,
+                                          style: TextStyle(
+                                            fontSize: 13.5,
+                                            fontWeight: FontWeight.bold,
+                                            decoration: isDone
+                                                ? TextDecoration.lineThrough
+                                                : null,
+                                            color: isDone
+                                                ? const Color(0xFF166534)
+                                                : AppTheme.textDark,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.volume_up_outlined,
+                                          size: 18,
+                                        ),
+                                        tooltip: 'Read Aloud',
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        visualDensity: VisualDensity.compact,
+                                        color: AppTheme.primaryTeal,
+                                        onPressed: () {
+                                          tts.speak(
+                                            '${tip.title}. ${tip.description}',
+                                            currentLang,
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    tip.description,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      height: 1.35,
+                                      color: isDone
+                                          ? const Color(0xFF15803D)
+                                                .withOpacity(0.85)
+                                          : AppTheme.textDark.withOpacity(0.85),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.surfaceMuted,
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          tip.source,
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppTheme.textMuted,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 18),
+
+              // SECTION 2: Breastfeeding Support Guidance
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFCCFBF1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.favorite_rounded,
+                          color: AppTheme.primaryTeal,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Breastfeeding & Lactation Support',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFCCFBF1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      state.feedingStyle,
+                      style: const TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryTealDark,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Breastfeeding Guidance Cards
+              ...kBreastfeedingGuidanceList.map((item) {
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  elevation: 0,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: AppTheme.borderLight),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.title,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textDark,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    item.subtitle,
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppTheme.primaryTeal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.volume_up_outlined,
+                                size: 20,
+                              ),
+                              tooltip: 'Read Aloud',
+                              color: AppTheme.primaryTeal,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () {
+                                tts.speak(
+                                  '${item.title}. ${item.subtitle}. ${item.body}. Actionable tip: ${item.actionableTip}',
+                                  currentLang,
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          item.body,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            height: 1.4,
+                            color: AppTheme.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Actionable Tip Pill
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF0FDFA),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFF99F6E4)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.lightbulb_outline_rounded,
+                                size: 16,
+                                color: AppTheme.primaryTeal,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  item.actionableTip,
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.primaryTealDark,
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Source attribution
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceMuted,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'Source: ${item.source}',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 14),
+
+              // Mandatory Non-Diagnostic Clinical Safety Disclaimer
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceMuted,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.borderLight),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.shield_outlined,
+                      size: 16,
+                      color: AppTheme.textMuted,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'PreNest postpartum recovery tips and breastfeeding guidance are educational and informational only. '
+                        'PreNest does not diagnose, prescribe, or provide medical dosing. '
+                        'Always consult your obstetrician, pediatrician, or an International Board Certified Lactation Consultant (IBCLC) for clinical concerns.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppTheme.textMuted,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
