@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,13 +64,15 @@ class CompletedChecklistNotifier extends Notifier<Set<String>> {
 
 final completedChecklistProvider =
     NotifierProvider<CompletedChecklistNotifier, Set<String>>(() {
-  return CompletedChecklistNotifier();
-});
+      return CompletedChecklistNotifier();
+    });
 
-final stageChecklistsProvider =
-    FutureProvider<List<StageChecklistItem>>((ref) async {
-  final jsonString =
-      await rootBundle.loadString('assets/content/stage_checklists.json');
+final stageChecklistsProvider = FutureProvider<List<StageChecklistItem>>((
+  ref,
+) async {
+  final jsonString = await rootBundle.loadString(
+    'assets/content/stage_checklists.json',
+  );
   final List<dynamic> jsonList = jsonDecode(jsonString) as List<dynamic>;
   return jsonList
       .map((item) => StageChecklistItem.fromJson(item as Map<String, dynamic>))
@@ -78,17 +81,17 @@ final stageChecklistsProvider =
 
 final filteredChecklistProvider =
     Provider<AsyncValue<List<StageChecklistItem>>>((ref) {
-  final checklistsAsync = ref.watch(stageChecklistsProvider);
-  final currentStage = ref.watch(stageProvider);
-  final couple = ref.watch(coupleProvider);
-  final activePartner = couple.activePartner;
-  final isHer = activePartner.role.trim().toLowerCase() == 'her';
+      final checklistsAsync = ref.watch(stageChecklistsProvider);
+      final currentStage = ref.watch(stageProvider);
+      final couple = ref.watch(coupleProvider);
+      final activePartner = couple.activePartner;
+      final isHer = activePartner.role.trim().toLowerCase() == 'her';
 
-  return checklistsAsync.whenData((items) {
-    return items.where((item) {
-      final matchesStage = item.stage == currentStage;
-      final matchesPartner = isHer ? item.isForHer : item.isForHim;
-      return matchesStage && matchesPartner;
-    }).toList();
-  });
-});
+      return checklistsAsync.whenData((items) {
+        return items.where((item) {
+          final matchesStage = item.stage == currentStage;
+          final matchesPartner = isHer ? item.isForHer : item.isForHim;
+          return matchesStage && matchesPartner;
+        }).toList();
+      });
+    });

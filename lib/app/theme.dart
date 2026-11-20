@@ -8,16 +8,22 @@ class AppTheme {
 
   // Core Palette
   static const Color primaryTeal = Color(0xFF0F766E); // Soft teal primary
-  static const Color primaryTealLight = Color(0xFFCCFBF1); // Soft teal container
+  static const Color primaryTealLight = Color(
+    0xFFCCFBF1,
+  ); // Soft teal container
   static const Color primaryTealDark = Color(0xFF115E59);
-  
+
   static const Color warmRose = Color(0xFFE11D48); // Warm rose/coral secondary
-  static const Color warmRoseLight = Color(0xFFFFE4E6); // Muted rose accent container
+  static const Color warmRoseLight = Color(
+    0xFFFFE4E6,
+  ); // Muted rose accent container
   static const Color warmRoseDark = Color(0xFFBE123C);
 
   static const Color scaffoldBg = Color(0xFFF8FAFC); // Clean off-white
   static const Color cardBg = Color(0xFFFFFFFF); // Crisp white
-  static const Color borderLight = Color(0xFFE2E8F0); // Subtle 1px border (slate-200)
+  static const Color borderLight = Color(
+    0xFFE2E8F0,
+  ); // Subtle 1px border (slate-200)
   static const Color textDark = Color(0xFF0F172A); // Slate-900
   static const Color textMuted = Color(0xFF64748B); // Slate-500
   static const Color surfaceMuted = Color(0xFFF1F5F9); // Slate-100
@@ -63,7 +69,6 @@ class AppTheme {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: scaffoldBg,
       fontFamily: null, // Default system font with optimal legibility
-      
       // Typography
       textTheme: const TextTheme(
         headlineMedium: TextStyle(
@@ -211,16 +216,17 @@ class AppTheme {
         backgroundColor: primaryTeal,
         foregroundColor: Colors.white,
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: cardBg,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: borderLight, width: 1),

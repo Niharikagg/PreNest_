@@ -40,8 +40,9 @@ class MlKitExtractionService implements ExtractionService {
       final inputImage = InputImage.fromFilePath(image.path);
       textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
 
-      final RecognizedText recognizedText =
-          await textRecognizer.processImage(inputImage);
+      final RecognizedText recognizedText = await textRecognizer.processImage(
+        inputImage,
+      );
 
       final extractedFields = parser.parseRecognizedText(recognizedText);
 

@@ -26,15 +26,16 @@ const List<DangerSign> kDangerSigns = [
     title: 'Heavy Vaginal Bleeding',
     description:
         'Soaking a sanitary pad in under 1-2 hours or passing large clots.',
-    emergencyNote: 'High risk: Placental abruption, placenta previa, or hemorrhage.',
+    emergencyNote:
+        'High risk: Placental abruption, placenta previa, or hemorrhage.',
     icon: Icons.bloodtype,
   ),
   DangerSign(
     id: 'severe_headache_vision',
     title: 'Severe Headache with Blurred Vision',
-    description:
-        'Pounding headache, flashing lights, aura, or sudden visual disturbance.',
-    emergencyNote: 'High risk: Impending eclampsia or acute gestational hypertension.',
+    description: 'Pounding headache, flashing lights, aura, or sudden visual disturbance.',
+    emergencyNote:
+        'High risk: Impending eclampsia or acute gestational hypertension.',
     icon: Icons.visibility_off,
   ),
   DangerSign(
@@ -50,7 +51,8 @@ const List<DangerSign> kDangerSigns = [
     title: 'Reduced or Absent Baby Movement',
     description:
         'Substantial drop in kick count or no movement felt over 2-3 hours.',
-    emergencyNote: 'Urgent: Possible fetal compromise requiring immediate CTG scan.',
+    emergencyNote:
+        'Urgent: Possible fetal compromise requiring immediate CTG scan.',
     icon: Icons.child_care,
   ),
   DangerSign(
@@ -64,16 +66,15 @@ const List<DangerSign> kDangerSigns = [
   DangerSign(
     id: 'severe_abdominal_pain',
     title: 'Severe Persistent Abdominal Pain',
-    description:
-        'Constant sharp or rigid abdominal cramps, distinct from normal Braxton-Hicks.',
-    emergencyNote: 'Critical: Possible uterine rupture, abruption, or acute abdomen.',
+    description: 'Constant sharp or rigid abdominal cramps, distinct from normal Braxton-Hicks.',
+    emergencyNote:
+        'Critical: Possible uterine rupture, abruption, or acute abdomen.',
     icon: Icons.healing,
   ),
   DangerSign(
     id: 'fluid_leakage',
     title: 'Amniotic Fluid Leakage (Water Break)',
-    description:
-        'Continuous trickle or sudden rush of clear/greenish fluid from vagina.',
+    description: 'Continuous trickle or sudden rush of clear/greenish fluid from vagina.',
     emergencyNote: 'Premature rupture of membranes (PROM) requiring immediate sterile evaluation.',
     icon: Icons.water_drop,
   ),
@@ -96,10 +97,11 @@ class DangerSignsNotifier extends Notifier<Set<String>> {
   }
 }
 
-final dangerSignsProvider =
-    NotifierProvider<DangerSignsNotifier, Set<String>>(() {
-  return DangerSignsNotifier();
-});
+final dangerSignsProvider = NotifierProvider<DangerSignsNotifier, Set<String>>(
+  () {
+    return DangerSignsNotifier();
+  },
+);
 
 class DangerSignCheckerScreen extends ConsumerWidget {
   const DangerSignCheckerScreen({super.key});
@@ -226,10 +228,9 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                               onPressed: () {
                                 final alertSpeech =
                                     '${AppStrings.t('critical_warning_prefix', currentLang)} ${AppStrings.t('Seek medical care immediately', currentLang)}. ${AppStrings.t('critical_warning_body', currentLang)}';
-                                ref.read(ttsServiceProvider).speak(
-                                      alertSpeech,
-                                      currentLang,
-                                    );
+                                ref
+                                    .read(ttsServiceProvider)
+                                    .speak(alertSpeech, currentLang);
                               },
                             ),
                           ],
@@ -267,10 +268,7 @@ class DangerSignCheckerScreen extends ConsumerWidget {
               decoration: const BoxDecoration(
                 color: Color(0xFFF0FDF4),
                 border: Border(
-                  bottom: BorderSide(
-                    color: Color(0xFFDCFCE7),
-                    width: 1,
-                  ),
+                  bottom: BorderSide(color: Color(0xFFDCFCE7), width: 1),
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -279,8 +277,11 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                   constraints: const BoxConstraints(maxWidth: 640),
                   child: Row(
                     children: [
-                      const Icon(Icons.check_circle_outline,
-                          color: Color(0xFF15803D), size: 20),
+                      const Icon(
+                        Icons.check_circle_outline,
+                        color: Color(0xFF15803D),
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -314,12 +315,9 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                     final sign = kDangerSigns[index];
                     final isSelected = selectedSigns.contains(sign.id);
 
-                    final title =
-                        AppStrings.t('${sign.id}_title', currentLang);
-                    final desc =
-                        AppStrings.t('${sign.id}_desc', currentLang);
-                    final note =
-                        AppStrings.t('${sign.id}_note', currentLang);
+                    final title = AppStrings.t('${sign.id}_title', currentLang);
+                    final desc = AppStrings.t('${sign.id}_desc', currentLang);
+                    final note = AppStrings.t('${sign.id}_note', currentLang);
 
                     return Card(
                       elevation: 0,
@@ -379,18 +377,14 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                                 Icons.volume_up_outlined,
                                 size: 20,
                               ),
-                              tooltip: AppStrings.t(
-                                'Read aloud',
-                                currentLang,
-                              ),
+                              tooltip: AppStrings.t('Read aloud', currentLang),
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
                               visualDensity: VisualDensity.compact,
                               onPressed: () {
-                                ref.read(ttsServiceProvider).speak(
-                                      '$title. $desc. $note',
-                                      currentLang,
-                                    );
+                                ref
+                                    .read(ttsServiceProvider)
+                                    .speak('$title. $desc. $note', currentLang);
                               },
                             ),
                           ],

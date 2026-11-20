@@ -29,9 +29,13 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
     _facilityNameController = TextEditingController(text: state.facilityName);
     _facilityPhoneController = TextEditingController(text: state.facilityPhone);
     _transportNameController = TextEditingController(text: state.transportName);
-    _transportPhoneController = TextEditingController(text: state.transportPhone);
+    _transportPhoneController = TextEditingController(
+      text: state.transportPhone,
+    );
     _donorNameController = TextEditingController(text: state.donorName);
-    _donorBloodGroupController = TextEditingController(text: state.donorBloodGroup);
+    _donorBloodGroupController = TextEditingController(
+      text: state.donorBloodGroup,
+    );
     _donorPhoneController = TextEditingController(text: state.donorPhone);
   }
 
@@ -86,7 +90,8 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
     {
       'key': 'aadhaar_id',
       'title': 'Aadhaar Card / Government Photo ID',
-      'subtitle': 'Original & copies for mother and partner for identity verification.',
+      'subtitle':
+          'Original & copies for mother and partner for identity verification.',
       'icon': Icons.credit_card_outlined,
     },
     {
@@ -115,8 +120,9 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
     final notifier = ref.read(birthPlanProvider.notifier);
     final theme = Theme.of(context);
 
-    final completedCount =
-        birthPlan.checklist.values.where((checked) => checked).length;
+    final completedCount = birthPlan.checklist.values
+        .where((checked) => checked)
+        .length;
     final totalCount = _checklistConfig.length;
     final progress = totalCount > 0 ? completedCount / totalCount : 0.0;
 
@@ -193,9 +199,10 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                                     value: progress,
                                     minHeight: 6,
                                     backgroundColor: const Color(0xFFCCFBF1),
-                                    valueColor: const AlwaysStoppedAnimation<Color>(
-                                      AppTheme.primaryTeal,
-                                    ),
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                          AppTheme.primaryTeal,
+                                        ),
                                   ),
                                 ),
                               ],
@@ -231,9 +238,13 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                             decoration: const InputDecoration(
                               labelText: 'Facility Name / Hospital',
                               hintText: 'e.g., District Hospital, Maternity Nursing Home',
-                              prefixIcon: Icon(Icons.apartment_outlined, size: 20),
+                              prefixIcon: Icon(
+                                Icons.apartment_outlined,
+                                size: 20,
+                              ),
                             ),
-                            validator: (val) => val == null || val.trim().isEmpty
+                            validator: (val) =>
+                                val == null || val.trim().isEmpty
                                 ? 'Please enter hospital name'
                                 : null,
                           ),
@@ -246,7 +257,8 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                               hintText: 'e.g., +91 94123 45678',
                               prefixIcon: Icon(Icons.phone_outlined, size: 20),
                             ),
-                            validator: (val) => val == null || val.trim().isEmpty
+                            validator: (val) =>
+                                val == null || val.trim().isEmpty
                                 ? 'Please enter contact number'
                                 : null,
                           ),
@@ -261,7 +273,8 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                     context,
                     icon: Icons.airport_shuttle_outlined,
                     title: '2. Emergency Transport Contact',
-                    subtitle: 'Arranged driver, auto, or dedicated ambulance contact',
+                    subtitle:
+                        'Arranged driver, auto, or dedicated ambulance contact',
                   ),
                   const SizedBox(height: 10),
                   Card(
@@ -282,7 +295,8 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                               hintText: 'e.g., Ramesh (Neighbor cab) or Ambulance 108',
                               prefixIcon: Icon(Icons.person_outline, size: 20),
                             ),
-                            validator: (val) => val == null || val.trim().isEmpty
+                            validator: (val) =>
+                                val == null || val.trim().isEmpty
                                 ? 'Please enter transport contact name'
                                 : null,
                           ),
@@ -293,9 +307,13 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                             decoration: const InputDecoration(
                               labelText: 'Driver Phone / Helpline',
                               hintText: 'e.g., 108 / +91 98765 12345',
-                              prefixIcon: Icon(Icons.phone_in_talk_outlined, size: 20),
+                              prefixIcon: Icon(
+                                Icons.phone_in_talk_outlined,
+                                size: 20,
+                              ),
                             ),
-                            validator: (val) => val == null || val.trim().isEmpty
+                            validator: (val) =>
+                                val == null || val.trim().isEmpty
                                 ? 'Please enter phone number'
                                 : null,
                           ),
@@ -328,10 +346,15 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                             controller: _donorNameController,
                             decoration: const InputDecoration(
                               labelText: 'Donor Name & Relation',
-                              hintText: 'e.g., Suresh Patel (Brother / Relative)',
-                              prefixIcon: Icon(Icons.person_pin_outlined, size: 20),
+                              hintText:
+                                  'e.g., Suresh Patel (Brother / Relative)',
+                              prefixIcon: Icon(
+                                Icons.person_pin_outlined,
+                                size: 20,
+                              ),
                             ),
-                            validator: (val) => val == null || val.trim().isEmpty
+                            validator: (val) =>
+                                val == null || val.trim().isEmpty
                                 ? 'Please enter blood donor name'
                                 : null,
                           ),
@@ -345,12 +368,15 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                                   decoration: const InputDecoration(
                                     labelText: 'Blood Group',
                                     hintText: 'e.g., B+ Positive, O-',
-                                    prefixIcon: Icon(Icons.opacity_outlined, size: 20),
+                                    prefixIcon: Icon(
+                                      Icons.opacity_outlined,
+                                      size: 20,
+                                    ),
                                   ),
                                   validator: (val) =>
                                       val == null || val.trim().isEmpty
-                                          ? 'Blood group'
-                                          : null,
+                                      ? 'Blood group'
+                                      : null,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -362,12 +388,15 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                                   decoration: const InputDecoration(
                                     labelText: 'Donor Phone',
                                     hintText: '+91 98111 22334',
-                                    prefixIcon: Icon(Icons.phone_outlined, size: 20),
+                                    prefixIcon: Icon(
+                                      Icons.phone_outlined,
+                                      size: 20,
+                                    ),
                                   ),
                                   validator: (val) =>
                                       val == null || val.trim().isEmpty
-                                          ? 'Phone number'
-                                          : null,
+                                      ? 'Phone number'
+                                      : null,
                                 ),
                               ),
                             ],
@@ -430,7 +459,9 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            decoration: isChecked ? TextDecoration.lineThrough : null,
+                            decoration: isChecked
+                                ? TextDecoration.lineThrough
+                                : null,
                             color: isChecked
                                 ? const Color(0xFF166534)
                                 : AppTheme.textDark,
@@ -479,7 +510,9 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                             decoration: BoxDecoration(
                               color: const Color(0xFFFFFBEB),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFFDE68A)),
+                              border: Border.all(
+                                color: const Color(0xFFFDE68A),
+                              ),
                             ),
                             child: const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,7 +557,9 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
                             decoration: BoxDecoration(
                               color: const Color(0xFFF0FDF4),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFBBF7D0)),
+                              border: Border.all(
+                                color: const Color(0xFFBBF7D0),
+                              ),
                             ),
                             child: const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -642,10 +677,7 @@ class _BirthPlanScreenState extends ConsumerState<BirthPlanScreen> {
           ],
         ),
         const SizedBox(height: 2),
-        Text(
-          subtitle,
-          style: theme.textTheme.bodySmall,
-        ),
+        Text(subtitle, style: theme.textTheme.bodySmall),
       ],
     );
   }

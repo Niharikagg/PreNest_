@@ -10,7 +10,7 @@ class TtsService {
   final FlutterTts _flutterTts;
 
   TtsService({FlutterTts? flutterTts})
-      : _flutterTts = flutterTts ?? FlutterTts();
+    : _flutterTts = flutterTts ?? FlutterTts();
 
   /// Reads aloud [text] using the appropriate TTS locale for [lang].
   /// Cancels any currently active speech, sets speech rate to 0.48, and initiates speak.

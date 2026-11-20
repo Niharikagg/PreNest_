@@ -20,10 +20,7 @@ final reportParserProvider = Provider<ReportParser>((ref) {
 /// Production ML Kit extraction service with graceful fallback.
 final mlKitExtractionServiceProvider = Provider<ExtractionService>((ref) {
   final parser = ref.watch(reportParserProvider);
-  return MlKitExtractionService(
-    parser: parser,
-    fallbackToMockOnFailure: true,
-  );
+  return MlKitExtractionService(parser: parser, fallbackToMockOnFailure: true);
 });
 
 /// Mock extraction service provider.

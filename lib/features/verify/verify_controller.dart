@@ -34,10 +34,12 @@ class VerifyState {
     return VerifyState(
       isLoading: isLoading ?? this.isLoading,
       fields: fields ?? this.fields,
-      selectedImageBytes:
-          clearImage ? null : (selectedImageBytes ?? this.selectedImageBytes),
-      selectedImagePath:
-          clearImage ? null : (selectedImagePath ?? this.selectedImagePath),
+      selectedImageBytes: clearImage
+          ? null
+          : (selectedImageBytes ?? this.selectedImageBytes),
+      selectedImagePath: clearImage
+          ? null
+          : (selectedImagePath ?? this.selectedImagePath),
       statusMessage: statusMessage ?? this.statusMessage,
     );
   }
@@ -80,7 +82,8 @@ class VerifyController extends Notifier<VerifyState> {
           fields: fallbackFields,
           selectedImageBytes: bytes,
           selectedImagePath: path,
-          statusMessage: 'Web preview: Sample extraction applied (Chrome demo mode)',
+          statusMessage:
+              'Web preview: Sample extraction applied (Chrome demo mode)',
         );
         return;
       }
@@ -145,8 +148,6 @@ class VerifyController extends Notifier<VerifyState> {
 }
 
 final verifyControllerProvider =
-    NotifierProvider<VerifyController, VerifyState>(
-      VerifyController.new,
-    );
+    NotifierProvider<VerifyController, VerifyState>(VerifyController.new);
 
 final verifyProvider = verifyControllerProvider;

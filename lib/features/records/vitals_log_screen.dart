@@ -91,10 +91,11 @@ class VitalsLogNotifier extends Notifier<List<VitalEntry>> {
   }
 }
 
-final vitalsLogProvider =
-    NotifierProvider<VitalsLogNotifier, List<VitalEntry>>(() {
-  return VitalsLogNotifier();
-});
+final vitalsLogProvider = NotifierProvider<VitalsLogNotifier, List<VitalEntry>>(
+  () {
+    return VitalsLogNotifier();
+  },
+);
 
 class VitalsLogScreen extends ConsumerStatefulWidget {
   const VitalsLogScreen({super.key});
@@ -129,7 +130,9 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
     final weight = double.parse(_weightController.text.trim());
     final note = _noteController.text.trim();
 
-    ref.read(vitalsLogProvider.notifier).addEntry(
+    ref
+        .read(vitalsLogProvider.notifier)
+        .addEntry(
           systolic: systolic,
           diastolic: diastolic,
           weight: weight,
@@ -153,8 +156,18 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
 
   String _formatDateTime(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
     final minute = dt.minute.toString().padLeft(2, '0');
@@ -168,9 +181,7 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Vitals Log (BP & Weight)'),
-      ),
+      appBar: AppBar(title: const Text('Vitals Log (BP & Weight)')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
@@ -282,7 +293,8 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
                           TextFormField(
                             controller: _weightController,
                             keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
+                              decimal: true,
+                            ),
                             decoration: const InputDecoration(
                               labelText: 'Weight',
                               hintText: '58.5',
@@ -420,10 +432,12 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color:
-                                                statusColor.withOpacity(0.12),
-                                            borderRadius:
-                                                BorderRadius.circular(6),
+                                            color: statusColor.withOpacity(
+                                              0.12,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
                                           child: Text(
                                             entry.bpCategory,
@@ -453,7 +467,9 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
                                       _formatDateTime(entry.recordedAt),
                                       style: TextStyle(
                                         fontSize: 11,
-                                        color: theme.colorScheme.onSurfaceVariant
+                                        color: theme
+                                            .colorScheme
+                                            .onSurfaceVariant
                                             .withOpacity(0.8),
                                       ),
                                     ),
@@ -461,8 +477,10 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline,
-                                    size: 20),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 20,
+                                ),
                                 color: theme.colorScheme.onSurfaceVariant,
                                 tooltip: 'Delete entry',
                                 onPressed: () {

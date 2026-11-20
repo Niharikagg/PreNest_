@@ -74,9 +74,18 @@ const List<EpdsQuestion> kEpdsQuestions = [
     id: 6,
     prompt: '6. Things have been getting on top of me:',
     options: [
-      EpdsOption(label: 'Yes, most of the time I haven\'t been able to cope', points: 3),
-      EpdsOption(label: 'Yes, sometimes I haven\'t been coping as well as usual', points: 2),
-      EpdsOption(label: 'No, most of the time I have coped quite well', points: 1),
+      EpdsOption(
+        label: 'Yes, most of the time I haven\'t been able to cope',
+        points: 3,
+      ),
+      EpdsOption(
+        label: 'Yes, sometimes I haven\'t been coping as well as usual',
+        points: 2,
+      ),
+      EpdsOption(
+        label: 'No, most of the time I have coped quite well',
+        points: 1,
+      ),
       EpdsOption(label: 'No, have been coping as well as ever', points: 0),
     ],
   ),
@@ -289,11 +298,7 @@ class PostpartumNotifier extends Notifier<PostpartumState> {
     final now = DateTime.now();
     return PostpartumState(
       // Pre-seed first 3 EPDS answers for smooth onboarding exploration
-      epdsAnswers: const {
-        0: 0,
-        1: 1,
-        2: 0,
-      },
+      epdsAnswers: const {0: 0, 1: 1, 2: 0},
       // Pre-seed birth doses for demo
       vaccineRecords: {
         'bcg': now.subtract(const Duration(days: 14)),
@@ -326,5 +331,5 @@ class PostpartumNotifier extends Notifier<PostpartumState> {
 
 final postpartumProvider =
     NotifierProvider<PostpartumNotifier, PostpartumState>(() {
-  return PostpartumNotifier();
-});
+      return PostpartumNotifier();
+    });

@@ -35,7 +35,9 @@ class RecordsScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -47,17 +49,16 @@ class RecordsScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Text(
                   'No verified records for ${activePartner.name} yet',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Switch to the "Verify" tab to import, review, and confirm lab reports.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -96,8 +97,9 @@ class RecordsScreen extends ConsumerWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
-                  context
-                      .push('/records/detail/${Uri.encodeComponent(testName)}');
+                  context.push(
+                    '/records/detail/${Uri.encodeComponent(testName)}',
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -148,7 +150,10 @@ class RecordsScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Divider(height: 1, color: theme.colorScheme.outlineVariant),
+                      Divider(
+                        height: 1,
+                        color: theme.colorScheme.outlineVariant,
+                      ),
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -183,8 +188,7 @@ class RecordsScreen extends ConsumerWidget {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
-                                      color:
-                                          theme.colorScheme.onSurfaceVariant,
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
@@ -197,13 +201,14 @@ class RecordsScreen extends ConsumerWidget {
                               vertical: 5,
                             ),
                             decoration: BoxDecoration(
-                              color: latest.status ==
-                                      VerificationStatus.confirmed
+                              color:
+                                  latest.status == VerificationStatus.confirmed
                                   ? const Color(0xFFF0FDF4)
                                   : const Color(0xFFFFFBEB),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: latest.status ==
+                                color:
+                                    latest.status ==
                                         VerificationStatus.confirmed
                                     ? const Color(0xFFBBF7D0)
                                     : const Color(0xFFFDE68A),
@@ -217,7 +222,8 @@ class RecordsScreen extends ConsumerWidget {
                                       ? Icons.verified_outlined
                                       : Icons.edit_note,
                                   size: 14,
-                                  color: latest.status ==
+                                  color:
+                                      latest.status ==
                                           VerificationStatus.confirmed
                                       ? const Color(0xFF15803D)
                                       : const Color(0xFFB45309),
@@ -230,7 +236,8 @@ class RecordsScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: latest.status ==
+                                    color:
+                                        latest.status ==
                                             VerificationStatus.confirmed
                                         ? const Color(0xFF15803D)
                                         : const Color(0xFFB45309),

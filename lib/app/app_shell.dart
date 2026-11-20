@@ -163,7 +163,10 @@ class AppShell extends ConsumerWidget {
                     const SizedBox(height: 16),
 
                     Text(
-                      AppStrings.t('Select Active Partner Profile', currentLang),
+                      AppStrings.t(
+                        'Select Active Partner Profile',
+                        currentLang,
+                      ),
                       style: Theme.of(context).textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
@@ -175,7 +178,9 @@ class AppShell extends ConsumerWidget {
                       return Card(
                         elevation: 0,
                         color: isActive
-                            ? theme.colorScheme.primaryContainer.withOpacity(0.35)
+                            ? theme.colorScheme.primaryContainer.withOpacity(
+                                0.35,
+                              )
                             : theme.colorScheme.surface,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -370,7 +375,8 @@ class AppShell extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(right: 14.0),
             child: Tooltip(
-              message: '${AppStrings.t('Switch Partner Profile', currentLang)} (${activePartner.name})',
+              message:
+                  '${AppStrings.t('Switch Partner Profile', currentLang)} (${activePartner.name})',
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -382,8 +388,9 @@ class AppShell extends ConsumerWidget {
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer
-                          .withOpacity(0.55),
+                      color: theme.colorScheme.primaryContainer.withOpacity(
+                        0.55,
+                      ),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: theme.colorScheme.primary.withOpacity(0.25),
@@ -434,10 +441,7 @@ class AppShell extends ConsumerWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border(
-            top: BorderSide(
-              color: theme.colorScheme.outlineVariant,
-              width: 1,
-            ),
+            top: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
           ),
         ),
         child: NavigationBar(

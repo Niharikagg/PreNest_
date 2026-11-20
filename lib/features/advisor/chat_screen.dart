@@ -99,8 +99,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
               decoration: BoxDecoration(
-                color:
-                    theme.colorScheme.surfaceContainerHighest.withOpacity(0.55),
+                color: theme.colorScheme.surfaceContainerHighest.withOpacity(
+                  0.55,
+                ),
                 border: Border(
                   bottom: BorderSide(
                     color: theme.colorScheme.outlineVariant,
@@ -222,8 +223,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                       const SizedBox(width: 10),
                       IconButton.filled(
-                        onPressed:
-                            chatState.isLoading ? null : _handleSubmitted,
+                        onPressed: chatState.isLoading
+                            ? null
+                            : _handleSubmitted,
                         icon: const Icon(Icons.send_rounded, size: 20),
                         tooltip: 'Send message',
                         style: IconButton.styleFrom(
@@ -254,8 +256,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Column(
-        crossAxisAlignment:
-            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isUser
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -327,10 +330,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         ),
                       ],
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Text(
                 message.text,
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -383,8 +383,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 bottomLeft: Radius.circular(4),
                 bottomRight: Radius.circular(16),
               ),
-              border:
-                  Border.all(color: theme.colorScheme.outlineVariant, width: 1),
+              border: Border.all(
+                color: theme.colorScheme.outlineVariant,
+                width: 1,
+              ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(

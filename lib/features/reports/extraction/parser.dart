@@ -12,11 +12,7 @@ class OcrLineItem {
   final Rect? bbox;
   final double? confidence;
 
-  const OcrLineItem({
-    required this.text,
-    this.bbox,
-    this.confidence,
-  });
+  const OcrLineItem({required this.text, this.bbox, this.confidence});
 }
 
 /// Layout-aware parser that transforms OCR blocks and text into standardized ExtractedFields.
@@ -61,7 +57,9 @@ class ReportParser {
     if (lineItems.isEmpty) return const [];
 
     // 1. Detect report date from line items
-    final reportDate = _extractReportDate(lineItems.map((e) => e.text).toList());
+    final reportDate = _extractReportDate(
+      lineItems.map((e) => e.text).toList(),
+    );
 
     // 2. Group items into horizontal rows using Y coordinate proximity
     final groupedRows = _groupLinesIntoRows(lineItems);
@@ -215,9 +213,7 @@ class ReportParser {
     final dateRegex1 = RegExp(
       r'\b(\d{1,2})[-/.]([A-Za-z]{3,9}|\d{1,2})[-/.](20\d{2}|\d{2})\b',
     );
-    final dateRegex2 = RegExp(
-      r'\b([A-Za-z]{3,9})\s+(\d{1,2}),?\s+(20\d{2})\b',
-    );
+    final dateRegex2 = RegExp(r'\b([A-Za-z]{3,9})\s+(\d{1,2}),?\s+(20\d{2})\b');
 
     for (final line in lines) {
       final match1 = dateRegex1.firstMatch(line);
@@ -296,18 +292,10 @@ class ReportParser {
     if (rangeMatch != null) {
       printedRange = rangeMatch.group(1)?.trim();
       // Remove range from remaining string to prevent interference with observed value
-      remaining = remaining.replaceRange(
-        rangeMatch.start,
-        rangeMatch.end,
-        ' ',
-      );
+      remaining = remaining.replaceRange(rangeMatch.start, rangeMatch.end, ' ');
     } else if (ineqMatch != null) {
       printedRange = ineqMatch.group(1)?.trim();
-      remaining = remaining.replaceRange(
-        ineqMatch.start,
-        ineqMatch.end,
-        ' ',
-      );
+      remaining = remaining.replaceRange(ineqMatch.start, ineqMatch.end, ' ');
     }
 
     // 2. Extract standard units
@@ -434,10 +422,11 @@ class _RowCluster {
   Rect bbox;
 
   _RowCluster({required this.items, Rect? bbox})
-      : bbox = bbox ??
-            (items.isNotEmpty && items.first.bbox != null
-                ? items.first.bbox!
-                : Rect.zero);
+    : bbox =
+          bbox ??
+          (items.isNotEmpty && items.first.bbox != null
+              ? items.first.bbox!
+              : Rect.zero);
 
   void add(OcrLineItem item) {
     items.add(item);
@@ -447,10 +436,7 @@ class _RowCluster {
   }
 
   double get averageConfidence {
-    final confs = items
-        .map((e) => e.confidence)
-        .whereType<double>()
-        .toList();
+    final confs = items.map((e) => e.confidence).whereType<double>().toList();
     if (confs.isEmpty) return 0.85;
     return confs.reduce((a, b) => a + b) / confs.length;
   }

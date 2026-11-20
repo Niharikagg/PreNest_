@@ -269,7 +269,13 @@ class LabDictionary {
     // 14. Calcium
     LabTestDefinition(
       canonicalName: 'Calcium',
-      aliases: ['calcium', 'serum calcium', 's. calcium', 'total calcium', 'ca'],
+      aliases: [
+        'calcium',
+        'serum calcium',
+        's. calcium',
+        'total calcium',
+        'ca',
+      ],
       standardUnits: ['mg/dL', 'mg/dl', 'mmol/L'],
       typicalRange: '8.5 - 10.5',
       plausibleMin: 4.0,
@@ -488,8 +494,8 @@ class LabNormaliser {
 
     // Direct containment bonus (e.g. "fasting blood glucose" contains "fasting glucose")
     if (cleanA.contains(cleanB) || cleanB.contains(cleanA)) {
-      final ratio = min(cleanA.length, cleanB.length) /
-          max(cleanA.length, cleanB.length);
+      final ratio =
+          min(cleanA.length, cleanB.length) / max(cleanA.length, cleanB.length);
       return (0.85 + (0.15 * ratio)).clamp(0.0, 1.0);
     }
 
@@ -632,20 +638,15 @@ class LabNormaliser {
 
     // Determine ExtractionStatus:
     // Status is auto when overall confidence >= 0.80, a numeric value is present, and name match >= 0.70.
-    final status =
-        (score >= 0.80 && value != null && nameScore >= 0.70)
-            ? ExtractionStatus.auto
-            : ExtractionStatus.needsReview;
+    final status = (score >= 0.80 && value != null && nameScore >= 0.70)
+        ? ExtractionStatus.auto
+        : ExtractionStatus.needsReview;
 
     final reasoning =
         'OCR: ${(ocrScore * 100).toInt()}%, Name: ${(nameScore * 100).toInt()}%, '
         'Value: ${(valScore * 100).toInt()}%, Unit: ${(unitScore * 100).toInt()}% '
         '=> Final: ${(score * 100).toInt()}% [${status.name}]';
 
-    return ConfidenceResult(
-      score: score,
-      status: status,
-      reasoning: reasoning,
-    );
+    return ConfidenceResult(score: score, status: status, reasoning: reasoning);
   }
 }

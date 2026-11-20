@@ -117,7 +117,9 @@ class KickCounterNotifier extends Notifier<KickCounterState> {
     final start = state.startTime ?? DateTime.now();
     final duration = DateTime.now().difference(start);
     // Ensure at least a few seconds duration
-    final safeDuration = duration.inSeconds < 1 ? const Duration(seconds: 1) : duration;
+    final safeDuration = duration.inSeconds < 1
+        ? const Duration(seconds: 1)
+        : duration;
 
     final newSession = KickSession(
       id: 'session_${DateTime.now().millisecondsSinceEpoch}',
@@ -144,5 +146,5 @@ class KickCounterNotifier extends Notifier<KickCounterState> {
 
 final kickCounterProvider =
     NotifierProvider<KickCounterNotifier, KickCounterState>(() {
-  return KickCounterNotifier();
-});
+      return KickCounterNotifier();
+    });

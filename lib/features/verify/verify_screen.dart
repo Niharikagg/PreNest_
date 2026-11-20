@@ -58,8 +58,9 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
     if (initialFields.isEmpty) {
       ref.read(verifyControllerProvider.notifier).loadSampleReport();
     } else {
-      _editModels =
-          initialFields.map((f) => _FieldEditModel(original: f)).toList();
+      _editModels = initialFields
+          .map((f) => _FieldEditModel(original: f))
+          .toList();
     }
   }
 
@@ -94,10 +95,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
       if (!mounted) return;
 
       final controller = ref.read(verifyControllerProvider.notifier);
-      await controller.extractFromImage(
-        path: picked.path,
-        bytes: bytes,
-      );
+      await controller.extractFromImage(path: picked.path, bytes: bytes);
     } catch (e) {
       debugPrint('[VerifyScreen] Error picking image: $e');
       if (mounted) {
@@ -226,8 +224,9 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                   children: [
                     Text(
                       'OCR Verification & Review',
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       'Patient: ${activePartner.name} [${activePartner.role}] • Stage: ${stage.displayName}',
@@ -350,8 +349,9 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                         verifyState.selectedImageBytes != null
                             ? 'Lab Report Image (Pinch/Scroll to Zoom)'
                             : 'Original Lab Report (Pinch/Scroll to Zoom)',
-                        style: theme.textTheme.labelMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -539,10 +539,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                   fontSize: 12,
                 ),
               ),
-              const Text(
-                'Date: 10-Nov-2026',
-                style: TextStyle(fontSize: 12),
-              ),
+              const Text('Date: 10-Nov-2026', style: TextStyle(fontSize: 12)),
             ],
           ),
           Row(
@@ -550,27 +547,18 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
             children: [
               Text(
                 'Age/Sex: ${activePartner.age} Y / ${activePartner.role == 'Her' ? 'F' : 'M'}',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey.shade700,
-                ),
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
               ),
               Text(
                 'Sample: Serum / Whole Blood',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey.shade700,
-                ),
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
               ),
             ],
           ),
           const SizedBox(height: 16),
           // Table header
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             color: Colors.grey.shade100,
             child: const Row(
               children: [
@@ -578,40 +566,28 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                   flex: 3,
                   child: Text(
                     'Investigation',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
                   flex: 2,
                   child: Text(
                     'Observed',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
                   flex: 2,
                   child: Text(
                     'Unit',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Expanded(
                   flex: 2,
                   child: Text(
                     'Reference',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -622,10 +598,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
           ..._editModels.map((m) {
             final isLowConf = m.original.confidence < 0.8;
             return Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               margin: const EdgeInsets.symmetric(vertical: 2),
               decoration: BoxDecoration(
                 color: isLowConf
@@ -633,10 +606,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(4),
                 border: isLowConf
-                    ? Border.all(
-                        color: Colors.amber.shade600,
-                        width: 1,
-                      )
+                    ? Border.all(color: Colors.amber.shade600, width: 1)
                     : null,
               ),
               child: Row(

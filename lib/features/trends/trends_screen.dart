@@ -37,7 +37,9 @@ class TrendsScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -49,17 +51,16 @@ class TrendsScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Text(
                   'No trend data for ${activePartner.name}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Add test results to see longitudinal health trajectories.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -98,8 +99,9 @@ class TrendsScreen extends ConsumerWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
-                  context
-                      .push('/records/detail/${Uri.encodeComponent(testName)}');
+                  context.push(
+                    '/records/detail/${Uri.encodeComponent(testName)}',
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -197,8 +199,8 @@ class TrendsScreen extends ConsumerWidget {
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: summary.change! > 0
-                                  ? Colors.teal.shade700
-                                  : Colors.indigo.shade700,
+                                    ? Colors.teal.shade700
+                                    : Colors.indigo.shade700,
                               ),
                             ),
                           ] else ...[

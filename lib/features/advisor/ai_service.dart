@@ -8,7 +8,7 @@ class AiService {
   GenerativeModel? _model;
 
   AiService({String? apiKey})
-      : _apiKey = apiKey ?? const String.fromEnvironment('GEMINI_API_KEY') {
+    : _apiKey = apiKey ?? const String.fromEnvironment('GEMINI_API_KEY') {
     if (_apiKey.isNotEmpty) {
       _model = GenerativeModel(
         model: 'gemini-1.5-flash',

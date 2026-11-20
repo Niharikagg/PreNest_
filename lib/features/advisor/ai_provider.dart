@@ -24,15 +24,9 @@ class ChatState {
   final List<ChatMessage> messages;
   final bool isLoading;
 
-  const ChatState({
-    required this.messages,
-    this.isLoading = false,
-  });
+  const ChatState({required this.messages, this.isLoading = false});
 
-  ChatState copyWith({
-    List<ChatMessage>? messages,
-    bool? isLoading,
-  }) {
+  ChatState copyWith({List<ChatMessage>? messages, bool? isLoading}) {
     return ChatState(
       messages: messages ?? this.messages,
       isLoading: isLoading ?? this.isLoading,
@@ -53,8 +47,7 @@ class ChatNotifier extends Notifier<ChatState> {
     return ChatState(
       messages: [
         ChatMessage(
-          text:
-              "Hello! I'm PreNest, your empathetic companion. I'm here to support you and your partner with emotional care, practical encouragement, and general guidance. What's on your mind today?",
+          text: "Hello! I'm PreNest, your empathetic companion. I'm here to support you and your partner with emotional care, practical encouragement, and general guidance. What's on your mind today?",
           isUser: false,
           timestamp: DateTime.now(),
         ),
@@ -102,8 +95,7 @@ class ChatNotifier extends Notifier<ChatState> {
       );
     } catch (_) {
       final fallbackMessage = ChatMessage(
-        text:
-            "I'm here for you, but I had trouble processing that just now. Please try again in a moment. Always consult your doctor for medical advice or urgent concerns.",
+        text: "I'm here for you, but I had trouble processing that just now. Please try again in a moment. Always consult your doctor for medical advice or urgent concerns.",
         isUser: false,
         timestamp: DateTime.now(),
       );
@@ -119,8 +111,7 @@ class ChatNotifier extends Notifier<ChatState> {
     state = ChatState(
       messages: [
         ChatMessage(
-          text:
-              "Hello! I'm PreNest, your empathetic companion. What's on your mind today?",
+          text: "Hello! I'm PreNest, your empathetic companion. What's on your mind today?",
           isUser: false,
           timestamp: DateTime.now(),
         ),

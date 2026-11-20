@@ -83,7 +83,9 @@ class TestDetailScreen extends ConsumerWidget {
                             'Chronological',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -140,7 +142,10 @@ class TestDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 2),
                 Text(
                   'PreNest Profile • Standard Unit: $unit',
-                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -296,7 +301,10 @@ class TestDetailScreen extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     summary.reason,
-                    style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
@@ -325,13 +333,17 @@ class TestDetailScreen extends ConsumerWidget {
           children: [
             Text(
               'Range Position Indicator',
-              style: theme.textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               'Normalized relative standing within expected clinical target boundaries',
-              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 18),
             // Position Gauge Bar
@@ -397,7 +409,10 @@ class TestDetailScreen extends ConsumerWidget {
               children: [
                 Text(
                   'Low / Sub-optimal',
-                  style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 Text(
                   'Optimal Target',
@@ -409,7 +424,10 @@ class TestDetailScreen extends ConsumerWidget {
                 ),
                 Text(
                   'High / Elevated',
-                  style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -439,7 +457,11 @@ class TestDetailScreen extends ConsumerWidget {
                 color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.event_note, size: 20, color: theme.colorScheme.primary),
+              child: Icon(
+                Icons.event_note,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -455,7 +477,10 @@ class TestDetailScreen extends ConsumerWidget {
                   ),
                   Text(
                     'Stage: ${_capitalize(record.stage)}',
-                    style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -473,7 +498,10 @@ class TestDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: record.status == VerificationStatus.confirmed
                         ? const Color(0xFFF0FDF4)

@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -48,8 +49,18 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
 
   String _formatSessionDate(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
     final minute = dt.minute.toString().padLeft(2, '0');
@@ -72,9 +83,7 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
     final hasReachedTen = kickState.kickCount >= 10;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fetal Kick Counter'),
-      ),
+      appBar: AppBar(title: const Text('Fetal Kick Counter')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
@@ -89,10 +98,7 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                   color: const Color(0xFFF0FDFA),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(
-                      color: Color(0xFF99F6E4),
-                      width: 1,
-                    ),
+                    side: const BorderSide(color: Color(0xFF99F6E4), width: 1),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -149,7 +155,9 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                             OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppTheme.warmRose,
-                                side: const BorderSide(color: Color(0xFFFECDD3)),
+                                side: const BorderSide(
+                                  color: Color(0xFFFECDD3),
+                                ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                   vertical: 8,
@@ -158,10 +166,16 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              icon: const Icon(Icons.warning_amber_rounded, size: 16),
+                              icon: const Icon(
+                                Icons.warning_amber_rounded,
+                                size: 16,
+                              ),
                               label: const Text(
                                 'Danger-Sign Checker',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               onPressed: () => context.push('/danger-signs'),
                             ),
@@ -187,12 +201,18 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 24,
+                    ),
                     child: Column(
                       children: [
                         // Status indicator
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: kickState.isActive
                                 ? const Color(0xFFECFDF5)
@@ -245,7 +265,9 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                             },
                             customBorder: const CircleBorder(),
                             splashColor: AppTheme.primaryTealLight,
-                            highlightColor: AppTheme.primaryTeal.withOpacity(0.1),
+                            highlightColor: AppTheme.primaryTeal.withOpacity(
+                              0.1,
+                            ),
                             child: Ink(
                               width: 210,
                               height: 210,
@@ -266,7 +288,9 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppTheme.primaryTeal.withOpacity(0.25),
+                                    color: AppTheme.primaryTeal.withOpacity(
+                                      0.25,
+                                    ),
                                     blurRadius: 18,
                                     offset: const Offset(0, 8),
                                   ),
@@ -313,15 +337,24 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                         if (hasReachedTen)
                           Container(
                             margin: const EdgeInsets.only(bottom: 16),
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFECFDF5),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFA7F3D0)),
+                              border: Border.all(
+                                color: const Color(0xFFA7F3D0),
+                              ),
                             ),
                             child: const Row(
                               children: [
-                                Icon(Icons.check_circle, color: Color(0xFF059669), size: 18),
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Color(0xFF059669),
+                                  size: 18,
+                                ),
                                 SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
@@ -349,7 +382,9 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                                   icon: const Icon(Icons.play_arrow_rounded),
                                   label: const Text('Start Session'),
                                   style: FilledButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
                                   ),
                                 ),
                               )
@@ -359,12 +394,19 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                                   onPressed: () {
                                     notifier.resetSession();
                                   },
-                                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                                  icon: const Icon(
+                                    Icons.refresh_rounded,
+                                    size: 18,
+                                  ),
                                   label: const Text('Reset'),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
                                     foregroundColor: AppTheme.textMuted,
-                                    side: const BorderSide(color: AppTheme.borderLight),
+                                    side: const BorderSide(
+                                      color: AppTheme.borderLight,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -375,19 +417,29 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                                   onPressed: kickState.kickCount > 0
                                       ? () {
                                           notifier.saveSession();
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             const SnackBar(
-                                              content: Text('Kick session saved to history.'),
-                                              backgroundColor: AppTheme.primaryTeal,
+                                              content: Text(
+                                                'Kick session saved to history.',
+                                              ),
+                                              backgroundColor:
+                                                  AppTheme.primaryTeal,
                                               duration: Duration(seconds: 2),
                                             ),
                                           );
                                         }
                                       : null,
-                                  icon: const Icon(Icons.save_rounded, size: 18),
+                                  icon: const Icon(
+                                    Icons.save_rounded,
+                                    size: 18,
+                                  ),
                                   label: const Text('Save Session'),
                                   style: FilledButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -421,7 +473,8 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                 if (kickState.sessions.isEmpty)
                   Card(
                     elevation: 0,
-                    color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
+                    color: theme.colorScheme.surfaceContainerHighest
+                        .withOpacity(0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                       side: const BorderSide(color: AppTheme.borderLight),
@@ -441,7 +494,8 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: kickState.sessions.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 10),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final session = kickState.sessions[index];
                       final isUnderTwoHours = session.duration.inHours < 2;
@@ -504,7 +558,9 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                                             color: isUnderTwoHours
                                                 ? const Color(0xFFECFDF5)
                                                 : const Color(0xFFFFFBEB),
-                                            borderRadius: BorderRadius.circular(6),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
                                           ),
                                           child: Text(
                                             _formatDuration(session.duration),
@@ -531,7 +587,10 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 18),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 18,
+                                ),
                                 color: AppTheme.textMuted,
                                 tooltip: 'Delete session',
                                 onPressed: () {
@@ -555,7 +614,11 @@ class _KickCounterScreenState extends ConsumerState<KickCounterScreen> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.shield_outlined, size: 16, color: AppTheme.textMuted),
+                      Icon(
+                        Icons.shield_outlined,
+                        size: 16,
+                        color: AppTheme.textMuted,
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(

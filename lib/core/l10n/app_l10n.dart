@@ -9,10 +9,7 @@ enum AppLanguage {
   final String label;
   final String ttsLocale;
 
-  const AppLanguage({
-    required this.label,
-    required this.ttsLocale,
-  });
+  const AppLanguage({required this.label, required this.ttsLocale});
 }
 
 /// Riverpod State Notifier managing active language preference.
@@ -26,8 +23,9 @@ class LanguageNotifier extends Notifier<AppLanguage> {
 }
 
 /// Provider for the currently active AppLanguage.
-final languageProvider =
-    NotifierProvider<LanguageNotifier, AppLanguage>(LanguageNotifier.new);
+final languageProvider = NotifierProvider<LanguageNotifier, AppLanguage>(
+  LanguageNotifier.new,
+);
 
 /// Pure-Dart translations map for compile-time safety and zero codegen dependencies.
 class AppStrings {
@@ -185,12 +183,9 @@ class AppStrings {
       AppLanguage.kn: 'ತೆರವುಗೊಳಿಸಿ',
     },
     'No critical danger signs reported': {
-      AppLanguage.en:
-          'No critical danger signs reported. Tap any symptom below if you experience it.',
-      AppLanguage.hi:
-          'कोई गंभीर खतरे के लक्षण नहीं मिले। यदि कोई लक्षण महसूस हो तो नीचे चुनें।',
-      AppLanguage.kn:
-          'ಯಾವುದೇ ಗಂಭೀರ ಅಪಾಯದ ಚಿಹ್ನೆಗಳು ವರದಿಯಾಗಿಲ್ಲ. ಯಾವುದೇ ಲಕ್ಷಣ ಅನುಭವಿಸಿದರೆ ಕೆಳಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ.',
+      AppLanguage.en: 'No critical danger signs reported. Tap any symptom below if you experience it.',
+      AppLanguage.hi: 'कोई गंभीर खतरे के लक्षण नहीं मिले। यदि कोई लक्षण महसूस हो तो नीचे चुनें।',
+      AppLanguage.kn: 'ಯಾವುದೇ ಗಂಭೀರ ಅಪಾಯದ ಚಿಹ್ನೆಗಳು ವರದಿಯಾಗಿಲ್ಲ. ಯಾವುದೇ ಲಕ್ಷಣ ಅನುಭವಿಸಿದರೆ ಕೆಳಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ.',
     },
     'critical_warning_prefix': {
       AppLanguage.en: 'CRITICAL WARNING: Danger sign(s) detected! ',
@@ -198,8 +193,7 @@ class AppStrings {
       AppLanguage.kn: 'ತೀವ್ರ ಎಚ್ಚರಿಕೆ: ಅಪಾಯದ ಲಕ್ಷಣ ಕಂಡುಬಂದಿದೆ! ',
     },
     'critical_warning_body': {
-      AppLanguage.en:
-          'Go to the nearest emergency health facility or hospital immediately.',
+      AppLanguage.en: 'Go to the nearest emergency health facility or hospital immediately.',
       AppLanguage.hi:
           'तुरंत निकटतम आपातकालीन स्वास्थ्य केंद्र या अस्पताल जाएं।',
       AppLanguage.kn:
@@ -217,14 +211,12 @@ class AppStrings {
           'Soaking a sanitary pad in under 1-2 hours or passing large clots.',
       AppLanguage.hi:
           '1-2 घंटे में सैनिटरी पैड का पूरी तरह भीगना या बड़े थक्के निकलना।',
-      AppLanguage.kn:
-          '1-2 ಗಂಟೆಗಳಲ್ಲಿ ಸ್ಯಾನಿಟರಿ ಪ್ಯಾಡ್ ಸಂಪೂರ್ಣ ನೆನೆಯುವುದು ಅಥವಾ ದೊಡ್ಡ ರಕ್ತ ಹೆಪ್ಪುಗಟ್ಟುವಿಕೆ.',
+      AppLanguage.kn: '1-2 ಗಂಟೆಗಳಲ್ಲಿ ಸ್ಯಾನಿಟರಿ ಪ್ಯಾಡ್ ಸಂಪೂರ್ಣ ನೆನೆಯುವುದು ಅಥವಾ ದೊಡ್ಡ ರಕ್ತ ಹೆಪ್ಪುಗಟ್ಟುವಿಕೆ.',
     },
     'heavy_bleeding_note': {
       AppLanguage.en:
           'High risk: Placental abruption, placenta previa, or hemorrhage.',
-      AppLanguage.hi:
-          'उच्च जोखिम: प्लेसेंटल एब्स्ट्रक्शन, प्लेसेंटा प्रिविया या अत्यधिक रक्तस्राव।',
+      AppLanguage.hi: 'उच्च जोखिम: प्लेसेंटल एब्स्ट्रक्शन, प्लेसेंटा प्रिविया या अत्यधिक रक्तस्राव।',
       AppLanguage.kn:
           'ಹೆಚ್ಚಿನ ಅಪಾಯ: ಜರಾಯು ಬೇರ್ಪಡುವಿಕೆ, ಪ್ಲಾಸೆಂಟಾ ಪ್ರೀವಿಯಾ ಅಥವಾ ರಕ್ತಸ್ರಾವ.',
     },
@@ -235,12 +227,9 @@ class AppStrings {
       AppLanguage.kn: 'ಮಸುಕಾದ ದೃಷ್ಟಿಯೊಂದಿಗೆ ತೀವ್ರ ತಲೆನೋವು',
     },
     'severe_headache_vision_desc': {
-      AppLanguage.en:
-          'Pounding headache, flashing lights, aura, or sudden visual disturbance.',
-      AppLanguage.hi:
-          'तेज सिरदर्द, चमकती रोशनी, या अचानक देखने में परेशानी।',
-      AppLanguage.kn:
-          'ವಿಪರೀತ ತಲೆನೋವು, ಮಿಂಚಿನ ಬೆಳಕು, ಅಥವಾ ಹಠಾತ್ ದೃಷ್ಟಿ ದೋಷ.',
+      AppLanguage.en: 'Pounding headache, flashing lights, aura, or sudden visual disturbance.',
+      AppLanguage.hi: 'तेज सिरदर्द, चमकती रोशनी, या अचानक देखने में परेशानी।',
+      AppLanguage.kn: 'ವಿಪರೀತ ತಲೆನೋವು, ಮಿಂಚಿನ ಬೆಳಕು, ಅಥವಾ ಹಠಾತ್ ದೃಷ್ಟಿ ದೋಷ.',
     },
     'severe_headache_vision_note': {
       AppLanguage.en:
@@ -259,10 +248,8 @@ class AppStrings {
     'fits_seizures_desc': {
       AppLanguage.en:
           'Uncontrollable shaking, spasms, or momentary loss of consciousness.',
-      AppLanguage.hi:
-          'अनियंत्रित कंपन, ऐंठन या अचानक बेहोशी।',
-      AppLanguage.kn:
-          'ನಿಯಂತ್ರಿಸಲಾಗದ ನಡುಕ, ಸೆಳೆತ ಅಥವಾ ಪ್ರಜ್ಞೆ ಕಳೆದುಕೊಳ್ಳುವುದು.',
+      AppLanguage.hi: 'अनियंत्रित कंपन, ऐंठन या अचानक बेहोशी।',
+      AppLanguage.kn: 'ನಿಯಂತ್ರಿಸಲಾಗದ ನಡುಕ, ಸೆಳೆತ ಅಥವಾ ಪ್ರಜ್ಞೆ ಕಳೆದುಕೊಳ್ಳುವುದು.',
     },
     'fits_seizures_note': {
       AppLanguage.en: 'Immediate critical emergency: Eclampsia convulsion.',
@@ -280,14 +267,12 @@ class AppStrings {
           'Substantial drop in kick count or no movement felt over 2-3 hours.',
       AppLanguage.hi:
           'किक की संख्या में भारी कमी या 2-3 घंटे तक कोई हलचल न होना।',
-      AppLanguage.kn:
-          'ಕಿಕ್ ಎಣಿಕೆಯಲ್ಲಿ ಗಣನೀಯ ಇಳಿಕೆ ಅಥವಾ 2-3 ಗಂಟೆಗಳ ಕಾಲ ಯಾವುದೇ ಚಲನೆ ಇಲ್ಲದಿರುವುದು.',
+      AppLanguage.kn: 'ಕಿಕ್ ಎಣಿಕೆಯಲ್ಲಿ ಗಣನೀಯ ಇಳಿಕೆ ಅಥವಾ 2-3 ಗಂಟೆಗಳ ಕಾಲ ಯಾವುದೇ ಚಲನೆ ಇಲ್ಲದಿರುವುದು.',
     },
     'reduced_fetal_movement_note': {
       AppLanguage.en:
           'Urgent: Possible fetal compromise requiring immediate CTG scan.',
-      AppLanguage.hi:
-          'अति आवश्यक: तत्काल सीटीजी स्कैन की आवश्यकता।',
+      AppLanguage.hi: 'अति आवश्यक: तत्काल सीटीजी स्कैन की आवश्यकता।',
       AppLanguage.kn:
           'ತುರ್ತು: ತಕ್ಷಣದ ಸಿಟಿಜಿ ಸ್ಕ್ಯಾನ್ ಅಗತ್ಯವಿರುವ ಸಂಭವನೀಯ ಭ್ರೂಣದ ತೊಂದರೆ.',
     },
@@ -298,20 +283,14 @@ class AppStrings {
       AppLanguage.kn: 'ತೀವ್ರ ಜ್ವರ ಮತ್ತು ನಡುಕ',
     },
     'high_fever_chills_desc': {
-      AppLanguage.en:
-          'Temperature over 101°F (38.3°C) with persistent shivering or rigors.',
-      AppLanguage.hi:
-          '101°F (38.3°C) से अधिक तापमान के साथ लगातार कंपकंपी।',
-      AppLanguage.kn:
-          '101°F (38.3°C) ಗಿಂತ ಹೆಚ್ಚಿನ ಜ್ವರ ಮತ್ತು ನಿರಂತರ ನಡುಕ.',
+      AppLanguage.en: 'Temperature over 101°F (38.3°C) with persistent shivering or rigors.',
+      AppLanguage.hi: '101°F (38.3°C) से अधिक तापमान के साथ लगातार कंपकंपी।',
+      AppLanguage.kn: '101°F (38.3°C) ಗಿಂತ ಹೆಚ್ಚಿನ ಜ್ವರ ಮತ್ತು ನಿರಂತರ ನಡುಕ.',
     },
     'high_fever_chills_note': {
-      AppLanguage.en:
-          'Risk of intra-amniotic infection (chorioamnionitis) or maternal sepsis.',
-      AppLanguage.hi:
-          'गर्भाशय संक्रमण या मातृ सेप्सिस का जोखिम।',
-      AppLanguage.kn:
-          'ಗರ್ಭಕೋಶದ ಸೋಂಕು ಅಥವಾ ಸೆಪ್ಸಿಸ್ ಅಪಾಯ.',
+      AppLanguage.en: 'Risk of intra-amniotic infection (chorioamnionitis) or maternal sepsis.',
+      AppLanguage.hi: 'गर्भाशय संक्रमण या मातृ सेप्सिस का जोखिम।',
+      AppLanguage.kn: 'ಗರ್ಭಕೋಶದ ಸೋಂಕು ಅಥವಾ ಸೆಪ್ಸಿಸ್ ಅಪಾಯ.',
     },
 
     'severe_abdominal_pain_title': {
@@ -320,20 +299,15 @@ class AppStrings {
       AppLanguage.kn: 'ಹೊಟ್ಟೆಯಲ್ಲಿ ತೀವ್ರ ನಿರಂತರ ನೋವು',
     },
     'severe_abdominal_pain_desc': {
-      AppLanguage.en:
-          'Constant sharp or rigid abdominal cramps, distinct from normal Braxton-Hicks.',
-      AppLanguage.hi:
-          'पेट में लगातार तेज ऐंठन जो सामान्य संकुचन से अलग हो।',
-      AppLanguage.kn:
-          'ಸಾಮಾನ್ಯ ಬ್ರಾಕ್ಸ್‌ಟನ್-ಹಿಕ್ಸ್ ಗಿಂತ ಭಿನ್ನವಾದ ನಿರಂತರ ತೀವ್ರ ಹೊಟ್ಟೆ ಸೆಳೆತ.',
+      AppLanguage.en: 'Constant sharp or rigid abdominal cramps, distinct from normal Braxton-Hicks.',
+      AppLanguage.hi: 'पेट में लगातार तेज ऐंठन जो सामान्य संकुचन से अलग हो।',
+      AppLanguage.kn: 'ಸಾಮಾನ್ಯ ಬ್ರಾಕ್ಸ್‌ಟನ್-ಹಿಕ್ಸ್ ಗಿಂತ ಭಿನ್ನವಾದ ನಿರಂತರ ತೀವ್ರ ಹೊಟ್ಟೆ ಸೆಳೆತ.',
     },
     'severe_abdominal_pain_note': {
       AppLanguage.en:
           'Critical: Possible uterine rupture, abruption, or acute abdomen.',
-      AppLanguage.hi:
-          'गंभीर: गर्भाशय फटने या प्लेसेंटा अलग होने का जोखिम।',
-      AppLanguage.kn:
-          'ಗಂಭೀರ: ಗರ್ಭಾಶಯ ಛಿದ್ರ ಅಥವಾ ಜರಾಯು ಬೇರ್ಪಡುವ ಸಾಧ್ಯತೆ.',
+      AppLanguage.hi: 'गंभीर: गर्भाशय फटने या प्लेसेंटा अलग होने का जोखिम।',
+      AppLanguage.kn: 'ಗಂಭೀರ: ಗರ್ಭಾಶಯ ಛಿದ್ರ ಅಥವಾ ಜರಾಯು ಬೇರ್ಪಡುವ ಸಾಧ್ಯತೆ.',
     },
 
     'fluid_leakage_title': {
@@ -342,20 +316,15 @@ class AppStrings {
       AppLanguage.kn: 'ಉಲ್ಬದ್ರವ ಸೋರಿಕೆ (ನೀರು ಒಡೆಯುವುದು)',
     },
     'fluid_leakage_desc': {
-      AppLanguage.en:
-          'Continuous trickle or sudden rush of clear/greenish fluid from vagina.',
-      AppLanguage.hi:
-          'योनि से लगातार या अचानक पानी जैसा स्राव होना।',
-      AppLanguage.kn:
-          'ಯೋನಿಯಿಂದ ನಿರಂತರವಾಗಿ ಅಥವಾ ಹಠಾತ್ತನೆ ದ್ರವ ಸೋರಿಕೆಯಾಗುವುದು.',
+      AppLanguage.en: 'Continuous trickle or sudden rush of clear/greenish fluid from vagina.',
+      AppLanguage.hi: 'योनि से लगातार या अचानक पानी जैसा स्राव होना।',
+      AppLanguage.kn: 'ಯೋನಿಯಿಂದ ನಿರಂತರವಾಗಿ ಅಥವಾ ಹಠಾತ್ತನೆ ದ್ರವ ಸೋರಿಕೆಯಾಗುವುದು.',
     },
     'fluid_leakage_note': {
-      AppLanguage.en:
-          'Premature rupture of membranes (PROM) requiring immediate sterile evaluation.',
+      AppLanguage.en: 'Premature rupture of membranes (PROM) requiring immediate sterile evaluation.',
       AppLanguage.hi:
           'झिल्ली का समय से पहले फटना (PROM), तत्काल परीक्षण आवश्यक।',
-      AppLanguage.kn:
-          'ಪೊರೆಯ ಅಕಾಲಿಕ ಛಿದ್ರ (PROM), ತಕ್ಷಣದ ಪರೀಕ್ಷೆ ಅಗತ್ಯ.',
+      AppLanguage.kn: 'ಪೊರೆಯ ಅಕಾಲಿಕ ಛಿದ್ರ (PROM), ತಕ್ಷಣದ ಪರೀಕ್ಷೆ ಅಗತ್ಯ.',
     },
   };
 

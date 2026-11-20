@@ -20,7 +20,10 @@ class PostpartumScreen extends ConsumerWidget {
             labelColor: AppTheme.primaryTeal,
             unselectedLabelColor: AppTheme.textMuted,
             labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+            unselectedLabelStyle: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+            ),
             tabs: [
               Tab(
                 icon: Icon(Icons.favorite_outline, size: 20),
@@ -33,12 +36,7 @@ class PostpartumScreen extends ConsumerWidget {
             ],
           ),
         ),
-        body: const TabBarView(
-          children: [
-            _EpdsTab(),
-            _VaccineTrackerTab(),
-          ],
-        ),
+        body: const TabBarView(children: [_EpdsTab(), _VaccineTrackerTab()]),
       ),
     );
   }
@@ -54,7 +52,11 @@ class _EpdsTab extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.phone_in_talk, color: AppTheme.warmRose, size: 40),
+        icon: const Icon(
+          Icons.phone_in_talk,
+          color: AppTheme.warmRose,
+          size: 40,
+        ),
         title: const Text('Tele-MANAS Support (14416)'),
         content: const Column(
           mainAxisSize: MainAxisSize.min,
@@ -87,7 +89,9 @@ class _EpdsTab extends ConsumerWidget {
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Simulated dial to Tele-MANAS helpline (14416).'),
+                  content: Text(
+                    'Simulated dial to Tele-MANAS helpline (14416).',
+                  ),
                   backgroundColor: AppTheme.warmRose,
                   duration: Duration(seconds: 3),
                 ),
@@ -129,7 +133,11 @@ class _EpdsTab extends ConsumerWidget {
                 child: const Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, size: 18, color: AppTheme.textMuted),
+                    Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: AppTheme.textMuted,
+                    ),
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -148,7 +156,13 @@ class _EpdsTab extends ConsumerWidget {
               const SizedBox(height: 16),
 
               // Computed Score Result Card
-              _buildResultCard(context, state, answeredCount, totalQuestions, score),
+              _buildResultCard(
+                context,
+                state,
+                answeredCount,
+                totalQuestions,
+                score,
+              ),
               const SizedBox(height: 20),
 
               // Questions List Header
@@ -164,7 +178,10 @@ class _EpdsTab extends ConsumerWidget {
                   if (answeredCount > 0)
                     TextButton.icon(
                       icon: const Icon(Icons.refresh, size: 16),
-                      label: const Text('Reset', style: TextStyle(fontSize: 12)),
+                      label: const Text(
+                        'Reset',
+                        style: TextStyle(fontSize: 12),
+                      ),
                       onPressed: () {
                         notifier.resetEpds();
                       },
@@ -301,8 +318,8 @@ class _EpdsTab extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           state.hasSelfHarmThought
-                            ? 'You indicated experiencing thoughts of self-harm, or your score is elevated ($score/30). You do not have to carry this alone. Please speak with your doctor, a loved one, or connect with the 24/7 Tele-MANAS helpline right now.'
-                            : 'Your score ($score/30) indicates that you may be experiencing symptoms of postpartum depression or significant distress. We strongly encourage talking to your doctor, obstetrician, or a counsellor.',
+                              ? 'You indicated experiencing thoughts of self-harm, or your score is elevated ($score/30). You do not have to carry this alone. Please speak with your doctor, a loved one, or connect with the 24/7 Tele-MANAS helpline right now.'
+                              : 'Your score ($score/30) indicates that you may be experiencing symptoms of postpartum depression or significant distress. We strongly encourage talking to your doctor, obstetrician, or a counsellor.',
                           style: const TextStyle(
                             fontSize: 12.5,
                             color: Color(0xFF7F1D1D),
@@ -480,8 +497,18 @@ class _VaccineTrackerTab extends ConsumerWidget {
 
   String _formatDate(DateTime dt) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
@@ -590,7 +617,11 @@ class _VaccineTrackerTab extends ConsumerWidget {
                 child: const Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.shield_outlined, size: 16, color: AppTheme.textMuted),
+                    Icon(
+                      Icons.shield_outlined,
+                      size: 16,
+                      color: AppTheme.textMuted,
+                    ),
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -669,13 +700,17 @@ class _VaccineTrackerTab extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     ...group.vaccines.map((v) {
-                      final isCompleted = state.vaccineRecords.containsKey(v.id);
+                      final isCompleted = state.vaccineRecords.containsKey(
+                        v.id,
+                      );
                       final completedDate = state.vaccineRecords[v.id];
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         elevation: 0,
-                        color: isCompleted ? const Color(0xFFF0FDF4) : Colors.white,
+                        color: isCompleted
+                            ? const Color(0xFFF0FDF4)
+                            : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                           side: BorderSide(
@@ -698,8 +733,9 @@ class _VaccineTrackerTab extends ConsumerWidget {
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  decoration:
-                                      isCompleted ? TextDecoration.lineThrough : null,
+                                  decoration: isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : null,
                                   color: isCompleted
                                       ? const Color(0xFF166534)
                                       : AppTheme.textDark,

@@ -87,13 +87,12 @@ class BirthPlanNotifier extends Notifier<BirthPlanState> {
 
   void toggleChecklistItem(String key) {
     final current = state.checklist[key] ?? false;
-    state = state.copyWith(
-      checklist: {...state.checklist, key: !current},
-    );
+    state = state.copyWith(checklist: {...state.checklist, key: !current});
   }
 }
 
-final birthPlanProvider =
-    NotifierProvider<BirthPlanNotifier, BirthPlanState>(() {
-  return BirthPlanNotifier();
-});
+final birthPlanProvider = NotifierProvider<BirthPlanNotifier, BirthPlanState>(
+  () {
+    return BirthPlanNotifier();
+  },
+);
