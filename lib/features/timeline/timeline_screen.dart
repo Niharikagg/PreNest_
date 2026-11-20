@@ -6,6 +6,7 @@ import '../../app/theme.dart';
 import '../../core/l10n/app_l10n.dart';
 import '../../core/l10n/tts_service.dart';
 import '../couple/couple_hints_provider.dart';
+import '../couple/partner_story_cards.dart';
 import '../onboarding/entry_state.dart';
 import '../onboarding/mode_selection_state.dart';
 import '../postpartum/postpartum_provider.dart';
@@ -944,6 +945,9 @@ class TimelineScreen extends ConsumerWidget {
 
     final activeMode = modeState.activeMode(currentStage);
     final stageColor = _getStageAccentColor(currentStage);
+    final isPartner =
+        activePartner.id == couple.secondaryPartner.id ||
+        activePartner.role.toLowerCase() == 'him';
 
     // Checklist stats
     final checklistItems = checklistAsync.asData?.value ?? [];
@@ -1407,6 +1411,12 @@ class TimelineScreen extends ConsumerWidget {
                 // STEP 3: 4 Circular Quick-Action Buttons
                 _buildCircularQuickActions(context: context, items: shortcuts),
                 const SizedBox(height: 14),
+
+                // Role-Badged Story Cards (You / Both / Her) for Partner Dashboard
+                if (isPartner) ...[
+                  PartnerStoryCards(stage: currentStage, showHeader: true),
+                  const SizedBox(height: 14),
+                ],
 
                 // STEP 3: Swipeable "Daily Insights" Cards
                 _buildDailyInsightsCards(
