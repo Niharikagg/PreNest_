@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,19 +8,90 @@ import '../profile/profile_provider.dart';
 /// Choice made by the user at the onboarding entry step.
 enum SetupChoice { forMyself, partnerCode }
 
-/// State model representing the user's entry choice and pairing status.
+/// Model capturing partner-specific private intake answers.
+@immutable
+class PartnerIntakeData {
+  final bool ageConfirmed;
+  final String? ageRange;
+  final List<String> goals;
+  final Map<String, bool> lifestyleHabits;
+  final List<String> feelings;
+  final DateTime? completedAt;
+
+  const PartnerIntakeData({
+    this.ageConfirmed = false,
+    this.ageRange,
+    this.goals = const [],
+    this.lifestyleHabits = const {
+      'regularSleep': true,
+      'regularExercise': false,
+      'moderateCaffeine': true,
+      'substanceAvoidance': true,
+    },
+    this.feelings = const [],
+    this.completedAt,
+  });
+
+  PartnerIntakeData copyWith({
+    bool? ageConfirmed,
+    String? ageRange,
+    List<String>? goals,
+    Map<String, bool>? lifestyleHabits,
+    List<String>? feelings,
+    DateTime? completedAt,
+  }) {
+    return PartnerIntakeData(
+      ageConfirmed: ageConfirmed ?? this.ageConfirmed,
+      ageRange: ageRange ?? this.ageRange,
+      goals: goals ?? this.goals,
+      lifestyleHabits: lifestyleHabits ?? this.lifestyleHabits,
+      feelings: feelings ?? this.feelings,
+      completedAt: completedAt ?? this.completedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PartnerIntakeData &&
+          runtimeType == other.runtimeType &&
+          ageConfirmed == other.ageConfirmed &&
+          ageRange == other.ageRange &&
+          listEquals(goals, other.goals) &&
+          mapEquals(lifestyleHabits, other.lifestyleHabits) &&
+          listEquals(feelings, other.feelings) &&
+          completedAt == other.completedAt;
+
+  @override
+  int get hashCode =>
+      ageConfirmed.hashCode ^
+      ageRange.hashCode ^
+      goals.hashCode ^
+      lifestyleHabits.hashCode ^
+      feelings.hashCode ^
+      completedAt.hashCode;
+}
+
+/// State model representing the user's entry choice, pairing status,
+/// active invite code, and private partner intake data.
 @immutable
 class EntryState {
   final SetupChoice? choice;
   final String? partnerCode;
   final bool isPaired;
   final String? errorMessage;
+  final String? generatedInviteCode;
+  final bool inviteActive;
+  final PartnerIntakeData? partnerIntake;
 
   const EntryState({
     this.choice,
     this.partnerCode,
     this.isPaired = false,
     this.errorMessage,
+    this.generatedInviteCode = 'PN2026',
+    this.inviteActive = true,
+    this.partnerIntake,
   });
 
   EntryState copyWith({
@@ -27,12 +100,25 @@ class EntryState {
     bool? isPaired,
     String? errorMessage,
     bool clearError = false,
+    String? generatedInviteCode,
+    bool? inviteActive,
+    PartnerIntakeData? partnerIntake,
+    bool clearGeneratedCode = false,
+    bool clearPartnerCode = false,
+    bool clearPartnerIntake = false,
   }) {
     return EntryState(
       choice: choice ?? this.choice,
-      partnerCode: partnerCode ?? this.partnerCode,
+      partnerCode: clearPartnerCode ? null : (partnerCode ?? this.partnerCode),
       isPaired: isPaired ?? this.isPaired,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      generatedInviteCode: clearGeneratedCode
+          ? null
+          : (generatedInviteCode ?? this.generatedInviteCode),
+      inviteActive: inviteActive ?? this.inviteActive,
+      partnerIntake: clearPartnerIntake
+          ? null
+          : (partnerIntake ?? this.partnerIntake),
     );
   }
 
@@ -44,14 +130,20 @@ class EntryState {
           choice == other.choice &&
           partnerCode == other.partnerCode &&
           isPaired == other.isPaired &&
-          errorMessage == other.errorMessage;
+          errorMessage == other.errorMessage &&
+          generatedInviteCode == other.generatedInviteCode &&
+          inviteActive == other.inviteActive &&
+          partnerIntake == other.partnerIntake;
 
   @override
   int get hashCode =>
       choice.hashCode ^
       partnerCode.hashCode ^
       isPaired.hashCode ^
-      errorMessage.hashCode;
+      errorMessage.hashCode ^
+      generatedInviteCode.hashCode ^
+      inviteActive.hashCode ^
+      partnerIntake.hashCode;
 }
 
 /// Riverpod Notifier controlling the onboarding entry & pairing flow.
@@ -61,13 +153,40 @@ class EntryNotifier extends Notifier<EntryState> {
     return const EntryState();
   }
 
-  /// Sets choice to 'for myself' and clears partner pairing.
+  /// Sets choice to 'for myself' and keeps invite active.
   void selectForMyself() {
-    state = const EntryState(
+    state = state.copyWith(
       choice: SetupChoice.forMyself,
-      partnerCode: null,
+      clearPartnerCode: true,
       isPaired: false,
-      errorMessage: null,
+      clearError: true,
+    );
+  }
+
+  /// Generates a fresh 6-character alphanumeric code and sets inviteActive = true.
+  void generateInviteCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    final random = Random();
+    final newCode = List.generate(
+      6,
+      (index) => chars[random.nextInt(chars.length)],
+    ).join();
+
+    state = state.copyWith(
+      generatedInviteCode: newCode,
+      inviteActive: true,
+      clearError: true,
+    );
+  }
+
+  /// Clears generatedInviteCode / partnerCode, sets inviteActive = false, isPaired = false.
+  void revokePairingCode() {
+    state = state.copyWith(
+      clearGeneratedCode: true,
+      clearPartnerCode: true,
+      inviteActive: false,
+      isPaired: false,
+      clearError: true,
     );
   }
 
@@ -82,11 +201,11 @@ class EntryNotifier extends Notifier<EntryState> {
       return false;
     }
 
-    state = EntryState(
+    state = state.copyWith(
       choice: SetupChoice.partnerCode,
       partnerCode: cleanCode,
       isPaired: true,
-      errorMessage: null,
+      clearError: true,
     );
 
     // Sync active partner profile if applicable
@@ -105,6 +224,13 @@ class EntryNotifier extends Notifier<EntryState> {
     return true;
   }
 
+  /// Saves the partner's completed private intake data.
+  void savePartnerIntake(PartnerIntakeData intake) {
+    state = state.copyWith(
+      partnerIntake: intake.copyWith(completedAt: DateTime.now()),
+    );
+  }
+
   /// Resets choice and pairing state back to defaults.
   void resetChoice() {
     state = const EntryState();
@@ -114,4 +240,9 @@ class EntryNotifier extends Notifier<EntryState> {
 /// Riverpod provider for onboarding entry state.
 final entryProvider = NotifierProvider<EntryNotifier, EntryState>(() {
   return EntryNotifier();
+});
+
+/// Dedicated provider for partner intake data.
+final partnerIntakeProvider = Provider<PartnerIntakeData?>((ref) {
+  return ref.watch(entryProvider).partnerIntake;
 });

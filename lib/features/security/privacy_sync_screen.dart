@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/theme.dart';
+import '../onboarding/entry_state.dart';
 import '../profile/profile_provider.dart';
 import 'vault_lock_provider.dart';
 
@@ -17,6 +19,7 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
   Widget build(BuildContext context) {
     final lockState = ref.watch(vaultLockProvider);
     final couple = ref.watch(coupleProvider);
+    final entry = ref.watch(entryProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBg,
@@ -272,7 +275,14 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
 
                 const SizedBox(height: 20),
 
-                // 4. Couple Sync & Data Privacy Boundaries
+                // 4. Partner Pairing Code Card
+                _buildSectionTitle('Partner Pairing & Invite Code'),
+                const SizedBox(height: 8),
+                _buildPartnerPairingCodeCard(context, entry),
+
+                const SizedBox(height: 20),
+
+                // 5. Couple Sync & Data Privacy Boundaries
                 _buildSectionTitle('Couple Sync & Privacy Boundary'),
                 const SizedBox(height: 8),
                 Card(
@@ -1143,6 +1153,325 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildPartnerPairingCodeCard(BuildContext context, EntryState entry) {
+    final bool hasActiveCode =
+        entry.inviteActive && entry.generatedInviteCode != null;
+
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: AppTheme.borderLight),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: hasActiveCode
+                        ? AppTheme.primaryTealLight
+                        : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    hasActiveCode ? Icons.key_rounded : Icons.key_off_rounded,
+                    color: hasActiveCode
+                        ? AppTheme.primaryTeal
+                        : AppTheme.textMuted,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Partner Pairing Code',
+                        style: TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        hasActiveCode
+                            ? 'Share this 6-character code with your partner to sync journeys'
+                            : 'No active invite. Generate a code so your partner can connect',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: hasActiveCode
+                        ? const Color(0xFFDCFCE7)
+                        : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    hasActiveCode ? 'Invite Active' : 'Invite Inactive',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: hasActiveCode
+                          ? const Color(0xFF15803D)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (hasActiveCode) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDFA),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF99F6E4)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(),
+                    Text(
+                      entry.generatedInviteCode!,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 8,
+                        color: AppTheme.primaryTealDark,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.copy_rounded,
+                        color: AppTheme.primaryTeal,
+                        size: 20,
+                      ),
+                      tooltip: 'Copy Code',
+                      onPressed: () {
+                        Clipboard.setData(
+                          ClipboardData(text: entry.generatedInviteCode!),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Code ${entry.generatedInviteCode} copied to clipboard!',
+                            ),
+                            backgroundColor: AppTheme.primaryTeal,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              if (entry.isPaired) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 14,
+                      color: AppTheme.successGreen,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Partner connected with code ${entry.partnerCode ?? entry.generatedInviteCode}',
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        color: AppTheme.successGreen,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppTheme.borderLight),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                      icon: const Icon(
+                        Icons.refresh_rounded,
+                        size: 16,
+                        color: AppTheme.primaryTeal,
+                      ),
+                      label: const Text(
+                        'Regenerate Code',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.primaryTeal,
+                        ),
+                      ),
+                      onPressed: () {
+                        ref.read(entryProvider.notifier).generateInviteCode();
+                        final newCode = ref
+                            .read(entryProvider)
+                            .generatedInviteCode;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'New invite code generated: $newCode',
+                            ),
+                            backgroundColor: AppTheme.primaryTeal,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFFECDD3)),
+                        foregroundColor: AppTheme.errorRed,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                      icon: const Icon(
+                        Icons.link_off_rounded,
+                        size: 16,
+                        color: AppTheme.errorRed,
+                      ),
+                      label: const Text(
+                        'Cancel / Revoke Invite',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.errorRed,
+                        ),
+                      ),
+                      onPressed: () => _showRevokeConfirmDialog(context),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceMuted,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'No active invite code. Generate a fresh 6-character code below so your partner can link to your timeline.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textMuted,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primaryTeal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+                icon: const Icon(Icons.add_link_rounded, size: 18),
+                label: const Text(
+                  'Generate Pairing Code',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  ref.read(entryProvider.notifier).generateInviteCode();
+                  final newCode = ref.read(entryProvider).generatedInviteCode;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Pairing code generated: $newCode'),
+                      backgroundColor: AppTheme.primaryTeal,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRevokeConfirmDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: AppTheme.errorRed),
+            SizedBox(width: 8),
+            Text('Revoke Pairing Code?', style: TextStyle(fontSize: 18)),
+          ],
+        ),
+        content: const Text(
+          'Are you sure you want to cancel and revoke this pairing code? '
+          'Any pending invite will be invalidated and your partner will not be able to connect until you generate a new code.',
+          style: TextStyle(fontSize: 13, height: 1.4, color: Color(0xFF475569)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Keep Active'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.errorRed,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              ref.read(entryProvider.notifier).revokePairingCode();
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Pairing code revoked and invite cancelled.'),
+                  backgroundColor: AppTheme.errorRed,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+            child: const Text('Revoke Invite'),
+          ),
+        ],
       ),
     );
   }

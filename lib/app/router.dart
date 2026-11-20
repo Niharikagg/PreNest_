@@ -6,6 +6,9 @@ import '../features/couple/couple_quizzes_screen.dart';
 import '../features/cycle/cycle_tracker_screen.dart';
 import '../features/onboarding/entry_choice_screen.dart';
 import '../features/onboarding/mode_select_screen.dart';
+import '../features/onboarding/onboarding_finale_screen.dart';
+import '../features/onboarding/partner_onboarding_screen.dart';
+import '../features/onboarding/planning_intake_screen.dart';
 import '../features/planning/planning_hub_screen.dart';
 import '../features/postpartum/postpartum_screen.dart';
 import '../features/pregnancy/birth_plan_screen.dart';
@@ -170,6 +173,24 @@ final appRouter = GoRouter(
           name: 'onboardingMode',
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const ModeSelectScreen(),
+        ),
+        GoRoute(
+          path: 'partner-intake',
+          name: 'partnerIntake',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const PartnerOnboardingScreen(),
+        ),
+        GoRoute(
+          path: 'planning-intake',
+          name: 'planningIntake',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const PlanningIntakeScreen(),
+        ),
+        GoRoute(
+          path: 'finale',
+          name: 'onboardingFinale',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const OnboardingFinaleScreen(),
         ),
       ],
     ),

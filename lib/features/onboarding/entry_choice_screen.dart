@@ -61,7 +61,7 @@ class _EntryChoiceScreenState extends ConsumerState<EntryChoiceScreen> {
           duration: Duration(seconds: 2),
         ),
       );
-      context.go('/timeline');
+      context.go('/onboarding/partner-intake');
     } else {
       final notifierError = ref.read(entryProvider).errorMessage;
       setState(() {
@@ -71,7 +71,8 @@ class _EntryChoiceScreenState extends ConsumerState<EntryChoiceScreen> {
   }
 
   void _fillSampleCode() {
-    _codeController.text = 'PN2026';
+    final activeCode = ref.read(entryProvider).generatedInviteCode ?? 'PN2026';
+    _codeController.text = activeCode;
     setState(() {
       _localError = null;
     });
@@ -438,6 +439,29 @@ class _EntryChoiceScreenState extends ConsumerState<EntryChoiceScreen> {
                   ),
                   const SizedBox(height: 28),
 
+                  // Subtle Share/Manage Pairing Code Action
+                  Center(
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppTheme.primaryTeal,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                      ),
+                      onPressed: () => _showManageCodeBottomSheet(context),
+                      icon: const Icon(Icons.share_outlined, size: 16),
+                      label: const Text(
+                        'Want to share your own code? Manage / Share Code',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
                   // Subtle Quick Testing Option
                   Center(
                     child: TextButton.icon(
@@ -466,6 +490,199 @@ class _EntryChoiceScreenState extends ConsumerState<EntryChoiceScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showManageCodeBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Consumer(
+          builder: (ctx, ref, _) {
+            final entry = ref.watch(entryProvider);
+            final hasActiveCode =
+                entry.inviteActive && entry.generatedInviteCode != null;
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppTheme.borderLight,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryTealLight,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.qr_code_2_rounded,
+                            color: AppTheme.primaryTeal,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Your Partner Pairing Code',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textDark,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Give this code to your partner to link up',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    if (hasActiveCode) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 20,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0FDFA),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFF99F6E4)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Spacer(),
+                            Text(
+                              entry.generatedInviteCode!,
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 8,
+                                color: AppTheme.primaryTealDark,
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.copy_rounded),
+                              color: AppTheme.primaryTeal,
+                              tooltip: 'Copy Code',
+                              onPressed: () {
+                                Clipboard.setData(
+                                  ClipboardData(
+                                    text: entry.generatedInviteCode!,
+                                  ),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Code ${entry.generatedInviteCode} copied!',
+                                    ),
+                                    backgroundColor: AppTheme.primaryTeal,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              icon: const Icon(Icons.refresh_rounded, size: 16),
+                              label: const Text('Regenerate'),
+                              onPressed: () {
+                                ref
+                                    .read(entryProvider.notifier)
+                                    .generateInviteCode();
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppTheme.errorRed,
+                                side: const BorderSide(
+                                  color: Color(0xFFFECDD3),
+                                ),
+                              ),
+                              icon: const Icon(
+                                Icons.link_off_rounded,
+                                size: 16,
+                              ),
+                              label: const Text('Revoke'),
+                              onPressed: () {
+                                ref
+                                    .read(entryProvider.notifier)
+                                    .revokePairingCode();
+                                Navigator.pop(ctx);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Pairing code revoked.'),
+                                    backgroundColor: AppTheme.errorRed,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      const Text(
+                        'No invite code is currently active. Generate one now to share with your partner.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppTheme.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        icon: const Icon(Icons.add_link_rounded),
+                        label: const Text('Generate Code'),
+                        onPressed: () {
+                          ref.read(entryProvider.notifier).generateInviteCode();
+                        },
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

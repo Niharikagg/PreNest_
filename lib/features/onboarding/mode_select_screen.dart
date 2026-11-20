@@ -184,7 +184,11 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
       ),
     );
 
-    context.go('/timeline');
+    if (_currentMode == PreNestMode.planningPregnancy) {
+      context.go('/onboarding/planning-intake');
+    } else {
+      context.go('/onboarding/finale');
+    }
   }
 
   Widget _buildModeGridCard(JourneyModeConfig config, BuildContext context) {
