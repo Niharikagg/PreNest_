@@ -37,7 +37,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/timeline',
+  initialLocation: '/onboarding',
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
