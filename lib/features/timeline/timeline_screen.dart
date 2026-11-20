@@ -67,28 +67,28 @@ class TimelineScreen extends ConsumerWidget {
       case PreNestMode.periodTracker:
         return [
           ModeShortcutItem(
+            title: AppStrings.t('Cycle & PCOS Hub', lang),
+            subtitle: 'Irregular mode & symptoms',
+            icon: Icons.water_drop_rounded,
+            accentColor: const Color(0xFFE11D48),
+            containerColor: const Color(0xFFFFE4E6),
+            route: '/cycle',
+          ),
+          ModeShortcutItem(
             title: AppStrings.t('Vitals Log', lang),
             subtitle: 'Flow, BBT & vitals',
             icon: Icons.monitor_heart,
-            accentColor: const Color(0xFFE11D48),
-            containerColor: const Color(0xFFFFE4E6),
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
             route: '/vitals',
           ),
           ModeShortcutItem(
             title: AppStrings.t('Trends', lang),
             subtitle: 'Cycle & hormone trends',
             icon: Icons.insights_rounded,
-            accentColor: const Color(0xFF0F766E),
-            containerColor: const Color(0xFFCCFBF1),
+            accentColor: const Color(0xFF0284C7),
+            containerColor: const Color(0xFFE0F2FE),
             route: '/trends',
-          ),
-          ModeShortcutItem(
-            title: AppStrings.t('AI Advisor', lang),
-            subtitle: 'PCOD & symptom advice',
-            icon: Icons.chat_bubble_outline_rounded,
-            accentColor: const Color(0xFF7C3AED),
-            containerColor: const Color(0xFFF3E8FF),
-            route: '/advisor',
           ),
           ModeShortcutItem(
             title: AppStrings.t('Danger Signs', lang),
@@ -103,28 +103,28 @@ class TimelineScreen extends ConsumerWidget {
       case PreNestMode.planningPregnancy:
         return [
           ModeShortcutItem(
+            title: AppStrings.t('Planning Hub', lang),
+            subtitle: 'Readiness, habits & tests',
+            icon: Icons.spa_rounded,
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
+            route: '/planning',
+          ),
+          ModeShortcutItem(
             title: AppStrings.t('Vitals Log', lang),
             subtitle: 'Preconception health',
             icon: Icons.monitor_heart,
-            accentColor: const Color(0xFF0F766E),
-            containerColor: const Color(0xFFCCFBF1),
+            accentColor: const Color(0xFFE11D48),
+            containerColor: const Color(0xFFFFE4E6),
             route: '/vitals',
           ),
           ModeShortcutItem(
             title: AppStrings.t('Records', lang),
-            subtitle: 'Labs & preconception tests',
+            subtitle: 'Preconception labs & tests',
             icon: Icons.folder_shared_rounded,
             accentColor: const Color(0xFF0284C7),
             containerColor: const Color(0xFFE0F2FE),
             route: '/records',
-          ),
-          ModeShortcutItem(
-            title: AppStrings.t('Trends', lang),
-            subtitle: 'Fertility window charts',
-            icon: Icons.trending_up_rounded,
-            accentColor: const Color(0xFFD97706),
-            containerColor: const Color(0xFFFEF3C7),
-            route: '/trends',
           ),
           ModeShortcutItem(
             title: AppStrings.t('Danger Signs', lang),
@@ -138,6 +138,22 @@ class TimelineScreen extends ConsumerWidget {
 
       case PreNestMode.pregnant:
         return [
+          ModeShortcutItem(
+            title: AppStrings.t('Kick Counter', lang),
+            subtitle: '10 kicks in 2h timer',
+            icon: Icons.touch_app_rounded,
+            accentColor: const Color(0xFF0284C7),
+            containerColor: const Color(0xFFE0F2FE),
+            route: '/kick-counter',
+          ),
+          ModeShortcutItem(
+            title: AppStrings.t('Birth Plan', lang),
+            subtitle: 'Facility, bag & JSY/PMMVY',
+            icon: Icons.assignment_turned_in_rounded,
+            accentColor: const Color(0xFF7C3AED),
+            containerColor: const Color(0xFFF3E8FF),
+            route: '/birth-plan',
+          ),
           ModeShortcutItem(
             title: AppStrings.t('Danger Signs', lang),
             subtitle: AppStrings.t('Critical triage & 108 dispatch', lang),
@@ -154,29 +170,13 @@ class TimelineScreen extends ConsumerWidget {
             containerColor: const Color(0xFFCCFBF1),
             route: '/vitals',
           ),
-          ModeShortcutItem(
-            title: AppStrings.t('Kick Counter', lang),
-            subtitle: 'Fetal movement session',
-            icon: Icons.touch_app_rounded,
-            accentColor: const Color(0xFF0284C7),
-            containerColor: const Color(0xFFE0F2FE),
-            route: '/kick-counter',
-          ),
-          ModeShortcutItem(
-            title: AppStrings.t('Birth Plan', lang),
-            subtitle: 'Preferences & bag checklist',
-            icon: Icons.assignment_turned_in_rounded,
-            accentColor: const Color(0xFF7C3AED),
-            containerColor: const Color(0xFFF3E8FF),
-            route: '/birth-plan',
-          ),
         ];
 
       case PreNestMode.postpartum:
         return [
           ModeShortcutItem(
             title: AppStrings.t('Postpartum Care', lang),
-            subtitle: 'Healing & EPDS (Tele-MANAS)',
+            subtitle: 'EPDS (Tele-MANAS) & UIP',
             icon: Icons.favorite_rounded,
             accentColor: const Color(0xFFD97706),
             containerColor: const Color(0xFFFEF3C7),
@@ -479,21 +479,36 @@ class TimelineScreen extends ConsumerWidget {
                         if (activeMode == PreNestMode.periodTracker &&
                             modeState.irregularCycleMode) ...[
                           const SizedBox(height: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFE4E6),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text(
-                              'PCOD/PCOS Irregular Cycle Mode Active • Stress-free tracking (no "late" alerts)',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFFBE123C),
+                          InkWell(
+                            onTap: () => context.push('/cycle'),
+                            borderRadius: BorderRadius.circular(6),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFE4E6),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'PCOD/PCOS Irregular Cycle Mode Active • Tap for Cycle & PCOS Hub',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFFBE123C),
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 10,
+                                    color: Color(0xFFBE123C),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
