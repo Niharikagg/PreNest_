@@ -11,7 +11,9 @@ import '../features/onboarding/partner_onboarding_screen.dart';
 import '../features/onboarding/planning_intake_screen.dart';
 import '../features/planning/planning_hub_screen.dart';
 import '../features/postpartum/postpartum_screen.dart';
+import '../features/pregnancy/anc_planner_screen.dart';
 import '../features/pregnancy/birth_plan_screen.dart';
+import '../features/pregnancy/contraction_timer_screen.dart';
 import '../features/pregnancy/kick_counter_screen.dart';
 import '../features/records/records_screen.dart';
 import '../features/records/test_detail_screen.dart';
@@ -137,6 +139,18 @@ final appRouter = GoRouter(
       name: 'kickCounter',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const KickCounterScreen(),
+    ),
+    GoRoute(
+      path: '/contraction-timer',
+      name: 'contractionTimer',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const ContractionTimerScreen(),
+    ),
+    GoRoute(
+      path: '/anc-planner',
+      name: 'ancPlanner',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const AncPlannerScreen(),
     ),
     GoRoute(
       path: '/birth-plan',

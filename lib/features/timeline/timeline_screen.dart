@@ -163,6 +163,22 @@ class TimelineScreen extends ConsumerWidget {
       case PreNestMode.pregnant:
         return [
           ModeShortcutItem(
+            title: AppStrings.t('ANC Planner', lang),
+            subtitle: '4+ visits & IFA/calcium',
+            icon: Icons.event_note_rounded,
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
+            route: '/anc-planner',
+          ),
+          ModeShortcutItem(
+            title: AppStrings.t('Contraction Timer', lang),
+            subtitle: '5-1-1 labor tracking',
+            icon: Icons.timer_outlined,
+            accentColor: const Color(0xFFE11D48),
+            containerColor: const Color(0xFFFFE4E6),
+            route: '/contraction-timer',
+          ),
+          ModeShortcutItem(
             title: AppStrings.t('Kick Counter', lang),
             subtitle: '10 kicks in 2h timer',
             icon: Icons.touch_app_rounded,
@@ -190,7 +206,7 @@ class TimelineScreen extends ConsumerWidget {
             title: AppStrings.t('Vitals Log', lang),
             subtitle: AppStrings.t('Track BP & weight metrics', lang),
             icon: Icons.monitor_heart,
-            accentColor: const Color(0xFF0F766E),
+            accentColor: const Color(0xFF0D9488),
             containerColor: const Color(0xFFCCFBF1),
             route: '/vitals',
           ),
@@ -477,6 +493,8 @@ class TimelineScreen extends ConsumerWidget {
     required BuildContext context,
     required List<ModeShortcutItem> items,
   }) {
+    final isScrollable = items.length > 4;
+
     return Card(
       elevation: 0,
       color: Colors.white,
@@ -486,58 +504,128 @@ class TimelineScreen extends ConsumerWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: items.map((item) {
-            return InkWell(
-              onTap: () => context.push(item.route),
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: item.containerColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: item.accentColor.withOpacity(0.25),
-                          width: 1.2,
+        child: isScrollable
+            ? SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: items.map((item) {
+                    return InkWell(
+                      onTap: () => context.push(item.route),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: item.accentColor.withOpacity(0.08),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: item.containerColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: item.accentColor.withOpacity(0.25),
+                                  width: 1.2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: item.accentColor.withOpacity(0.08),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                item.icon,
+                                color: item.accentColor,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(height: 7),
+                            SizedBox(
+                              width: 72,
+                              child: Text(
+                                item.title,
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.textDark,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: items.map((item) {
+                  return InkWell(
+                    onTap: () => context.push(item.route),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 4,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: item.containerColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: item.accentColor.withOpacity(0.25),
+                                width: 1.2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: item.accentColor.withOpacity(0.08),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              item.icon,
+                              color: item.accentColor,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(height: 7),
+                          SizedBox(
+                            width: 68,
+                            child: Text(
+                              item.title,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.textDark,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      child: Icon(item.icon, color: item.accentColor, size: 24),
                     ),
-                    const SizedBox(height: 7),
-                    SizedBox(
-                      width: 68,
-                      child: Text(
-                        item.title,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textDark,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                }).toList(),
               ),
-            );
-          }).toList(),
-        ),
       ),
     );
   }
@@ -559,7 +647,7 @@ class TimelineScreen extends ConsumerWidget {
         icon: Icons.event_available_rounded,
         accentColor: const Color(0xFF0284C7),
         containerColor: const Color(0xFFE0F2FE),
-        route: '/records',
+        route: '/anc-planner',
       ),
       _DailyInsightData(
         title: 'Weekly Vitals',
@@ -1219,6 +1307,194 @@ class TimelineScreen extends ConsumerWidget {
                   lang: currentLang,
                 ),
                 const SizedBox(height: 14),
+
+                // Mode 3 (Pregnancy) Dedicated Clinical Tools Quick-Access Cards
+                if (activeMode == PreNestMode.pregnant) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Card(
+                          elevation: 0,
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: const Color(0xFF0F766E).withOpacity(0.3),
+                              width: 1.1,
+                            ),
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () => context.push('/anc-planner'),
+                            child: Padding(
+                              padding: const EdgeInsets.all(14.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFCCFBF1),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.event_note_rounded,
+                                          size: 20,
+                                          color: Color(0xFF0F766E),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFCCFBF1),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          '4+ Visits',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF0F766E),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    AppStrings.t(
+                                      'ANC Visit Planner',
+                                      currentLang,
+                                    ),
+                                    style: const TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF0F172A),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 3),
+                                  const Text(
+                                    '4 visits, scans & IFA/Calcium',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppTheme.textMuted,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Card(
+                          elevation: 0,
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: const Color(0xFFE11D48).withOpacity(0.3),
+                              width: 1.1,
+                            ),
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () => context.push('/contraction-timer'),
+                            child: Padding(
+                              padding: const EdgeInsets.all(14.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFFE4E6),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.timer_outlined,
+                                          size: 20,
+                                          color: Color(0xFFE11D48),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFFE4E6),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          '5-1-1 Rule',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFFE11D48),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    AppStrings.t(
+                                      'Contraction Timer',
+                                      currentLang,
+                                    ),
+                                    style: const TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF0F172A),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 3),
+                                  const Text(
+                                    'Labor timer & frequency cue',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppTheme.textMuted,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                ],
 
                 // 2. Stage Switcher Segmented Button
                 Card(

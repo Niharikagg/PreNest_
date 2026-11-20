@@ -110,6 +110,21 @@ class AppStrings {
       AppLanguage.hi: 'किक काउंटर',
       AppLanguage.kn: 'ಕಿಕ್ ಕೌಂಟರ್',
     },
+    'Contraction Timer': {
+      AppLanguage.en: 'Contraction Timer',
+      AppLanguage.hi: 'संकुचन टाइमर',
+      AppLanguage.kn: 'ಸಂಕೋಚನ ಟೈಮರ್',
+    },
+    'ANC Visit Planner': {
+      AppLanguage.en: 'ANC Visit Planner',
+      AppLanguage.hi: 'एएनसी विजिट प्लानर',
+      AppLanguage.kn: 'ಎಎನ್‌ಸಿ ಭೇಟಿ ಯೋಜಕ',
+    },
+    'ANC Planner': {
+      AppLanguage.en: 'ANC Planner',
+      AppLanguage.hi: 'एएनसी प्लानर',
+      AppLanguage.kn: 'ಎಎನ್‌ಸಿ ಯೋಜಕ',
+    },
     'Birth Plan': {
       AppLanguage.en: 'Birth Plan',
       AppLanguage.hi: 'प्रसव योजना',
