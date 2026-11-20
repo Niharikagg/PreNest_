@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/advisor/chat_screen.dart';
+import '../features/postpartum/postpartum_screen.dart';
+import '../features/pregnancy/birth_plan_screen.dart';
+import '../features/pregnancy/kick_counter_screen.dart';
 import '../features/records/records_screen.dart';
 import '../features/records/test_detail_screen.dart';
 import '../features/records/vitals_log_screen.dart';
@@ -93,6 +96,24 @@ final appRouter = GoRouter(
       name: 'advisor',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const ChatScreen(),
+    ),
+    GoRoute(
+      path: '/kick-counter',
+      name: 'kickCounter',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const KickCounterScreen(),
+    ),
+    GoRoute(
+      path: '/birth-plan',
+      name: 'birthPlan',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const BirthPlanScreen(),
+    ),
+    GoRoute(
+      path: '/postpartum',
+      name: 'postpartum',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const PostpartumScreen(),
     ),
   ],
 );
