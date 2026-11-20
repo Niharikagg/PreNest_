@@ -3,12 +3,17 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 
+import 'capture_quality_check_service.dart';
 import 'report_scan_storage.dart';
 
 class DocumentScannerService {
-  const DocumentScannerService({this.storage = const ReportScanStorage()});
+  const DocumentScannerService({
+    this.storage = const ReportScanStorage(),
+    this.qualityChecker = const CaptureQualityCheckService(),
+  });
 
   final ReportScanStorage storage;
+  final CaptureQualityCheckService qualityChecker;
 
   Future<DocumentScanResult?> scanDocument() async {
     final scanner = DocumentScanner(
@@ -27,6 +32,25 @@ class DocumentScannerService {
           .map(File.new)
           .toList(growable: false);
       final pdfPath = result.pdf?.uri;
+      if (imageFiles.isEmpty) {
+        return DocumentScanResult(
+          images: const <File>[],
+          pdfFile: null,
+          pdfPageCount: null,
+          qualityResult: null,
+        );
+      }
+
+      final qualityResult = await qualityChecker.check(imageFiles.first);
+      if (!qualityResult.isAcceptable) {
+        return DocumentScanResult(
+          images: const <File>[],
+          pdfFile: null,
+          pdfPageCount: null,
+          qualityResult: qualityResult,
+        );
+      }
+
       final storedScan = await storage.save(
         jpegSources: imageFiles,
         pdfSource: pdfPath == null || pdfPath.isEmpty ? null : File(pdfPath),
@@ -38,6 +62,7 @@ class DocumentScannerService {
         pdfPageCount: storedScan?.pdfFile == null
             ? null
             : result.pdf?.pageCount,
+        qualityResult: qualityResult,
       );
     } on PlatformException catch (error) {
       if (error.code == 'DocumentScanner' &&
@@ -78,11 +103,13 @@ class DocumentScanResult {
     required List<File> images,
     this.pdfFile,
     this.pdfPageCount,
+    this.qualityResult,
   }) : images = List<File>.unmodifiable(images);
 
   final List<File> images;
   final File? pdfFile;
   final int? pdfPageCount;
+  final CaptureQualityResult? qualityResult;
 }
 
 class DocumentScannerException implements Exception {

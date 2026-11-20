@@ -2,15 +2,18 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'capture_quality_check_service.dart';
 import 'document_scanner_service.dart';
 
 class DocumentScannerTestPage extends StatefulWidget {
   const DocumentScannerTestPage({
     super.key,
     this.scannerService = const DocumentScannerService(),
+    this.onContinue,
   });
 
   final DocumentScannerService scannerService;
+  final VoidCallback? onContinue;
 
   @override
   State<DocumentScannerTestPage> createState() =>
@@ -22,6 +25,8 @@ class _DocumentScannerTestPageState extends State<DocumentScannerTestPage> {
   bool _isStatusError = false;
   String? _statusMessage;
   DocumentScanResult? _scanResult;
+  CaptureQualityResult? _qualityResult;
+  final Map<String, Future<bool>> _fileExistenceChecks = {};
 
   Future<void> _scanDocument() async {
     setState(() {
@@ -29,6 +34,7 @@ class _DocumentScannerTestPageState extends State<DocumentScannerTestPage> {
       _isStatusError = false;
       _statusMessage = null;
       _scanResult = null;
+      _qualityResult = null;
     });
 
     try {
@@ -37,6 +43,7 @@ class _DocumentScannerTestPageState extends State<DocumentScannerTestPage> {
 
       setState(() {
         _scanResult = result;
+        _qualityResult = result?.qualityResult;
         if (result == null) {
           _statusMessage = 'Scanning cancelled.';
         } else if (result.images.isEmpty) {
@@ -67,6 +74,31 @@ class _DocumentScannerTestPageState extends State<DocumentScannerTestPage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Document scanner test')),
+      bottomNavigationBar: result == null
+          ? null
+          : SafeArea(
+              minimum: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: _isScanning
+                      ? null
+                      : _qualityResult?.isAcceptable == true
+                      ? widget.onContinue
+                      : _scanDocument,
+                  icon: Icon(
+                    _qualityResult?.isAcceptable == true
+                        ? Icons.arrow_forward
+                        : Icons.camera_alt_outlined,
+                  ),
+                  label: Text(
+                    _qualityResult?.isAcceptable == true
+                        ? 'Continue'
+                        : 'Retake',
+                  ),
+                ),
+              ),
+            ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -75,16 +107,17 @@ class _DocumentScannerTestPageState extends State<DocumentScannerTestPage> {
             'scanner screen.',
           ),
           const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _isScanning ? null : _scanDocument,
-            icon: _isScanning
-                ? const SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.document_scanner_outlined),
-            label: const Text('Scan Report'),
-          ),
+          if (_scanResult == null)
+            FilledButton.icon(
+              onPressed: _isScanning ? null : _scanDocument,
+              icon: _isScanning
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.document_scanner_outlined),
+              label: const Text('Scan Report'),
+            ),
           if (_statusMessage != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -98,30 +131,41 @@ class _DocumentScannerTestPageState extends State<DocumentScannerTestPage> {
           ],
           if (result != null) ...[
             const SizedBox(height: 24),
-            for (final image in result.images) ...[
-              const Text('JPEG result'),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 360,
-                width: double.infinity,
-                child: Image.file(
-                  image,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Text('Unable to preview this image.'),
-                  ),
+            if (_qualityResult != null && !_qualityResult!.isAcceptable) ...[
+              Text(
+                'Capture rejected',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.error,
                 ),
               ),
-              SelectableText('JPEG file: ${image.path}'),
-              _fileExistenceLabel('Stored JPEG exists', image),
-              const SizedBox(height: 16),
-            ],
-            if (result.pdfFile case final pdfFile?) ...[
-              const Text('PDF result'),
-              SelectableText('PDF file: ${pdfFile.path}'),
-              _fileExistenceLabel('Stored PDF exists', pdfFile),
-              if (result.pdfPageCount case final pageCount?)
-                Text('PDF pages: $pageCount'),
+              const SizedBox(height: 8),
+              for (final reason in _qualityResult!.failureReasons) Text(reason),
+            ] else if (result.images.isNotEmpty) ...[
+              for (final image in result.images) ...[
+                const Text('JPEG result'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 360,
+                  width: double.infinity,
+                  child: Image.file(
+                    image,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Text('Unable to preview this image.'),
+                    ),
+                  ),
+                ),
+                SelectableText('JPEG file: ${image.path}'),
+                _fileExistenceLabel('Stored JPEG exists', image),
+                const SizedBox(height: 16),
+              ],
+              if (result.pdfFile case final pdfFile?) ...[
+                const Text('PDF result'),
+                SelectableText('PDF file: ${pdfFile.path}'),
+                _fileExistenceLabel('Stored PDF exists', pdfFile),
+                if (result.pdfPageCount case final pageCount?)
+                  Text('PDF pages: $pageCount'),
+              ],
             ],
           ],
         ],
@@ -131,7 +175,7 @@ class _DocumentScannerTestPageState extends State<DocumentScannerTestPage> {
 
   Widget _fileExistenceLabel(String label, File file) {
     return FutureBuilder<bool>(
-      future: file.exists(),
+      future: _fileExistenceChecks.putIfAbsent(file.path, () => file.exists()),
       builder: (context, snapshot) {
         final value = snapshot.hasError
             ? 'Error checking file: ${snapshot.error}'
