@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/advisor/chat_screen.dart';
+import '../features/couple/couple_quizzes_screen.dart';
 import '../features/cycle/cycle_tracker_screen.dart';
 import '../features/onboarding/entry_choice_screen.dart';
 import '../features/onboarding/mode_select_screen.dart';
@@ -12,6 +13,7 @@ import '../features/pregnancy/kick_counter_screen.dart';
 import '../features/records/records_screen.dart';
 import '../features/records/test_detail_screen.dart';
 import '../features/records/vitals_log_screen.dart';
+import '../features/reminders/medicine_reminders_screen.dart';
 import '../features/timeline/timeline_screen.dart';
 import '../features/trends/trends_screen.dart';
 import '../features/validity/danger_sign_checker_screen.dart';
@@ -100,6 +102,18 @@ final appRouter = GoRouter(
       name: 'advisor',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const ChatScreen(),
+    ),
+    GoRoute(
+      path: '/reminders',
+      name: 'reminders',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const MedicineRemindersScreen(),
+    ),
+    GoRoute(
+      path: '/couple-quizzes',
+      name: 'coupleQuizzes',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const CoupleQuizzesScreen(),
     ),
     GoRoute(
       path: '/cycle',

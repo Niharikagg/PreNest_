@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/l10n/app_l10n.dart';
 import '../../core/l10n/tts_service.dart';
+import '../couple/couple_hints_provider.dart';
 import '../onboarding/entry_state.dart';
 import '../onboarding/mode_selection_state.dart';
 import '../profile/profile_provider.dart';
+import '../reminders/medicine_reminders_provider.dart';
 import '../stage/checklist_provider.dart';
 import '../stage/stage.dart';
 import '../stage/stage_provider.dart';
@@ -218,19 +220,50 @@ class TimelineScreen extends ConsumerWidget {
     final entryState = ref.watch(entryProvider);
     final modeState = ref.watch(modeSelectionProvider);
     final activePartner = couple.activePartner;
+    final otherPartner = couple.otherPartner;
     final checklistAsync = ref.watch(filteredChecklistProvider);
     final completedIds = ref.watch(completedChecklistProvider);
+    final reminders = ref.watch(medicineRemindersProvider);
+    final hintsState = ref.watch(coupleHintsProvider);
     final theme = Theme.of(context);
 
     final activeMode = modeState.activeMode(currentStage);
     final stageColor = _getStageAccentColor(currentStage);
 
+    // Checklist stats
     final checklistItems = checklistAsync.asData?.value ?? [];
-    final totalCount = checklistItems.length;
-    final completedCount = checklistItems
+    final totalChecklistCount = checklistItems.length;
+    final completedChecklistCount = checklistItems
         .where((it) => completedIds.contains(it.id))
         .length;
-    final progress = totalCount == 0 ? 0.0 : (completedCount / totalCount);
+    final checklistProgress = totalChecklistCount == 0
+        ? 0.0
+        : (completedChecklistCount / totalChecklistCount);
+
+    // Medicine stats
+    final partnerVisibleReminders = reminders.where((r) {
+      if (r.isSharedWithPartner) return true;
+      if (r.partnerOwnerId == 'all') return true;
+      return r.partnerOwnerId == activePartner.id;
+    }).toList();
+
+    final stageReminders = partnerVisibleReminders.where((r) {
+      return r.stageScope == null || r.stageScope == currentStage;
+    }).toList();
+
+    final takenMedsCount = stageReminders.where((r) => r.takenToday).length;
+    final totalMedsCount = stageReminders.length;
+    final medProgress = totalMedsCount > 0
+        ? (takenMedsCount / totalMedsCount)
+        : 0.0;
+
+    // Couple hints & checkup stats
+    final activeHint = hintsState.activeSmartHint;
+    final pendingCheckupsCount = hintsState.checkupReminders
+        .where(
+          (c) => !c.isCompleted && (c.stage == null || c.stage == currentStage),
+        )
+        .length;
 
     final shortcuts = _getShortcutsForMode(activeMode, currentLang);
 
@@ -532,13 +565,14 @@ class TimelineScreen extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              '$completedCount / $totalCount',
+                              '$completedChecklistCount / $totalChecklistCount',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color:
-                                    completedCount == totalCount &&
-                                        totalCount > 0
+                                    completedChecklistCount ==
+                                            totalChecklistCount &&
+                                        totalChecklistCount > 0
                                     ? Colors.green.shade700
                                     : stageColor,
                               ),
@@ -549,11 +583,11 @@ class TimelineScreen extends ConsumerWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(6),
                           child: LinearProgressIndicator(
-                            value: progress,
+                            value: checklistProgress,
                             minHeight: 8,
                             backgroundColor: theme.colorScheme.outlineVariant,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              progress == 1.0
+                              checklistProgress == 1.0
                                   ? Colors.green.shade600
                                   : stageColor,
                             ),
@@ -703,9 +737,344 @@ class TimelineScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 14),
+
+                // 4. Medicine Reminders Dashboard Card
+                Card(
+                  elevation: 0,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: const Color(0xFF0F766E).withOpacity(0.3),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => context.push('/reminders'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFCCFBF1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.medication_rounded,
+                                  size: 20,
+                                  color: Color(0xFF0F766E),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Medicine & Supplement Reminders',
+                                      style: TextStyle(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                    Text(
+                                      'Shared doctor-advised schedule adherence',
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      takenMedsCount == totalMedsCount &&
+                                          totalMedsCount > 0
+                                      ? const Color(0xFFDCFCE7)
+                                      : const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '$takenMedsCount of $totalMedsCount Taken',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        takenMedsCount == totalMedsCount &&
+                                            totalMedsCount > 0
+                                        ? const Color(0xFF15803D)
+                                        : const Color(0xFF0F766E),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: medProgress,
+                              minHeight: 6,
+                              backgroundColor: const Color(0xFFE2E8F0),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                medProgress == 1.0
+                                    ? const Color(0xFF059669)
+                                    : const Color(0xFF0F766E),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'View full list & timings for ${activePartner.name} & ${otherPartner.name}',
+                                style: const TextStyle(
+                                  fontSize: 11.5,
+                                  color: Color(0xFF64748B),
+                                ),
+                              ),
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 12,
+                                color: Color(0xFF0F766E),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // 5. Couple Check-In & Smart Hints Dashboard Card
+                Card(
+                  elevation: 0,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: const Color(0xFFE11D48).withOpacity(0.3),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFE4E6),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.volunteer_activism_rounded,
+                                size: 20,
+                                color: Color(0xFFE11D48),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Couple Check-In & Smart Hints',
+                                    style: TextStyle(
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  Text(
+                                    pendingCheckupsCount > 0
+                                        ? '$pendingCheckupsCount checkup & helping reminders pending'
+                                        : 'All partner tasks up to date',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Active Smart Hint banner if present
+                        if (activeHint != null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF1F2),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFFDA4AF),
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.favorite_rounded,
+                                  size: 16,
+                                  color: Color(0xFFE11D48),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        activeHint.fromPartnerId ==
+                                                activePartner.id
+                                            ? 'Your Active Hint for ${otherPartner.name}:'
+                                            : 'Gentle Hint from ${activeHint.fromPartnerName}:',
+                                        style: const TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFFBE123C),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        activeHint.hintText,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          height: 1.35,
+                                          color: Color(0xFF881337),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ] else ...[
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.lightbulb_outline_rounded,
+                                  size: 16,
+                                  color: Color(0xFFE11D48),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Take a 1-min check-in to send ${otherPartner.name} an effortless care hint.',
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      color: Color(0xFF475569),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
+                        // Quick action buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xFFBE123C),
+                                  side: const BorderSide(
+                                    color: Color(0xFFFDA4AF),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 8,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                onPressed: () =>
+                                    context.push('/couple-quizzes'),
+                                icon: const Icon(Icons.quiz_outlined, size: 15),
+                                label: const Text(
+                                  'Quizzes & Hints',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xFF0F766E),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 8,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                onPressed: () => context.push('/advisor'),
+                                icon: const Icon(
+                                  Icons.support_agent_rounded,
+                                  size: 15,
+                                ),
+                                label: const Text(
+                                  'Ask AI Advisor',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
 
-                // 4. Filtered Stage Checklist Section
+                // 6. Filtered Stage Checklist Section
                 checklistAsync.when(
                   data: (items) {
                     return Column(
@@ -727,27 +1096,30 @@ class TimelineScreen extends ConsumerWidget {
                               ),
                               decoration: BoxDecoration(
                                 color:
-                                    completedCount == totalCount &&
-                                        totalCount > 0
+                                    completedChecklistCount ==
+                                            totalChecklistCount &&
+                                        totalChecklistCount > 0
                                     ? Colors.green.shade50
                                     : theme.colorScheme.surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
                                   color:
-                                      completedCount == totalCount &&
-                                          totalCount > 0
+                                      completedChecklistCount ==
+                                              totalChecklistCount &&
+                                          totalChecklistCount > 0
                                       ? Colors.green.shade200
                                       : theme.colorScheme.outlineVariant,
                                 ),
                               ),
                               child: Text(
-                                '$completedCount / $totalCount',
+                                '$completedChecklistCount / $totalChecklistCount',
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color:
-                                      completedCount == totalCount &&
-                                          totalCount > 0
+                                      completedChecklistCount ==
+                                              totalChecklistCount &&
+                                          totalChecklistCount > 0
                                       ? Colors.green.shade700
                                       : theme.colorScheme.onSurfaceVariant,
                                 ),

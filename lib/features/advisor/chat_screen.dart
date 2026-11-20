@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../couple/couple_hints_provider.dart';
+import '../onboarding/mode_selection_state.dart';
 import '../profile/profile_provider.dart';
 import '../stage/stage.dart';
 import '../stage/stage_provider.dart';
@@ -38,13 +40,32 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
   }
 
-  void _handleSubmitted() {
-    final text = _textController.text.trim();
+  void _handleSubmitted([String? textOverride]) {
+    final text = (textOverride ?? _textController.text).trim();
     if (text.isEmpty) return;
 
-    _textController.clear();
+    if (textOverride == null) {
+      _textController.clear();
+    }
     ref.read(chatProvider.notifier).sendMessage(text);
     _scrollToBottom();
+  }
+
+  List<String> _getQuickPrompts(PregnancyStage stage, String partnerRole) {
+    final stagePrompt = switch (stage) {
+      PregnancyStage.trying => 'Tips for PCOS cycle fatigue & mood',
+      PregnancyStage.plan => 'Preconception nutrition & habits for partners',
+      PregnancyStage.pregnancy => 'Healthy ways to manage nausea & rest',
+      PregnancyStage.postpartum =>
+        'Postpartum recovery & emotional wellness check',
+    };
+
+    return [
+      'How can I support my partner today?',
+      'Questions for next doctor visit',
+      'Feeling overwhelmed—help me unwind',
+      stagePrompt,
+    ];
   }
 
   @override
@@ -52,7 +73,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatState = ref.watch(chatProvider);
     final couple = ref.watch(coupleProvider);
     final stage = ref.watch(stageProvider);
+    final modeState = ref.watch(modeSelectionProvider);
+    final hintsState = ref.watch(coupleHintsProvider);
     final theme = Theme.of(context);
+
+    final activePartner = couple.activePartner;
+    final otherPartner = couple.otherPartner;
+    final activeMode = modeState.activeMode(stage);
+    final activeHint = hintsState.activeSmartHint;
+
+    final quickPrompts = _getQuickPrompts(stage, activePartner.role);
 
     // Scroll down when messages change or loading state toggles
     ref.listen<ChatState>(chatProvider, (previous, next) {
@@ -70,11 +100,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'PreNest AI Advisor',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'PreNest AI Emotional Advisor',
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
             Text(
-              '${couple.activePartner.name} (${couple.activePartner.role}) • ${stage.displayName}',
+              '${activePartner.name} (${activePartner.role}) • ${activeMode.badge}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -82,19 +112,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ],
         ),
         actions: [
+          TextButton.icon(
+            style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+            onPressed: () {
+              ref.read(coupleProvider.notifier).togglePartner();
+            },
+            icon: const Icon(Icons.switch_account_outlined, size: 14),
+            label: Text(
+              otherPartner.name,
+              style: const TextStyle(fontSize: 11),
+            ),
+          ),
           IconButton(
             tooltip: 'Clear Chat',
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, size: 20),
             onPressed: () {
               ref.read(chatProvider.notifier).clearChat();
             },
           ),
+          const SizedBox(width: 4),
         ],
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // Sleek & compact top disclaimer banner
+            // Clinical safety disclaimer banner
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
@@ -123,7 +165,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
-                          'Support & general info only — consult your doctor for medical advice.',
+                          'Support & reassurance only — consult your doctor for medical advice or symptoms.',
                           style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w500,
@@ -139,6 +181,51 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
             ),
 
+            // Active Opted-in Partner Hint Banner (if active)
+            if (activeHint != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF1F2),
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xFFFDA4AF), width: 1),
+                  ),
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.favorite_rounded,
+                          size: 15,
+                          color: Color(0xFFE11D48),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Smart Hint from ${activeHint.fromPartnerName}: "${activeHint.hintText}"',
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF9F1239),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
             // Chat Messages List
             Expanded(
               child: Center(
@@ -152,7 +239,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                     itemCount: itemCount,
                     itemBuilder: (context, index) {
-                      // Show loading indicator as the last item if loading
                       if (index == chatState.messages.length) {
                         return _buildLoadingBubble(theme);
                       }
@@ -165,7 +251,48 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
             ),
 
-            // Bottom Text Field + Send Button
+            // Quick Starter Prompt Chips Carousel
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              color: const Color(0xFFF8FAFC),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: SizedBox(
+                    height: 36,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: quickPrompts.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, idx) {
+                        final prompt = quickPrompts[idx];
+                        return ActionChip(
+                          visualDensity: VisualDensity.compact,
+                          backgroundColor: Colors.white,
+                          side: BorderSide(
+                            color: theme.colorScheme.outlineVariant,
+                            width: 1,
+                          ),
+                          label: Text(
+                            prompt,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onPressed: chatState.isLoading
+                              ? null
+                              : () => _handleSubmitted(prompt),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Bottom Input Bar
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
@@ -225,7 +352,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       IconButton.filled(
                         onPressed: chatState.isLoading
                             ? null
-                            : _handleSubmitted,
+                            : () => _handleSubmitted(),
                         icon: const Icon(Icons.send_rounded, size: 20),
                         tooltip: 'Send message',
                         style: IconButton.styleFrom(

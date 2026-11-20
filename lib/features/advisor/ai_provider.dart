@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../couple/couple_hints_provider.dart';
+import '../onboarding/mode_selection_state.dart';
 import '../profile/profile_provider.dart';
 import '../stage/stage.dart';
 import '../stage/stage_provider.dart';
@@ -47,7 +49,7 @@ class ChatNotifier extends Notifier<ChatState> {
     return ChatState(
       messages: [
         ChatMessage(
-          text: "Hello! I'm PreNest, your empathetic companion. I'm here to support you and your partner with emotional care, practical encouragement, and general guidance. What's on your mind today?",
+          text: "Hello! I'm PreNest, your empathetic emotional companion and couple communication guide. I'm here to support you and your partner with reassurance, mutual care tips, and general healthcare insights. What's on your mind today?",
           isUser: false,
           timestamp: DateTime.now(),
         ),
@@ -75,10 +77,20 @@ class ChatNotifier extends Notifier<ChatState> {
     // Read active context without showing prefix in the UI
     final stage = ref.read(stageProvider);
     final couple = ref.read(coupleProvider);
+    final modeState = ref.read(modeSelectionProvider);
+    final hintsState = ref.read(coupleHintsProvider);
+
     final activePartner = couple.activePartner;
+    final otherPartner = couple.otherPartner;
+    final activeMode = modeState.activeMode(stage);
+
+    final activeHint = hintsState.activeSmartHint;
+    final hintContext = (activeHint != null && activeHint.hintText.isNotEmpty)
+        ? 'ActivePartnerHint=${activeHint.fromPartnerName}: "${activeHint.hintText}"'
+        : 'ActivePartnerHint=None';
 
     final contextPrefix =
-        '[Context: Partner=${activePartner.name}/${activePartner.role}, Stage=${stage.displayName}]';
+        '[Context: Partner=${activePartner.name}/${activePartner.role}, OtherPartner=${otherPartner.name}/${otherPartner.role}, Mode=${activeMode.title}, Stage=${stage.displayName}, $hintContext]';
     final invisiblePrompt = '$contextPrefix $trimmed';
 
     try {
