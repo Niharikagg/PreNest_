@@ -1,7 +1,8 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../app/providers.dart';
 import '../../core/models/extracted_field.dart';
@@ -9,6 +10,7 @@ import '../../core/models/verified_result.dart';
 import '../profile/profile_provider.dart';
 import '../records/records_provider.dart';
 import '../stage/stage_provider.dart';
+import 'verify_controller.dart';
 
 class VerifyScreen extends ConsumerStatefulWidget {
   const VerifyScreen({super.key});
@@ -46,24 +48,26 @@ class _FieldEditModel {
 
 class _VerifyScreenState extends ConsumerState<VerifyScreen> {
   final _formKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();
   List<_FieldEditModel> _editModels = [];
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadFields();
+    final initialFields = ref.read(verifyControllerProvider).fields;
+    if (initialFields.isEmpty) {
+      ref.read(verifyControllerProvider.notifier).loadSampleReport();
+    } else {
+      _editModels =
+          initialFields.map((f) => _FieldEditModel(original: f)).toList();
+    }
   }
 
-  Future<void> _loadFields() async {
-    final service = ref.read(extractionServiceProvider);
-    // Passing simulated File as required by contract
-    final fields = await service.extract(File('placeholder_lab_report.png'));
-    if (!mounted) return;
-    setState(() {
-      _editModels = fields.map((f) => _FieldEditModel(original: f)).toList();
-      _isLoading = false;
-    });
+  void _updateEditModels(List<ExtractedField> fields) {
+    for (final model in _editModels) {
+      model.dispose();
+    }
+    _editModels = fields.map((f) => _FieldEditModel(original: f)).toList();
   }
 
   @override
@@ -72,6 +76,43 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
       model.dispose();
     }
     super.dispose();
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+      );
+
+      if (picked == null) {
+        // User cancelled picker
+        return;
+      }
+
+      final Uint8List bytes = await picked.readAsBytes();
+      if (!mounted) return;
+
+      final controller = ref.read(verifyControllerProvider.notifier);
+      await controller.extractFromImage(
+        path: picked.path,
+        bytes: bytes,
+      );
+    } catch (e) {
+      debugPrint('[VerifyScreen] Error picking image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not access image: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  void _loadSampleReport() {
+    ref.read(verifyControllerProvider.notifier).loadSampleReport();
   }
 
   void _onConfirm() {
@@ -135,15 +176,28 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
     final activePartner = ref.watch(coupleProvider).activePartner;
     final stage = ref.watch(stageProvider);
     final theme = Theme.of(context);
+    final verifyState = ref.watch(verifyControllerProvider);
 
-    if (_isLoading) {
-      return const Center(
+    ref.listen<VerifyState>(verifyControllerProvider, (previous, next) {
+      if ((previous?.isLoading == true && !next.isLoading) ||
+          previous?.fields != next.fields) {
+        setState(() {
+          _updateEditModels(next.fields);
+        });
+      }
+    });
+
+    if (verifyState.isLoading) {
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Extracting lab parameters via OCR...'),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              verifyState.statusMessage ??
+                  'Extracting lab parameters via OCR...',
+            ),
           ],
         ),
       );
@@ -210,7 +264,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                       flex: 5,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: _buildReportViewer(context),
+                        child: _buildReportViewer(context, verifyState),
                       ),
                     ),
                     VerticalDivider(
@@ -237,8 +291,8 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           SizedBox(
-                            height: 300,
-                            child: _buildReportViewer(context),
+                            height: 380,
+                            child: _buildReportViewer(context, verifyState),
                           ),
                           const SizedBox(height: 16),
                           _buildFieldsList(context, shrinkWrap: true),
@@ -267,8 +321,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
     );
   }
 
-  Widget _buildReportViewer(BuildContext context) {
-    final activePartner = ref.watch(coupleProvider).activePartner;
+  Widget _buildReportViewer(BuildContext context, VerifyState verifyState) {
     final theme = Theme.of(context);
 
     return Card(
@@ -281,23 +334,83 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Header with zoom indicator and Camera/Gallery/Demo controls
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Row(
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.zoom_in, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Original Lab Report (Pinch/Scroll to Zoom)',
-                  style: Theme.of(context).textTheme.labelMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    const Icon(Icons.zoom_in, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        verifyState.selectedImageBytes != null
+                            ? 'Lab Report Image (Pinch/Scroll to Zoom)'
+                            : 'Original Lab Report (Pinch/Scroll to Zoom)',
+                        style: theme.textTheme.labelMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (verifyState.statusMessage != null)
+                      Flexible(
+                        child: Text(
+                          verifyState.statusMessage!,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
                 ),
-                const Spacer(),
-                Text(
-                  'Interactive OCR Scan',
-                  style: Theme.of(context).textTheme.labelSmall
-                      ?.copyWith(color: Colors.grey.shade600),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => _pickImage(ImageSource.gallery),
+                      icon: const Icon(Icons.photo_library_outlined, size: 16),
+                      label: const Text('Gallery'),
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        textStyle: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () => _pickImage(ImageSource.camera),
+                      icon: const Icon(Icons.camera_alt_outlined, size: 16),
+                      label: const Text('Camera'),
+                      style: OutlinedButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        textStyle: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    ActionChip(
+                      avatar: const Icon(Icons.science_outlined, size: 16),
+                      label: const Text(
+                        'Demo Sample',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      onPressed: _loadSampleReport,
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -310,257 +423,292 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                 minScale: 0.8,
                 maxScale: 3.5,
                 child: Center(
-                  child: Container(
-                    margin: const EdgeInsets.all(16),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                      border: Border.all(color: Colors.grey.shade300),
+                  child: verifyState.selectedImageBytes != null
+                      ? Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Image.memory(
+                            verifyState.selectedImageBytes!,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.broken_image_outlined,
+                                      size: 48,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Failed to display image preview',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      : _buildSampleReportPlaceholder(context),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSampleReportPlaceholder(BuildContext context) {
+    final activePartner = ref.watch(coupleProvider).activePartner;
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      width: 440,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Lab Header
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.local_hospital,
+                  color: Colors.blue.shade800,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'APEX CLINICAL DIAGNOSTICS',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.blue.shade900,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                    width: 440,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Lab Header
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Icons.local_hospital,
-                                color: Colors.blue.shade800,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'APEX CLINICAL DIAGNOSTICS',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: Colors.blue.shade900,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Pre-Conception & Maternal Wellness Panel',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 24, thickness: 1.5),
-                        // Patient details
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Patient: ${activePartner.name} (${activePartner.role})',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                            const Text(
-                              'Date: 10-Nov-2026',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Age/Sex: ${activePartner.age} Y / ${activePartner.role == 'Her' ? 'F' : 'M'}',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade700,
-                              ),
-                            ),
-                            Text(
-                              'Sample: Serum / Whole Blood',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // Table header
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 6,
-                          ),
-                          color: Colors.grey.shade100,
-                          child: const Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: Text(
-                                  'Investigation',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  'Observed',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  'Unit',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  'Reference',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        // Extracted lines in the simulated document
-                        ..._editModels.map((m) {
-                          final isLowConf = m.original.confidence < 0.8;
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 6,
-                            ),
-                            margin: const EdgeInsets.symmetric(vertical: 2),
-                            decoration: BoxDecoration(
-                              color: isLowConf
-                                  ? Colors.amber.withValues(alpha: 0.15)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(4),
-                              border: isLowConf
-                                  ? Border.all(
-                                      color: Colors.amber.shade600,
-                                      width: 1,
-                                    )
-                                  : null,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 3,
-                                  child: Text(
-                                    m.original.testNameRaw,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    m.original.value?.toString() ?? '--',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: isLowConf
-                                          ? Colors.amber.shade900
-                                          : Colors.black87,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    m.original.unit ?? '',
-                                    style: const TextStyle(fontSize: 11),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    m.original.printedRange ?? '',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Lab Director: Dr. K. Mehta, MD (Path)',
-                                style: TextStyle(fontSize: 10),
-                              ),
-                              Text(
-                                'Status: Final Authorized',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'Pre-Conception & Maternal Wellness Panel',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 24, thickness: 1.5),
+          // Patient details
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Patient: ${activePartner.name} (${activePartner.role})',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+              const Text(
+                'Date: 10-Nov-2026',
+                style: TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Age/Sex: ${activePartner.age} Y / ${activePartner.role == 'Her' ? 'F' : 'M'}',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              Text(
+                'Sample: Serum / Whole Blood',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Table header
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 6,
+            ),
+            color: Colors.grey.shade100,
+            child: const Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    'Investigation',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Observed',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Unit',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'Reference',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          // Extracted lines in the simulated document
+          ..._editModels.map((m) {
+            final isLowConf = m.original.confidence < 0.8;
+            return Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 6,
               ),
+              margin: const EdgeInsets.symmetric(vertical: 2),
+              decoration: BoxDecoration(
+                color: isLowConf
+                    ? Colors.amber.withValues(alpha: 0.15)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(4),
+                border: isLowConf
+                    ? Border.all(
+                        color: Colors.amber.shade600,
+                        width: 1,
+                      )
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      m.original.testNameRaw,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      m.original.value?.toString() ?? '--',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isLowConf
+                            ? Colors.amber.shade900
+                            : Colors.black87,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      m.original.unit ?? '',
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      m.original.printedRange ?? '',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Lab Director: Dr. K. Mehta, MD (Path)',
+                  style: TextStyle(fontSize: 10),
+                ),
+                Text(
+                  'Status: Final Authorized',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -698,10 +846,12 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                             filled: isLowConfidence,
                           ),
                           validator: (val) {
-                            if (val == null || val.trim().isEmpty)
+                            if (val == null || val.trim().isEmpty) {
                               return 'Required';
-                            if (double.tryParse(val.trim()) == null)
+                            }
+                            if (double.tryParse(val.trim()) == null) {
                               return 'Invalid #';
+                            }
                             return null;
                           },
                         ),
