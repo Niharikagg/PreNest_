@@ -7,6 +7,7 @@ import '../../core/l10n/app_l10n.dart';
 import '../../core/l10n/tts_service.dart';
 import '../couple/couple_hints_provider.dart';
 import '../couple/partner_story_cards.dart';
+import '../insights/mood_state_insight_card.dart';
 import '../onboarding/entry_state.dart';
 import '../onboarding/mode_selection_state.dart';
 import '../postpartum/postpartum_provider.dart';
@@ -101,6 +102,14 @@ class TimelineScreen extends ConsumerWidget {
             route: '/cycle',
           ),
           ModeShortcutItem(
+            title: AppStrings.t('Symptom Checker', lang),
+            subtitle: 'Discomforts & red flags',
+            icon: Icons.health_and_safety_rounded,
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
+            route: '/symptom-checker',
+          ),
+          ModeShortcutItem(
             title: AppStrings.t('PCOS Self-Check', lang),
             subtitle: 'Rule-based check',
             icon: Icons.checklist_rtl_rounded,
@@ -153,6 +162,14 @@ class TimelineScreen extends ConsumerWidget {
             route: '/planning',
           ),
           ModeShortcutItem(
+            title: AppStrings.t('Symptom Checker', lang),
+            subtitle: 'Preconception comfort & signs',
+            icon: Icons.health_and_safety_rounded,
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
+            route: '/symptom-checker',
+          ),
+          ModeShortcutItem(
             title: AppStrings.t('Vitals Log', lang),
             subtitle: 'Preconception health',
             icon: Icons.monitor_heart,
@@ -187,6 +204,14 @@ class TimelineScreen extends ConsumerWidget {
             accentColor: const Color(0xFF0F766E),
             containerColor: const Color(0xFFCCFBF1),
             route: '/anc-planner',
+          ),
+          ModeShortcutItem(
+            title: AppStrings.t('Symptom Checker', lang),
+            subtitle: 'Trimester comfort & red flags',
+            icon: Icons.health_and_safety_rounded,
+            accentColor: const Color(0xFF0284C7),
+            containerColor: const Color(0xFFE0F2FE),
+            route: '/symptom-checker',
           ),
           ModeShortcutItem(
             title: AppStrings.t('Contraction Timer', lang),
@@ -239,6 +264,14 @@ class TimelineScreen extends ConsumerWidget {
             accentColor: const Color(0xFFD97706),
             containerColor: const Color(0xFFFEF3C7),
             route: '/postpartum',
+          ),
+          ModeShortcutItem(
+            title: AppStrings.t('Symptom Checker', lang),
+            subtitle: 'Recovery discomforts & red flags',
+            icon: Icons.health_and_safety_rounded,
+            accentColor: const Color(0xFFD97706),
+            containerColor: const Color(0xFFFEF3C7),
+            route: '/symptom-checker',
           ),
           const ModeShortcutItem(
             title: 'Articles & Guides',
@@ -421,36 +454,71 @@ class TimelineScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_rounded,
-                    size: 14,
-                    color: stageColor,
+              InkWell(
+                onTap: () => context.push('/calendar'),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_month_rounded,
+                        size: 15,
+                        color: stageColor,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${months[now.month - 1]} ${now.year}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 11,
+                        color: stageColor,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    '${months[now.month - 1]} ${now.year}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textDark,
+                ),
+              ),
+              InkWell(
+                onTap: () => context.push('/calendar'),
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: stageColor.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: stageColor.withOpacity(0.25),
+                      width: 1,
                     ),
                   ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: stageColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'Today • Day ${now.day}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: stageColor,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.calendar_month_rounded,
+                        size: 12,
+                        color: stageColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Full Calendar',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: stageColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -466,60 +534,64 @@ class TimelineScreen extends ConsumerWidget {
                   day.day == now.day;
               final weekdayName = weekdays[day.weekday - 1];
 
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 40,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: isToday ? stageColor : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isToday ? stageColor : AppTheme.borderLight,
-                    width: isToday ? 1.5 : 1,
+              return InkWell(
+                onTap: () => context.push('/calendar'),
+                borderRadius: BorderRadius.circular(14),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 40,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isToday ? stageColor : const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isToday ? stageColor : AppTheme.borderLight,
+                      width: isToday ? 1.5 : 1,
+                    ),
+                    boxShadow: isToday
+                        ? [
+                            BoxShadow(
+                              color: stageColor.withOpacity(0.25),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ]
+                        : null,
                   ),
-                  boxShadow: isToday
-                      ? [
-                          BoxShadow(
-                            color: stageColor.withOpacity(0.25),
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      weekdayName,
-                      style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
-                        color: isToday
-                            ? Colors.white.withOpacity(0.9)
-                            : AppTheme.textMuted,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${day.day}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isToday ? Colors.white : AppTheme.textDark,
-                      ),
-                    ),
-                    if (isToday) ...[
-                      const SizedBox(height: 3),
-                      Container(
-                        width: 4,
-                        height: 4,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
+                  child: Column(
+                    children: [
+                      Text(
+                        weekdayName,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: isToday
+                              ? Colors.white.withOpacity(0.9)
+                              : AppTheme.textMuted,
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${day.day}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isToday ? Colors.white : AppTheme.textDark,
+                        ),
+                      ),
+                      if (isToday) ...[
+                        const SizedBox(height: 3),
+                        Container(
+                          width: 4,
+                          height: 4,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               );
             }).toList(),
@@ -683,6 +755,24 @@ class TimelineScreen extends ConsumerWidget {
     if (mode == PreNestMode.periodTracker) {
       insights = [
         const _DailyInsightData(
+          title: 'Symptom Checker',
+          subtitle: 'Guided review: stage discomforts vs red flags',
+          badge: 'Checker',
+          icon: Icons.health_and_safety_rounded,
+          accentColor: Color(0xFF0F766E),
+          containerColor: Color(0xFFCCFBF1),
+          route: '/symptom-checker',
+        ),
+        const _DailyInsightData(
+          title: 'Shared Calendar',
+          subtitle: 'Visits, vaccines, fertile days & reminders',
+          badge: 'Calendar',
+          icon: Icons.calendar_month_rounded,
+          accentColor: Color(0xFF7C3AED),
+          containerColor: Color(0xFFF3E8FF),
+          route: '/calendar',
+        ),
+        const _DailyInsightData(
           title: 'PCOS Self-Check',
           subtitle: 'Review 7 key indicators & doctor talking points',
           badge: 'Self-Check',
@@ -734,6 +824,24 @@ class TimelineScreen extends ConsumerWidget {
       ];
     } else {
       insights = [
+        const _DailyInsightData(
+          title: 'Symptom Checker',
+          subtitle: 'Guided review: stage discomforts vs red flags',
+          badge: 'Checker',
+          icon: Icons.health_and_safety_rounded,
+          accentColor: Color(0xFF0F766E),
+          containerColor: Color(0xFFCCFBF1),
+          route: '/symptom-checker',
+        ),
+        const _DailyInsightData(
+          title: 'Shared Calendar',
+          subtitle: 'Visits, vaccines, fertile days & reminders',
+          badge: 'Calendar',
+          icon: Icons.calendar_month_rounded,
+          accentColor: Color(0xFF7C3AED),
+          containerColor: Color(0xFFF3E8FF),
+          route: '/calendar',
+        ),
         const _DailyInsightData(
           title: 'Next ANC Visit',
           subtitle: 'Ultrasound & clinical panel due',
@@ -1418,6 +1526,10 @@ class TimelineScreen extends ConsumerWidget {
                   const SizedBox(height: 14),
                 ],
 
+                // Mood & State Professional Insights (Her & Partner views)
+                const MoodStateInsightCard(),
+                const SizedBox(height: 14),
+
                 // STEP 3: Swipeable "Daily Insights" Cards
                 _buildDailyInsightsCards(
                   context: context,
@@ -1515,6 +1627,130 @@ class TimelineScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                ),
+                const SizedBox(height: 14),
+
+                // Cross-Mode Core Hubs: Shared Calendar & Symptom Checker
+                Row(
+                  children: [
+                    Expanded(
+                      child: Card(
+                        elevation: 0,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(
+                            color: const Color(0xFF7C3AED).withOpacity(0.3),
+                            width: 1.1,
+                          ),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () => context.push('/calendar'),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF3E8FF),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.calendar_month_rounded,
+                                    size: 18,
+                                    color: Color(0xFF7C3AED),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Shared Calendar',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textDark,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                const Text(
+                                  'Visits, vaccines & cycle dots',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    color: AppTheme.textMuted,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Card(
+                        elevation: 0,
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(
+                            color: const Color(0xFF0F766E).withOpacity(0.3),
+                            width: 1.1,
+                          ),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () => context.push('/symptom-checker'),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFCCFBF1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.health_and_safety_rounded,
+                                    size: 18,
+                                    color: Color(0xFF0F766E),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Symptom Checker',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textDark,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                const Text(
+                                  'Discomforts vs red flags',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    color: AppTheme.textMuted,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 14),
 

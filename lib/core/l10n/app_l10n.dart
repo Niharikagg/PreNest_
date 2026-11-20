@@ -140,6 +140,16 @@ class AppStrings {
       AppLanguage.hi: 'दवा अनुस्मारक',
       AppLanguage.kn: 'ಔಷಧ ಜ್ಞಾಪನೆಗಳು',
     },
+    'Shared Calendar': {
+      AppLanguage.en: 'Shared Calendar',
+      AppLanguage.hi: 'साझा कैलेंडर',
+      AppLanguage.kn: 'ಹಂಚಿಕೊಂಡ ಕ್ಯಾಲೆಂಡರ್',
+    },
+    'Symptom Checker': {
+      AppLanguage.en: 'Symptom Checker',
+      AppLanguage.hi: 'लक्षण परीक्षक',
+      AppLanguage.kn: 'ಲಕ್ಷಣ ಪರೀಕ್ಷಕ',
+    },
     'Couple Quizzes': {
       AppLanguage.en: 'Couple Quizzes',
       AppLanguage.hi: 'दंपति प्रश्नोत्तरी',

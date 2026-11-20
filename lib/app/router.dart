@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/advisor/chat_screen.dart';
+import '../features/calendar/shared_calendar_screen.dart';
 import '../features/couple/couple_quizzes_screen.dart';
 import '../features/cycle/cycle_tracker_screen.dart';
 import '../features/cycle/pcos_lab_panel_screen.dart';
@@ -23,6 +24,7 @@ import '../features/records/test_detail_screen.dart';
 import '../features/records/vitals_log_screen.dart';
 import '../features/reminders/medicine_reminders_screen.dart';
 import '../features/security/privacy_sync_screen.dart';
+import '../features/symptoms/symptom_checker_screen.dart';
 import '../features/timeline/timeline_screen.dart';
 import '../features/trends/trends_screen.dart';
 import '../features/validity/danger_sign_checker_screen.dart';
@@ -100,6 +102,18 @@ final appRouter = GoRouter(
       name: 'dangerSigns',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const DangerSignCheckerScreen(),
+    ),
+    GoRoute(
+      path: '/calendar',
+      name: 'calendar',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const SharedCalendarScreen(),
+    ),
+    GoRoute(
+      path: '/symptom-checker',
+      name: 'symptomChecker',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const SymptomCheckerScreen(),
     ),
     GoRoute(
       path: '/vitals',
