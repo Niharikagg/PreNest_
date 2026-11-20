@@ -122,8 +122,9 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
             ),
           ],
         ),
-        backgroundColor: Colors.teal.shade700,
+        backgroundColor: const Color(0xFF0F766E),
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 4),
       ),
     );
@@ -133,6 +134,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
   Widget build(BuildContext context) {
     final activePartner = ref.watch(coupleProvider).activePartner;
     final stage = ref.watch(stageProvider);
+    final theme = Theme.of(context);
 
     if (_isLoading) {
       return const Center(
@@ -154,9 +156,13 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
         final topActionBar = Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest
-                .withOpacity(0.35),
-            border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            color: Colors.white,
+            border: Border(
+              bottom: BorderSide(
+                color: theme.colorScheme.outlineVariant,
+                width: 1,
+              ),
+            ),
           ),
           child: Row(
             children: [
@@ -166,14 +172,14 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                   children: [
                     Text(
                       'OCR Verification & Review',
-                      style: Theme.of(context).textTheme.titleMedium
+                      style: theme.textTheme.titleMedium
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Patient: ${activePartner.name} [${activePartner.role}] • Stage: ${stage.displayName}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade700,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -184,7 +190,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                 icon: const Icon(Icons.check, size: 18),
                 label: const Text('Confirm'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: Colors.teal.shade700,
+                  backgroundColor: theme.colorScheme.primary,
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -207,7 +213,10 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                         child: _buildReportViewer(context),
                       ),
                     ),
-                    const VerticalDivider(width: 1),
+                    VerticalDivider(
+                      width: 1,
+                      color: theme.colorScheme.outlineVariant,
+                    ),
                     Expanded(flex: 6, child: _buildFieldsList(context)),
                   ],
                 ),
@@ -219,27 +228,35 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
             children: [
               topActionBar,
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(height: 300, child: _buildReportViewer(context)),
-                      const SizedBox(height: 16),
-                      _buildFieldsList(context, shrinkWrap: true),
-                      const SizedBox(height: 20),
-                      FilledButton.icon(
-                        onPressed: _onConfirm,
-                        icon: const Icon(Icons.done_all),
-                        label: const Text('Confirm & Save All Records'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.teal.shade700,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(
+                            height: 300,
+                            child: _buildReportViewer(context),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildFieldsList(context, shrinkWrap: true),
+                          const SizedBox(height: 20),
+                          FilledButton.icon(
+                            onPressed: _onConfirm,
+                            icon: const Icon(Icons.done_all),
+                            label: const Text('Confirm & Save All Records'),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: theme.colorScheme.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
                       ),
-                      const SizedBox(height: 32),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -252,11 +269,15 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
 
   Widget _buildReportViewer(BuildContext context) {
     final activePartner = ref.watch(coupleProvider).activePartner;
+    final theme = Theme.of(context);
 
     return Card(
-      elevation: 2,
+      elevation: 0,
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -561,16 +582,20 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
         itemBuilder: (context, index) {
           final model = _editModels[index];
           final isLowConfidence = model.original.confidence < 0.8;
+          final theme = Theme.of(context);
 
           return Card(
-            elevation: isLowConfidence ? 3 : 1,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               side: isLowConfidence
-                  ? BorderSide(color: Colors.amber.shade700, width: 1.5)
-                  : BorderSide(color: Colors.grey.shade300, width: 0.5),
+                  ? const BorderSide(color: Color(0xFFF59E0B), width: 1.5)
+                  : BorderSide(
+                      color: theme.colorScheme.outlineVariant,
+                      width: 1,
+                    ),
             ),
-            color: isLowConfidence ? const Color(0xFFFFFBEB) : null,
+            color: isLowConfidence ? const Color(0xFFFFFBEB) : Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(

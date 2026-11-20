@@ -171,282 +171,316 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
       appBar: AppBar(
         title: const Text('Vitals Log (BP & Weight)'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Form Card
-            Card(
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(18.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.monitor_heart,
-                              color: theme.colorScheme.primary),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Record Today\'s Vitals',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Systolic BP
-                          Expanded(
-                            child: TextFormField(
-                              controller: _systolicController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Systolic BP',
-                                hintText: '120',
-                                suffixText: 'mmHg',
-                                border: OutlineInputBorder(),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Required';
-                                }
-                                final parsed = int.tryParse(value.trim());
-                                if (parsed == null) {
-                                  return 'Integer only';
-                                }
-                                if (parsed < 60 || parsed > 250) {
-                                  return '60-250';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Diastolic BP
-                          Expanded(
-                            child: TextFormField(
-                              controller: _diastolicController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Diastolic BP',
-                                hintText: '80',
-                                suffixText: 'mmHg',
-                                border: OutlineInputBorder(),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Required';
-                                }
-                                final parsed = int.tryParse(value.trim());
-                                if (parsed == null) {
-                                  return 'Integer only';
-                                }
-                                if (parsed < 40 || parsed > 160) {
-                                  return '40-160';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      // Weight
-                      TextFormField(
-                        controller: _weightController,
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        decoration: const InputDecoration(
-                          labelText: 'Weight',
-                          hintText: '58.5',
-                          suffixText: 'kg',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Enter maternal/partner weight';
-                          }
-                          final parsed = double.tryParse(value.trim());
-                          if (parsed == null) {
-                            return 'Enter a valid number';
-                          }
-                          if (parsed < 30 || parsed > 250) {
-                            return 'Enter realistic weight (30-250 kg)';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 14),
-                      // Notes (Optional)
-                      TextFormField(
-                        controller: _noteController,
-                        decoration: const InputDecoration(
-                          labelText: 'Optional note / symptom',
-                          hintText: 'e.g., Fasting, morning post-walk',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: _submit,
-                        icon: const Icon(Icons.add),
-                        label: const Text('Save Vitals Entry'),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // History Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Vitals History (${vitals.length})',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'WHO Guideline: <120/<80',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // History List
-            if (vitals.isEmpty)
-              Card(
-                elevation: 0,
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
-                child: const Padding(
-                  padding: EdgeInsets.all(24.0),
-                  child: Center(
-                    child: Text('No vitals recorded yet. Use the form above to log.'),
-                  ),
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: vitals.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final entry = vitals[index];
-                  final statusColor = entry.bpColor;
-
-                  return Card(
-                    elevation: 0.5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.grey.shade200),
+                // Form Card
+                Card(
+                  elevation: 0,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: theme.colorScheme.outlineVariant,
+                      width: 1,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14.0),
-                      child: Row(
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Container(
-                            width: 6,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: statusColor,
-                              borderRadius: BorderRadius.circular(3),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  Icons.monitor_heart,
+                                  color: theme.colorScheme.primary,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Record Today\'s Vitals',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Systolic BP
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _systolicController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Systolic BP',
+                                    hintText: '120',
+                                    suffixText: 'mmHg',
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Required';
+                                    }
+                                    final parsed = int.tryParse(value.trim());
+                                    if (parsed == null) {
+                                      return 'Integer only';
+                                    }
+                                    if (parsed < 60 || parsed > 250) {
+                                      return '60-250';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // Diastolic BP
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _diastolicController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Diastolic BP',
+                                    hintText: '80',
+                                    suffixText: 'mmHg',
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Required';
+                                    }
+                                    final parsed = int.tryParse(value.trim());
+                                    if (parsed == null) {
+                                      return 'Integer only';
+                                    }
+                                    if (parsed < 40 || parsed > 160) {
+                                      return '40-160';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          // Weight
+                          TextFormField(
+                            controller: _weightController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: const InputDecoration(
+                              labelText: 'Weight',
+                              hintText: '58.5',
+                              suffixText: 'kg',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Enter maternal/partner weight';
+                              }
+                              final parsed = double.tryParse(value.trim());
+                              if (parsed == null) {
+                                return 'Enter a valid number';
+                              }
+                              if (parsed < 30 || parsed > 250) {
+                                return 'Enter realistic weight (30-250 kg)';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          // Notes (Optional)
+                          TextFormField(
+                            controller: _noteController,
+                            decoration: const InputDecoration(
+                              labelText: 'Optional note / symptom',
+                              hintText: 'e.g., Fasting, morning post-walk',
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                          const SizedBox(height: 16),
+                          FilledButton.icon(
+                            onPressed: _submit,
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text('Save Vitals Entry'),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // History Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Vitals History (${vitals.length})',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'WHO Guideline: <120/<80',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // History List
+                if (vitals.isEmpty)
+                  Card(
+                    elevation: 0,
+                    color: theme.colorScheme.surfaceContainerHighest
+                        .withOpacity(0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: theme.colorScheme.outlineVariant),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(28.0),
+                      child: Center(
+                        child: Text(
+                          'No vitals recorded yet. Use the form above to log.',
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: vitals.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final entry = vitals[index];
+                      final statusColor = entry.bpColor;
+
+                      return Card(
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(
+                            color: theme.colorScheme.outlineVariant,
+                            width: 1,
+                          ),
+                        ),
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(14.0),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 5,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: statusColor,
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${entry.systolicBp}/${entry.diastolicBp} mmHg',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                statusColor.withOpacity(0.12),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            entry.bpCategory,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: statusColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
                                     Text(
-                                      '${entry.systolicBp}/${entry.diastolicBp} mmHg',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                      'Weight: ${entry.weightKg.toStringAsFixed(1)} kg' +
+                                          (entry.note != null
+                                              ? ' • ${entry.note}'
+                                              : ''),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: statusColor.withOpacity(0.12),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        entry.bpCategory,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          color: statusColor,
-                                        ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _formatDateTime(entry.recordedAt),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: theme.colorScheme.onSurfaceVariant
+                                            .withOpacity(0.8),
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Weight: ${entry.weightKg.toStringAsFixed(1)} kg' +
-                                      (entry.note != null
-                                          ? ' • ${entry.note}'
-                                          : ''),
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  _formatDateTime(entry.recordedAt),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline,
+                                    size: 20),
+                                color: theme.colorScheme.onSurfaceVariant,
+                                tooltip: 'Delete entry',
+                                onPressed: () {
+                                  ref
+                                      .read(vitalsLogProvider.notifier)
+                                      .removeEntry(entry.id);
+                                },
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, size: 20),
-                            color: Colors.grey.shade600,
-                            tooltip: 'Delete entry',
-                            onPressed: () {
-                              ref
-                                  .read(vitalsLogProvider.notifier)
-                                  .removeEntry(entry.id);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-          ],
+                        ),
+                      );
+                    },
+                  ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
         ),
       ),
     );

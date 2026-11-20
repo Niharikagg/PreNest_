@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/router.dart';
+import 'app/theme.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -15,14 +16,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'PreNest',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6750A4),
-          brightness: Brightness.light,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       routerConfig: appRouter,
     );
   }
 }
+

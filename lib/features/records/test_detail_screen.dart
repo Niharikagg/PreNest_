@@ -33,56 +33,69 @@ class TestDetailScreen extends ConsumerWidget {
         ),
       ),
       body: testRecords.isEmpty
-          ? Center(child: Text('No records found for "$testName"'))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Patient banner
-                  _buildPatientHeader(
-                    context,
-                    activePartner,
-                    testRecords.last.unit,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Trend Summary Card
-                  _buildTrendSummaryCard(
-                    context,
-                    trendSummary,
-                    testRecords.last.unit,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Range Position Visualizer
-                  _buildRangePositionCard(context, trendSummary),
-                  const SizedBox(height: 24),
-
-                  // History Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ? Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Text('No records found for "$testName"'),
+                ),
+              ),
+            )
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Historical Readings (${testRecords.length})',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                      // Patient banner
+                      _buildPatientHeader(
+                        context,
+                        activePartner,
+                        testRecords.last.unit,
                       ),
-                      Text(
-                        'Chronological',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
+                      const SizedBox(height: 12),
+
+                      // Trend Summary Card
+                      _buildTrendSummaryCard(
+                        context,
+                        trendSummary,
+                        testRecords.last.unit,
                       ),
+                      const SizedBox(height: 12),
+
+                      // Range Position Visualizer
+                      _buildRangePositionCard(context, trendSummary),
+                      const SizedBox(height: 20),
+
+                      // History Section
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Historical Readings (${testRecords.length})',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Chronological',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      ...testRecords.reversed.map(
+                        (record) => _buildHistoryItem(context, record),
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  ...testRecords.reversed.map(
-                    (record) => _buildHistoryItem(context, record),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                ),
               ),
             ),
     );
@@ -93,25 +106,26 @@ class TestDetailScreen extends ConsumerWidget {
     PartnerProfile partner,
     String unit,
   ) {
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest
-            .withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.outlineVariant, width: 1),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            radius: 18,
+            backgroundColor: theme.colorScheme.primaryContainer,
+            foregroundColor: theme.colorScheme.primary,
+            radius: 20,
             child: Text(
               partner.initials,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,12 +134,13 @@ class TestDetailScreen extends ConsumerWidget {
                   '${partner.name} (${partner.role})',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 15,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   'PreNest Profile • Standard Unit: $unit',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -141,10 +156,15 @@ class TestDetailScreen extends ConsumerWidget {
     String unit,
   ) {
     final labelInfo = _getTrendLabelInfo(summary.labelKey);
+    final theme = Theme.of(context);
 
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
+      ),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Column(
@@ -155,8 +175,8 @@ class TestDetailScreen extends ConsumerWidget {
               children: [
                 Text(
                   'Trend Trajectory',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.grey.shade700,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -199,7 +219,7 @@ class TestDetailScreen extends ConsumerWidget {
                       'Current Value',
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.grey.shade600,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     Row(
@@ -213,15 +233,16 @@ class TestDetailScreen extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           unit,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -237,7 +258,7 @@ class TestDetailScreen extends ConsumerWidget {
                         'Baseline Shift',
                         style: TextStyle(
                           fontSize: 11,
-                          color: Colors.grey.shade600,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                       Text(
@@ -257,7 +278,9 @@ class TestDetailScreen extends ConsumerWidget {
                 ],
               ],
             ),
-            const Divider(height: 24),
+            const SizedBox(height: 14),
+            Divider(height: 1, color: theme.colorScheme.outlineVariant),
+            const SizedBox(height: 14),
             Row(
               children: [
                 Icon(
@@ -266,14 +289,14 @@ class TestDetailScreen extends ConsumerWidget {
                       : Icons.info_outline,
                   size: 16,
                   color: summary.canCompare
-                      ? Colors.green.shade700
-                      : Colors.amber.shade800,
+                      ? const Color(0xFF059669)
+                      : const Color(0xFFD97706),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     summary.reason,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                    style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ),
               ],
@@ -286,10 +309,15 @@ class TestDetailScreen extends ConsumerWidget {
 
   Widget _buildRangePositionCard(BuildContext context, TrendSummary summary) {
     final pos = summary.positionInRange ?? 0.5;
+    final theme = Theme.of(context);
 
     return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
+      ),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -297,13 +325,13 @@ class TestDetailScreen extends ConsumerWidget {
           children: [
             Text(
               'Range Position Indicator',
-              style: Theme.of(context).textTheme.titleSmall
+              style: theme.textTheme.titleSmall
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               'Normalized relative standing within expected clinical target boundaries',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 18),
             // Position Gauge Bar
@@ -337,7 +365,7 @@ class TestDetailScreen extends ConsumerWidget {
                             width: 20,
                             height: 24,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: theme.colorScheme.primary,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
                               boxShadow: const [
@@ -369,19 +397,19 @@ class TestDetailScreen extends ConsumerWidget {
               children: [
                 Text(
                   'Low / Sub-optimal',
-                  style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurfaceVariant),
                 ),
                 Text(
                   'Optimal Target',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green.shade800,
+                    color: Color(0xFF15803D),
                   ),
                 ),
                 Text(
                   'High / Elevated',
-                  style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -392,79 +420,88 @@ class TestDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildHistoryItem(BuildContext context, VerifiedResult record) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.event_note, size: 20, color: theme.colorScheme.primary),
             ),
-            child: const Icon(Icons.event_note, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _formatDate(record.date),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    'Stage: ${_capitalize(record.stage)}',
+                    style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  _formatDate(record.date),
-                  style: const TextStyle(
+                  '${record.value} ${record.unit}',
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 15,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
-                Text(
-                  'Stage: ${_capitalize(record.stage)}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: record.status == VerificationStatus.confirmed
+                        ? const Color(0xFFF0FDF4)
+                        : const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: record.status == VerificationStatus.confirmed
+                          ? const Color(0xFFBBF7D0)
+                          : const Color(0xFFFDE68A),
+                    ),
+                  ),
+                  child: Text(
+                    record.status == VerificationStatus.confirmed
+                        ? 'Confirmed'
+                        : 'Corrected',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: record.status == VerificationStatus.confirmed
+                          ? const Color(0xFF15803D)
+                          : const Color(0xFFB45309),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${record.value} ${record.unit}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: record.status == VerificationStatus.confirmed
-                      ? Colors.green.shade50
-                      : Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  record.status == VerificationStatus.confirmed
-                      ? 'Confirmed'
-                      : 'Corrected',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: record.status == VerificationStatus.confirmed
-                        ? Colors.green.shade800
-                        : Colors.orange.shade800,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -94,97 +94,147 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Disclaimer Banner
+            // Sleek & compact top disclaimer banner
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.7),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 18,
-                    color: theme.colorScheme.onSurfaceVariant,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+              decoration: BoxDecoration(
+                color:
+                    theme.colorScheme.surfaceContainerHighest.withOpacity(0.55),
+                border: Border(
+                  bottom: BorderSide(
+                    color: theme.colorScheme.outlineVariant,
+                    width: 1,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Emotional support & general info only — not medical advice.',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
+                ),
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.shield_outlined,
+                        size: 14,
+                        color: theme.colorScheme.primary,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'Support & general info only — consult your doctor for medical advice.',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
 
             // Chat Messages List
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                itemCount: itemCount,
-                itemBuilder: (context, index) {
-                  // Show loading indicator as the last item if loading
-                  if (index == chatState.messages.length) {
-                    return _buildLoadingBubble(theme);
-                  }
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    itemCount: itemCount,
+                    itemBuilder: (context, index) {
+                      // Show loading indicator as the last item if loading
+                      if (index == chatState.messages.length) {
+                        return _buildLoadingBubble(theme);
+                      }
 
-                  final message = chatState.messages[index];
-                  return _buildMessageBubble(context, message, theme);
-                },
+                      final message = chatState.messages[index];
+                      return _buildMessageBubble(context, message, theme);
+                    },
+                  ),
+                ),
               ),
             ),
 
             // Bottom Text Field + Send Button
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
+                color: Colors.white,
                 border: Border(
                   top: BorderSide(
-                    color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+                    color: theme.colorScheme.outlineVariant,
+                    width: 1,
                   ),
                 ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _textController,
-                      focusNode: _focusNode,
-                      textCapitalization: TextCapitalization.sentences,
-                      maxLines: 4,
-                      minLines: 1,
-                      decoration: InputDecoration(
-                        hintText: 'Ask PreNest anything...',
-                        filled: true,
-                        fillColor: theme.colorScheme.surfaceContainerHighest
-                            .withOpacity(0.4),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _textController,
+                          focusNode: _focusNode,
+                          textCapitalization: TextCapitalization.sentences,
+                          maxLines: 4,
+                          minLines: 1,
+                          decoration: InputDecoration(
+                            hintText: 'Ask PreNest anything...',
+                            filled: true,
+                            fillColor: theme.colorScheme.surfaceContainerHighest
+                                .withOpacity(0.4),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide(
+                                color: theme.colorScheme.outlineVariant,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide(
+                                color: theme.colorScheme.outlineVariant,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24),
+                              borderSide: BorderSide(
+                                color: theme.colorScheme.primary,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          onSubmitted: (_) => _handleSubmitted(),
                         ),
                       ),
-                      onSubmitted: (_) => _handleSubmitted(),
-                    ),
+                      const SizedBox(width: 10),
+                      IconButton.filled(
+                        onPressed:
+                            chatState.isLoading ? null : _handleSubmitted,
+                        icon: const Icon(Icons.send_rounded, size: 20),
+                        tooltip: 'Send message',
+                        style: IconButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.all(12),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    onPressed: chatState.isLoading ? null : _handleSubmitted,
-                    icon: const Icon(Icons.send_rounded),
-                    tooltip: 'Send message',
-                  ),
-                ],
+                ),
               ),
             ),
           ],
@@ -242,32 +292,50 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           const SizedBox(height: 4),
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.78,
+              maxWidth: MediaQuery.of(context).size.width * 0.78 > 480
+                  ? 480
+                  : MediaQuery.of(context).size.width * 0.78,
             ),
-            child: Material(
-              color: isUser
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.surfaceContainerHighest,
-              elevation: 0.5,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
-                bottomLeft: Radius.circular(isUser ? 16 : 4),
-                bottomRight: Radius.circular(isUser ? 4 : 16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+            child: Container(
+              decoration: BoxDecoration(
+                color: isUser ? theme.colorScheme.primary : Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: Radius.circular(isUser ? 16 : 4),
+                  bottomRight: Radius.circular(isUser ? 4 : 16),
                 ),
-                child: Text(
-                  message.text,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isUser
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onSurface,
-                    height: 1.35,
-                  ),
+                border: isUser
+                    ? null
+                    : Border.all(
+                        color: theme.colorScheme.outlineVariant,
+                        width: 1,
+                      ),
+                boxShadow: isUser
+                    ? [
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withOpacity(0.15),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              child: Text(
+                message.text,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isUser ? Colors.white : const Color(0xFF0F172A),
+                  height: 1.45,
                 ),
               ),
             ),
@@ -306,39 +374,41 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ],
           ),
           const SizedBox(height: 4),
-          Material(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-              bottomLeft: Radius.circular(4),
-              bottomRight: Radius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Thinking...',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+                bottomLeft: Radius.circular(4),
+                bottomRight: Radius.circular(16),
               ),
+              border:
+                  Border.all(color: theme.colorScheme.outlineVariant, width: 1),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Thinking...',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

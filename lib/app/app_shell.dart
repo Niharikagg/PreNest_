@@ -134,23 +134,27 @@ class AppShell extends ConsumerWidget {
                     // Partner Options
                     ...currentCouple.partners.map((partner) {
                       final isActive = partner.id == activeId;
+                      final theme = Theme.of(context);
                       return Card(
-                        elevation: isActive ? 2 : 0,
+                        elevation: 0,
                         color: isActive
-                            ? Theme.of(context).colorScheme.primaryContainer
-                                  .withOpacity(0.3)
-                            : Theme.of(context).colorScheme.surface,
+                            ? theme.colorScheme.primaryContainer.withOpacity(0.35)
+                            : theme.colorScheme.surface,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                           side: BorderSide(
                             color: isActive
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey.shade300,
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.outlineVariant,
                             width: isActive ? 1.5 : 1,
                           ),
                         ),
                         margin: const EdgeInsets.only(bottom: 10),
                         child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 4,
+                          ),
                           onTap: () {
                             ref
                                 .read(coupleProvider.notifier)
@@ -158,16 +162,18 @@ class AppShell extends ConsumerWidget {
                             Navigator.of(sheetContext).pop();
                           },
                           leading: CircleAvatar(
+                            radius: 20,
                             backgroundColor: isActive
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey.shade300,
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.surfaceContainerHighest,
                             foregroundColor: isActive
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Colors.black87,
+                                ? theme.colorScheme.onPrimary
+                                : theme.colorScheme.onSurfaceVariant,
                             child: Text(
                               partner.initials,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
+                                fontSize: 13,
                               ),
                             ),
                           ),
@@ -176,20 +182,27 @@ class AppShell extends ConsumerWidget {
                             style: TextStyle(
                               fontWeight: isActive
                                   ? FontWeight.bold
-                                  : FontWeight.w500,
+                                  : FontWeight.w600,
+                              color: isActive
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurface,
                             ),
                           ),
                           subtitle: Text(
                             'Age: ${partner.age} • Blood Group: ${partner.bloodGroup}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
                           trailing: isActive
                               ? Icon(
-                                  Icons.check_circle,
-                                  color: Theme.of(context).colorScheme.primary,
+                                  Icons.check_circle_rounded,
+                                  color: theme.colorScheme.primary,
                                 )
-                              : const Icon(
+                              : Icon(
                                   Icons.radio_button_unchecked,
-                                  color: Colors.grey,
+                                  color: theme.colorScheme.outline,
                                 ),
                         ),
                       );
@@ -210,53 +223,132 @@ class AppShell extends ConsumerWidget {
     final couple = ref.watch(coupleProvider);
     final activePartner = couple.activePartner;
     final currentIndex = navigationShell.currentIndex;
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              _getTabTitle(currentIndex),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.favorite_rounded,
+                size: 18,
+                color: theme.colorScheme.primary,
+              ),
             ),
-            Text(
-              '${couple.coupleName} • Active: ${activePartner.name} (${activePartner.role})',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'PreNest',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          _getTabTitle(currentIndex),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    couple.coupleName,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
           ],
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12.0),
+            padding: const EdgeInsets.only(right: 14.0),
             child: Tooltip(
               message: 'Switch Partner Profile (${activePartner.name})',
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () => _showProfileSwitcher(context, ref),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 17,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context)
-                            .colorScheme
-                            .onPrimary,
-                        child: Text(
-                          activePartner.initials,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => _showProfileSwitcher(context, ref),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer
+                          .withOpacity(0.55),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withOpacity(0.25),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(
+                          radius: 12,
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          child: Text(
+                            activePartner.initials,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.arrow_drop_down, size: 20),
-                    ],
+                        const SizedBox(width: 6),
+                        Text(
+                          activePartner.name,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(
+                          Icons.arrow_drop_down,
+                          size: 18,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -265,36 +357,50 @@ class AppShell extends ConsumerWidget {
         ],
       ),
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: (index) {
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == currentIndex,
-          );
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.timeline_outlined),
-            selectedIcon: Icon(Icons.timeline),
-            label: 'Timeline',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(
+              color: theme.colorScheme.outlineVariant,
+              width: 1,
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.description_outlined),
-            selectedIcon: Icon(Icons.description),
-            label: 'Records',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.fact_check_outlined),
-            selectedIcon: Icon(Icons.fact_check),
-            label: 'Verify',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.trending_up_outlined),
-            selectedIcon: Icon(Icons.trending_up),
-            label: 'Trends',
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: currentIndex,
+          elevation: 0,
+          backgroundColor: Colors.white,
+          indicatorColor: theme.colorScheme.primaryContainer,
+          onDestinationSelected: (index) {
+            navigationShell.goBranch(
+              index,
+              initialLocation: index == currentIndex,
+            );
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.timeline_outlined),
+              selectedIcon: Icon(Icons.timeline),
+              label: 'Timeline',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.description_outlined),
+              selectedIcon: Icon(Icons.description),
+              label: 'Records',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.fact_check_outlined),
+              selectedIcon: Icon(Icons.fact_check),
+              label: 'Verify',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.trending_up_outlined),
+              selectedIcon: Icon(Icons.trending_up),
+              label: 'Trends',
+            ),
+          ],
+        ),
       ),
     );
   }

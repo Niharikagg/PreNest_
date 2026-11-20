@@ -173,160 +173,223 @@ class DangerSignCheckerScreen extends ConsumerWidget {
         children: [
           // Prominent MaterialBanner when ANY critical symptom is checked
           if (hasCriticalSigns)
-            MaterialBanner(
-              elevation: 4,
-              backgroundColor: theme.colorScheme.errorContainer,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              leading: Icon(
-                Icons.warning_amber_rounded,
-                color: theme.colorScheme.onErrorContainer,
-                size: 38,
-              ),
-              content: Text(
-                'CRITICAL WARNING: ${selectedSigns.length} danger sign(s) detected! '
-                'Go to the nearest emergency health facility or hospital immediately.',
-                style: TextStyle(
-                  color: theme.colorScheme.onErrorContainer,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              actions: [
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.error,
-                    foregroundColor: theme.colorScheme.onError,
-                    elevation: 2,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
+            Container(
+              width: double.infinity,
+              color: const Color(0xFFFEF2F2),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: Container(
+                    margin: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEE2E2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFFFECACA),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              color: Color(0xFFDC2626),
+                              size: 32,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'CRITICAL WARNING: ${selectedSigns.length} danger sign(s) detected! '
+                                'Go to the nearest emergency health facility or hospital immediately.',
+                                style: const TextStyle(
+                                  color: Color(0xFF991B1B),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13.5,
+                                  height: 1.35,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFFDC2626),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: const Icon(Icons.phone_in_talk, size: 20),
+                          label: const Text(
+                            'Call Ambulance (108)',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () => _simulateAmbulanceCall(context),
+                        ),
+                      ],
                     ),
                   ),
-                  icon: const Icon(Icons.phone_in_talk),
-                  label: const Text(
-                    'Call Ambulance (108)',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  onPressed: () => _simulateAmbulanceCall(context),
                 ),
-              ],
+              ),
             )
           else
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              color: Colors.green.shade50,
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle_outline, color: Colors.green.shade800),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'No critical danger signs reported. Tap any symptom below if you experience it.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.green.shade900,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                border: Border(
+                  bottom: BorderSide(
+                    color: const Color(0xFFDCFCE7),
+                    width: 1,
                   ),
-                ],
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_outline,
+                          color: Color(0xFF15803D), size: 20),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'No critical danger signs reported. Tap any symptom below if you experience it.',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: Color(0xFF166534),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
 
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: kDangerSigns.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final sign = kDangerSigns[index];
-                final isSelected = selectedSigns.contains(sign.id);
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: kDangerSigns.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final sign = kDangerSigns[index];
+                    final isSelected = selectedSigns.contains(sign.id);
 
-                return Card(
-                  elevation: isSelected ? 2 : 0,
-                  color: isSelected
-                      ? theme.colorScheme.errorContainer.withOpacity(0.35)
-                      : theme.colorScheme.surface,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: BorderSide(
+                    return Card(
+                      elevation: 0,
                       color: isSelected
-                          ? theme.colorScheme.error
-                          : Colors.grey.shade300,
-                      width: isSelected ? 1.5 : 1,
-                    ),
-                  ),
-                  child: CheckboxListTile(
-                    value: isSelected,
-                    activeColor: theme.colorScheme.error,
-                    checkColor: theme.colorScheme.onError,
-                    onChanged: (_) {
-                      ref
-                          .read(dangerSignsProvider.notifier)
-                          .toggleSymptom(sign.id);
-                    },
-                    secondary: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? theme.colorScheme.error.withOpacity(0.12)
-                            : theme.colorScheme.surfaceContainerHighest,
-                        shape: BoxShape.circle,
+                          ? const Color(0xFFFEF2F2)
+                          : Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(
+                          color: isSelected
+                              ? const Color(0xFFF87171)
+                              : theme.colorScheme.outlineVariant,
+                          width: isSelected ? 1.5 : 1,
+                        ),
                       ),
-                      child: Icon(
-                        sign.icon,
-                        color: isSelected
-                            ? theme.colorScheme.error
-                            : theme.colorScheme.onSurfaceVariant,
-                        size: 22,
-                      ),
-                    ),
-                    title: Text(
-                      sign.title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? theme.colorScheme.error : null,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(
-                          sign.description,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade800,
+                      child: CheckboxListTile(
+                        value: isSelected,
+                        activeColor: const Color(0xFFDC2626),
+                        checkColor: Colors.white,
+                        onChanged: (_) {
+                          ref
+                              .read(dangerSignsProvider.notifier)
+                              .toggleSymptom(sign.id);
+                        },
+                        secondary: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFFFEE2E2)
+                                : theme.colorScheme.surfaceContainerHighest,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            sign.icon,
+                            color: isSelected
+                                ? const Color(0xFFDC2626)
+                                : theme.colorScheme.onSurfaceVariant,
+                            size: 20,
                           ),
                         ),
-                        if (isSelected) ...[
-                          const SizedBox(height: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.error.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              '⚠ ${sign.emergencyNote}',
+                        title: Text(
+                          sign.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.5,
+                            color: isSelected
+                                ? const Color(0xFF991B1B)
+                                : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            Text(
+                              sign.description,
                               style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.error,
+                                fontSize: 12,
+                                color: isSelected
+                                    ? const Color(0xFF7F1D1D)
+                                    : const Color(0xFF475569),
                               ),
                             ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    isThreeLine: true,
-                  ),
-                );
-              },
+                            if (isSelected) ...[
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEE2E2),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: const Color(0xFFFECACA),
+                                  ),
+                                ),
+                                child: Text(
+                                  '⚠ ${sign.emergencyNote}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFFB91C1C),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        isThreeLine: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ],
