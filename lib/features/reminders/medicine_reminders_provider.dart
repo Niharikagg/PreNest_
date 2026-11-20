@@ -14,7 +14,7 @@ class MedicineReminder {
   final bool isSharedWithPartner;
   final bool takenToday;
   final String notes;
-  final String partnerOwnerId; // 'partner_priya', 'partner_rohan', or 'all'
+  final String partnerOwnerId; // 'primary_user', 'secondary_user', or 'all'
 
   const MedicineReminder({
     required this.id,
@@ -24,7 +24,7 @@ class MedicineReminder {
     this.isSharedWithPartner = true,
     this.takenToday = false,
     this.notes = '',
-    this.partnerOwnerId = 'partner_priya',
+    this.partnerOwnerId = 'primary_user',
   });
 
   MedicineReminder copyWith({
@@ -89,7 +89,7 @@ class MedicineRemindersNotifier extends Notifier<List<MedicineReminder>> {
         isSharedWithPartner: true,
         takenToday: true,
         notes: 'Preconception neural tube development support as advised by your doctor.',
-        partnerOwnerId: 'partner_priya',
+        partnerOwnerId: 'primary_user',
       ),
       MedicineReminder(
         id: 'med_pcos_inositol',
@@ -99,7 +99,7 @@ class MedicineRemindersNotifier extends Notifier<List<MedicineReminder>> {
         isSharedWithPartner: true,
         takenToday: true,
         notes: 'Ovulatory rhythm & insulin sensitivity support as advised by your doctor.',
-        partnerOwnerId: 'partner_priya',
+        partnerOwnerId: 'primary_user',
       ),
       MedicineReminder(
         id: 'med_iron_ifa',
@@ -109,7 +109,7 @@ class MedicineRemindersNotifier extends Notifier<List<MedicineReminder>> {
         isSharedWithPartner: true,
         takenToday: false,
         notes: 'Best taken with citrus or lemon water; maintain gap from milk/tea/calcium as advised by doctor.',
-        partnerOwnerId: 'partner_priya',
+        partnerOwnerId: 'primary_user',
       ),
       MedicineReminder(
         id: 'med_calcium',
@@ -119,7 +119,7 @@ class MedicineRemindersNotifier extends Notifier<List<MedicineReminder>> {
         isSharedWithPartner: true,
         takenToday: false,
         notes: 'Bone & fetal skeletal support; maintain 2-3 hr gap from IFA as recommended by doctor.',
-        partnerOwnerId: 'partner_priya',
+        partnerOwnerId: 'primary_user',
       ),
       MedicineReminder(
         id: 'med_postnatal_recovery',
@@ -129,7 +129,7 @@ class MedicineRemindersNotifier extends Notifier<List<MedicineReminder>> {
         isSharedWithPartner: true,
         takenToday: false,
         notes: 'Replenishes maternal iron stores and supports postpartum recovery as advised by doctor.',
-        partnerOwnerId: 'partner_priya',
+        partnerOwnerId: 'primary_user',
       ),
       MedicineReminder(
         id: 'med_partner_vitality',
@@ -139,7 +139,7 @@ class MedicineRemindersNotifier extends Notifier<List<MedicineReminder>> {
         isSharedWithPartner: true,
         takenToday: true,
         notes: 'Paternal preconception health and cellular vitality as advised by clinician.',
-        partnerOwnerId: 'partner_rohan',
+        partnerOwnerId: 'secondary_user',
       ),
       MedicineReminder(
         id: 'med_daily_hydration',

@@ -23,51 +23,80 @@ class RecordsScreen extends ConsumerWidget {
     // Sort tests alphabetically
     final testNames = groupedRecords.keys.toList()..sort();
 
+    final theme = Theme.of(context);
+
     if (testNames.isEmpty) {
+      final displayName = activePartner.name.isNotEmpty ? activePartner.name : 'you';
       return Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(28.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest,
+                    color: const Color(0xFFCCFBF1),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: const Color(0xFF99F6E4),
+                      width: 1.5,
+                    ),
                   ),
-                  child: Icon(
-                    Icons.folder_open_rounded,
+                  child: const Icon(
+                    Icons.document_scanner_outlined,
                     size: 48,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: Color(0xFF0F766E),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Text(
-                  'No verified records for ${activePartner.name} yet',
-                  style: Theme.of(context).textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  'No lab reports yet',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF0F172A),
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Switch to the "Verify" tab to import, review, and confirm lab reports.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  'No verified records for $displayName yet. Scan or upload your lab report to safely extract markers, detect trimester flags, and track healthy trends.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF64748B),
+                    height: 1.45,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 FilledButton.icon(
-                  onPressed: () => context.push('/doctor-summary'),
-                  icon: const Icon(Icons.picture_as_pdf_outlined),
-                  label: const Text('Export One-Page Doctor Summary'),
+                  onPressed: () => context.go('/verify'),
+                  icon: const Icon(Icons.document_scanner_rounded, size: 18),
+                  label: const Text('Scan Lab Report'),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF0F766E),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/doctor-summary'),
+                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
+                  label: const Text('Export One-Page Doctor Summary'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF0F766E),
+                    side: const BorderSide(color: Color(0xFF99F6E4)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                 ),
               ],
@@ -76,8 +105,6 @@ class RecordsScreen extends ConsumerWidget {
         ),
       );
     }
-
-    final theme = Theme.of(context);
 
     return Center(
       child: ConstrainedBox(

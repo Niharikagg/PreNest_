@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/providers.dart';
 import '../../app/theme.dart';
+import '../../core/security/app_security_service.dart';
 import '../onboarding/entry_state.dart';
 import '../profile/profile_provider.dart';
-import 'vault_lock_provider.dart';
+import 'privacy_sync_provider.dart';
 
 class PrivacySyncScreen extends ConsumerStatefulWidget {
   const PrivacySyncScreen({super.key});
@@ -17,7 +19,8 @@ class PrivacySyncScreen extends ConsumerStatefulWidget {
 class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
   @override
   Widget build(BuildContext context) {
-    final lockState = ref.watch(vaultLockProvider);
+    final privacyState = ref.watch(privacySyncProvider);
+    final securityService = ref.watch(appSecurityServiceProvider);
     final couple = ref.watch(coupleProvider);
     final entry = ref.watch(entryProvider);
 
@@ -35,13 +38,13 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 1. App Lock Status Card
-                _buildLockStatusHeader(lockState),
+                // 1. App Lock Status Card (Riddhi's AppLockGate / AppSecurityService)
+                _buildLockStatusHeader(securityService),
 
                 const SizedBox(height: 16),
 
-                // 2. App Lock & Security Settings Section
-                _buildSectionTitle('App & Vault Lock (PIN Protection)'),
+                // 2. App Security & Biometric Protection Section
+                _buildSectionTitle('App Security & Biometric Protection'),
                 const SizedBox(height: 8),
                 Card(
                   elevation: 0,
@@ -51,50 +54,55 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                   ),
                   child: Column(
                     children: [
-                      SwitchListTile(
+                      ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 4,
                         ),
-                        secondary: Container(
+                        leading: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: lockState.appLockEnabled
-                                ? AppTheme.primaryTealLight
-                                : const Color(0xFFF1F5F9),
+                            color: AppTheme.primaryTealLight,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Icon(
-                            lockState.appLockEnabled
-                                ? Icons.lock_rounded
-                                : Icons.lock_open_rounded,
-                            color: lockState.appLockEnabled
-                                ? AppTheme.primaryTeal
-                                : AppTheme.textMuted,
+                          child: const Icon(
+                            Icons.fingerprint_rounded,
+                            color: AppTheme.primaryTeal,
                             size: 20,
                           ),
                         ),
                         title: const Text(
-                          'Enable App Lock',
+                          'Biometric & System Security',
                           style: TextStyle(
                             fontSize: 14.5,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         subtitle: const Text(
-                          'Require a 4-digit PIN code to access locked keepsakes & records',
+                          'Integrated with Riddhi\'s AppLockGate & Local Biometric Authenticator',
                           style: TextStyle(fontSize: 12),
                         ),
-                        value: lockState.appLockEnabled,
-                        onChanged: (val) {
-                          ref
-                              .read(vaultLockProvider.notifier)
-                              .toggleAppLock(val);
-                        },
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDCFCE7),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'Active',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF15803D),
+                            ),
+                          ),
+                        ),
                       ),
                       const Divider(height: 1),
 
-                      // Set/Change PIN Tile
                       ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -107,28 +115,30 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
-                            Icons.pin_rounded,
+                            Icons.timer_outlined,
                             color: Color(0xFF0284C7),
                             size: 20,
                           ),
                         ),
                         title: const Text(
-                          'Change 4-Digit Security PIN',
+                          'Inactivity Timeout',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        subtitle: Text(
-                          'Current PIN: ${lockState.pinCode} (Tap to change)',
-                          style: const TextStyle(fontSize: 12),
+                        subtitle: const Text(
+                          'Auto-locks screen after 5 minutes of background or idle state',
+                          style: TextStyle(fontSize: 12),
                         ),
-                        trailing: const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: AppTheme.textMuted,
+                        trailing: const Text(
+                          '5 mins',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0284C7),
+                          ),
                         ),
-                        onTap: () => _showChangePinDialog(context, lockState),
                       ),
                       const Divider(height: 1),
 
@@ -151,28 +161,21 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           ),
                         ),
                         title: const Text(
-                          'Lock App Now (Test Mode)',
+                          'Lock App Now',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        subtitle: Text(
-                          lockState.isLocked
-                              ? 'App is currently locked. Tap to enter PIN.'
-                              : 'Immediately engage PIN screen to test lock state',
-                          style: const TextStyle(fontSize: 12),
+                        subtitle: const Text(
+                          'Immediately engage Riddhi\'s AppLockGate lock screen',
+                          style: TextStyle(fontSize: 12),
                         ),
                         trailing: FilledButton.tonal(
                           onPressed: () {
-                            if (!lockState.isLocked) {
-                              ref.read(vaultLockProvider.notifier).lockNow();
-                            }
-                            _showUnlockPinDialog(context);
+                            securityService.lock();
                           },
-                          child: Text(
-                            lockState.isLocked ? 'Unlock' : 'Lock Now',
-                          ),
+                          child: const Text('Lock Now'),
                         ),
                       ),
                     ],
@@ -220,10 +223,10 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           'Save all vitals, lab PDFs, and milestone media on-device first. Full functionality without internet.',
                           style: TextStyle(fontSize: 12),
                         ),
-                        value: lockState.offlineFirstEnabled,
+                        value: privacyState.offlineFirstEnabled,
                         onChanged: (val) {
                           ref
-                              .read(vaultLockProvider.notifier)
+                              .read(privacySyncProvider.notifier)
                               .toggleOfflineFirst(val);
                         },
                       ),
@@ -321,10 +324,10 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           'Automatically synchronize shared items with ${couple.otherPartner.name}\'s paired device',
                           style: const TextStyle(fontSize: 12),
                         ),
-                        value: lockState.autoSyncCoupleData,
+                        value: privacyState.autoSyncCoupleData,
                         onChanged: (val) {
                           ref
-                              .read(vaultLockProvider.notifier)
+                              .read(privacySyncProvider.notifier)
                               .toggleAutoSync(val);
                         },
                       ),
@@ -349,14 +352,16 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                               icon: Icons.check_circle_rounded,
                               iconColor: const Color(0xFF059669),
                               title: 'Shared by Default:',
-                              description: 'Lab reports, doctor medicines, vitals analysis & shared pregnancy milestones are visible to both partners for unified care.',
+                              description:
+                                  'Lab reports, doctor medicines, vitals analysis & shared pregnancy milestones are visible to both partners for unified care.',
                             ),
                             const SizedBox(height: 12),
                             _buildRuleRow(
                               icon: Icons.shield_rounded,
                               iconColor: const Color(0xFFE11D48),
                               title: 'Strictly Private by Default:',
-                              description: 'Personal emotional reflections, private AI advisor chats, and locked vault photos remain on your personal device unless explicitly opted into sharing.',
+                              description:
+                                  'Personal emotional reflections, private AI advisor chats, and locked vault photos remain on your personal device unless explicitly opted into sharing.',
                             ),
                           ],
                         ),
@@ -367,7 +372,7 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
 
                 const SizedBox(height: 20),
 
-                // 5. Explicit Partner Data-Sharing Controls & Toggles
+                // 6. Explicit Partner Data-Sharing Controls & Toggles
                 _buildSectionTitle('Partner Data-Sharing Defaults & Controls'),
                 const SizedBox(height: 8),
                 Card(
@@ -457,7 +462,7 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                             const SizedBox(width: 8),
                             _buildSharingBadge(
                               isDefaultShared: true,
-                              isActive: lockState.shareLabReports,
+                              isActive: privacyState.shareLabReports,
                             ),
                           ],
                         ),
@@ -465,10 +470,10 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           'Share CBC, ultrasound scans, urinalysis & verified doctor reports',
                           style: TextStyle(fontSize: 12),
                         ),
-                        value: lockState.shareLabReports,
+                        value: privacyState.shareLabReports,
                         onChanged: (val) {
                           ref
-                              .read(vaultLockProvider.notifier)
+                              .read(privacySyncProvider.notifier)
                               .toggleShareLabReports(val);
                         },
                       ),
@@ -504,7 +509,7 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                             const SizedBox(width: 8),
                             _buildSharingBadge(
                               isDefaultShared: true,
-                              isActive: lockState.shareMedicineReminders,
+                              isActive: privacyState.shareMedicineReminders,
                             ),
                           ],
                         ),
@@ -512,10 +517,10 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           'Synchronize daily supplements & adherence (IFA, Calcium, Inositol)',
                           style: TextStyle(fontSize: 12),
                         ),
-                        value: lockState.shareMedicineReminders,
+                        value: privacyState.shareMedicineReminders,
                         onChanged: (val) {
                           ref
-                              .read(vaultLockProvider.notifier)
+                              .read(privacySyncProvider.notifier)
                               .toggleShareMedicineReminders(val);
                         },
                       ),
@@ -551,7 +556,7 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                             const SizedBox(width: 8),
                             _buildSharingBadge(
                               isDefaultShared: true,
-                              isActive: lockState.shareTrendAnalysis,
+                              isActive: privacyState.shareTrendAnalysis,
                             ),
                           ],
                         ),
@@ -559,10 +564,10 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           'Share blood pressure records, weight progression & cycle trends',
                           style: TextStyle(fontSize: 12),
                         ),
-                        value: lockState.shareTrendAnalysis,
+                        value: privacyState.shareTrendAnalysis,
                         onChanged: (val) {
                           ref
-                              .read(vaultLockProvider.notifier)
+                              .read(privacySyncProvider.notifier)
                               .toggleShareTrendAnalysis(val);
                         },
                       ),
@@ -598,7 +603,7 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                             const SizedBox(width: 8),
                             _buildSharingBadge(
                               isDefaultShared: false,
-                              isActive: lockState.sharePersonalReflections,
+                              isActive: privacyState.sharePersonalReflections,
                             ),
                           ],
                         ),
@@ -606,10 +611,10 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           'Private by default. Opt in to allow partner to read your personal reflections',
                           style: TextStyle(fontSize: 12),
                         ),
-                        value: lockState.sharePersonalReflections,
+                        value: privacyState.sharePersonalReflections,
                         onChanged: (val) {
                           ref
-                              .read(vaultLockProvider.notifier)
+                              .read(privacySyncProvider.notifier)
                               .toggleSharePersonalReflections(val);
                         },
                       ),
@@ -645,7 +650,7 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                             const SizedBox(width: 8),
                             _buildSharingBadge(
                               isDefaultShared: false,
-                              isActive: lockState.sharePrivateAiChats,
+                              isActive: privacyState.sharePrivateAiChats,
                             ),
                           ],
                         ),
@@ -653,10 +658,10 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           'Private by default. Opt in to share confidential AI emotional companion chat sessions',
                           style: TextStyle(fontSize: 12),
                         ),
-                        value: lockState.sharePrivateAiChats,
+                        value: privacyState.sharePrivateAiChats,
                         onChanged: (val) {
                           ref
-                              .read(vaultLockProvider.notifier)
+                              .read(privacySyncProvider.notifier)
                               .toggleSharePrivateAiChats(val);
                         },
                       ),
@@ -692,7 +697,7 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                             const SizedBox(width: 8),
                             _buildSharingBadge(
                               isDefaultShared: false,
-                              isActive: lockState.shareQuizPartnerHints,
+                              isActive: privacyState.shareQuizPartnerHints,
                             ),
                           ],
                         ),
@@ -700,10 +705,10 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           'Private by default. Opt in to display gentle caring hints from check-in quizzes',
                           style: TextStyle(fontSize: 12),
                         ),
-                        value: lockState.shareQuizPartnerHints,
+                        value: privacyState.shareQuizPartnerHints,
                         onChanged: (val) {
                           ref
-                              .read(vaultLockProvider.notifier)
+                              .read(privacySyncProvider.notifier)
                               .toggleShareQuizPartnerHints(val);
                         },
                       ),
@@ -733,7 +738,7 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                           ),
                           onPressed: () {
                             ref
-                                .read(vaultLockProvider.notifier)
+                                .read(privacySyncProvider.notifier)
                                 .resetSharingDefaults();
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -792,100 +797,65 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
     );
   }
 
-  Widget _buildLockStatusHeader(VaultLockState lockState) {
-    final isLocked = lockState.isLocked;
-    final isEnabled = lockState.appLockEnabled;
-
+  Widget _buildLockStatusHeader(AppSecurityService securityService) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isLocked
-            ? const Color(0xFFFFF1F2)
-            : (isEnabled ? const Color(0xFFECFDF5) : Colors.white),
+        color: const Color(0xFFECFDF5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isLocked
-              ? const Color(0xFFFDA4AF)
-              : (isEnabled ? const Color(0xFFA7F3D0) : AppTheme.borderLight),
-        ),
+        border: Border.all(color: const Color(0xFFA7F3D0)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isLocked
-                  ? const Color(0xFFFFE4E6)
-                  : (isEnabled
-                        ? const Color(0xFFD1FAE5)
-                        : const Color(0xFFF1F5F9)),
+            decoration: const BoxDecoration(
+              color: Color(0xFFD1FAE5),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              isLocked
-                  ? Icons.lock_rounded
-                  : (isEnabled
-                        ? Icons.verified_user_rounded
-                        : Icons.lock_open_rounded),
-              color: isLocked
-                  ? const Color(0xFFBE123C)
-                  : (isEnabled
-                        ? const Color(0xFF059669)
-                        : const Color(0xFF64748B)),
+            child: const Icon(
+              Icons.verified_user_rounded,
+              color: Color(0xFF059669),
               size: 26,
             ),
           ),
           const SizedBox(width: 14),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isLocked
-                      ? 'App State: Locked'
-                      : (isEnabled ? 'App Lock: Active' : 'App Lock: Off'),
+                  'App Lock: Active',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: isLocked
-                        ? const Color(0xFF881337)
-                        : (isEnabled
-                              ? const Color(0xFF065F46)
-                              : AppTheme.textDark),
+                    color: Color(0xFF065F46),
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
-                  isLocked
-                      ? 'PIN is required to view locked items. Tap "Unlock" below.'
-                      : (isEnabled
-                            ? 'Protected with 4-digit PIN (${lockState.pinCode})'
-                            : 'Turn on PIN protection to safeguard confidential memories.'),
+                  'Secured by Riddhi\'s AppLockGate & Local Biometric Authenticator (5m timeout).',
                   style: TextStyle(
                     fontSize: 12,
-                    color: isLocked
-                        ? const Color(0xFF9F1239)
-                        : (isEnabled
-                              ? const Color(0xFF047857)
-                              : AppTheme.textMuted),
+                    color: Color(0xFF047857),
                   ),
                 ),
               ],
             ),
           ),
-          if (isLocked)
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBE123C),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFBE123C),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 8,
               ),
-              onPressed: () => _showUnlockPinDialog(context),
-              child: const Text('Unlock'),
             ),
+            onPressed: () => securityService.lock(),
+            icon: const Icon(Icons.lock_rounded, size: 16),
+            label: const Text('Lock Now'),
+          ),
         ],
       ),
     );
@@ -939,221 +909,6 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  void _showUnlockPinDialog(BuildContext context) {
-    final pinController = TextEditingController();
-    String? localError;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          final lockState = ref.watch(vaultLockProvider);
-
-          return AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.shield_rounded, color: AppTheme.primaryTeal),
-                SizedBox(width: 10),
-                Text('Enter Security PIN', style: TextStyle(fontSize: 18)),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Enter your 4-digit PIN to unlock the app and access private records.',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF475569)),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: pinController,
-                  autofocus: true,
-                  keyboardType: TextInputType.number,
-                  obscureText: true,
-                  maxLength: 4,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    letterSpacing: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  decoration: InputDecoration(
-                    counterText: '',
-                    hintText: '••••',
-                    errorText: localError,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Default PIN is 1234 (current: ${lockState.pinCode})',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppTheme.textMuted,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  ref.read(vaultLockProvider.notifier).resetPinToDefault();
-                  pinController.text = '1234';
-                  setDialogState(() {
-                    localError = null;
-                  });
-                },
-                child: const Text('Reset to 1234'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final entered = pinController.text.trim();
-                  final success = ref
-                      .read(vaultLockProvider.notifier)
-                      .verifyAndUnlock(entered);
-                  if (success) {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('App successfully unlocked!'),
-                        backgroundColor: Color(0xFF059669),
-                      ),
-                    );
-                  } else {
-                    setDialogState(() {
-                      localError = 'Incorrect PIN. Try 1234.';
-                    });
-                  }
-                },
-                child: const Text('Unlock'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _showChangePinDialog(BuildContext context, VaultLockState lockState) {
-    final currentPinController = TextEditingController();
-    final newPinController = TextEditingController();
-    final confirmPinController = TextEditingController();
-    String? localError;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          return AlertDialog(
-            title: const Text(
-              'Update 4-Digit PIN',
-              style: TextStyle(fontSize: 18),
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: currentPinController,
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
-                    maxLength: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'Current PIN',
-                      hintText: 'e.g. 1234',
-                      counterText: '',
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: newPinController,
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
-                    maxLength: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'New 4-Digit PIN',
-                      hintText: 'e.g. 5678',
-                      counterText: '',
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: confirmPinController,
-                    keyboardType: TextInputType.number,
-                    obscureText: true,
-                    maxLength: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'Confirm New PIN',
-                      hintText: 'Re-enter new PIN',
-                      counterText: '',
-                    ),
-                  ),
-                  if (localError != null) ...[
-                    const SizedBox(height: 10),
-                    Text(
-                      localError!,
-                      style: const TextStyle(
-                        color: AppTheme.errorRed,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final cur = currentPinController.text.trim();
-                  final n1 = newPinController.text.trim();
-                  final n2 = confirmPinController.text.trim();
-
-                  if (cur != lockState.pinCode) {
-                    setDialogState(() {
-                      localError =
-                          'Current PIN is incorrect (hint: ${lockState.pinCode}).';
-                    });
-                    return;
-                  }
-                  if (n1.length != 4 || int.tryParse(n1) == null) {
-                    setDialogState(() {
-                      localError = 'New PIN must be exactly 4 numeric digits.';
-                    });
-                    return;
-                  }
-                  if (n1 != n2) {
-                    setDialogState(() {
-                      localError = 'New PIN and confirmation do not match.';
-                    });
-                    return;
-                  }
-
-                  final success = ref
-                      .read(vaultLockProvider.notifier)
-                      .updatePin(currentPin: cur, newPin: n1);
-                  if (success) {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('PIN successfully changed to $n1.'),
-                        backgroundColor: AppTheme.primaryTeal,
-                      ),
-                    );
-                  }
-                },
-                child: const Text('Save PIN'),
-              ),
-            ],
-          );
-        },
-      ),
     );
   }
 

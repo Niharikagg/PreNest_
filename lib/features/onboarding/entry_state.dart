@@ -89,7 +89,7 @@ class EntryState {
     this.partnerCode,
     this.isPaired = false,
     this.errorMessage,
-    this.generatedInviteCode = 'PN2026',
+    this.generatedInviteCode,
     this.inviteActive = true,
     this.partnerIntake,
   });
@@ -165,18 +165,17 @@ class EntryNotifier extends Notifier<EntryState> {
 
   /// Generates a fresh 6-character alphanumeric code and sets inviteActive = true.
   void generateInviteCode() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    final random = Random();
-    final newCode = List.generate(
-      6,
-      (index) => chars[random.nextInt(chars.length)],
-    ).join();
+    final newCode = CoupleNotifier.generate6CharPartnerCode();
 
     state = state.copyWith(
       generatedInviteCode: newCode,
       inviteActive: true,
       clearError: true,
     );
+
+    try {
+      ref.read(coupleProvider.notifier).setPartnerInviteCode(newCode);
+    } catch (_) {}
   }
 
   /// Clears generatedInviteCode / partnerCode, sets inviteActive = false, isPaired = false.

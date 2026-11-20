@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'app/providers.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
 import 'core/security/app_security_service.dart';
@@ -37,14 +38,19 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'PreNest',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      routerConfig: appRouter,
-      builder: (context, child) => AppLockGate(
-        securityService: _securityService,
-        child: child ?? const SizedBox.shrink(),
+    return ProviderScope(
+      overrides: [
+        appSecurityServiceProvider.overrideWithValue(_securityService),
+      ],
+      child: MaterialApp.router(
+        title: 'PreNest',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        routerConfig: appRouter,
+        builder: (context, child) => AppLockGate(
+          securityService: _securityService,
+          child: child ?? const SizedBox.shrink(),
+        ),
       ),
     );
   }

@@ -289,16 +289,9 @@ const List<CoupleQuizQuestion> kCoupleQuizCatalog = [
 class CoupleHintsNotifier extends Notifier<CoupleHintsState> {
   @override
   CoupleHintsState build() {
-    return CoupleHintsState(
-      activeSmartHint: SmartPartnerHint(
-        id: 'hint_seed_001',
-        fromPartnerId: 'partner_priya',
-        fromPartnerName: 'Priya',
-        hintText: "She's leaning toward quiet rest & help with meals—offering to take care of dinner or giving her a calm wind-down tonight could mean a lot.",
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        isAcknowledged: false,
-      ),
-      checkupReminders: const [
+    return const CoupleHintsState(
+      activeSmartHint: null,
+      checkupReminders: [
         PartnerCheckupReminder(
           id: 'chk_anc_prep',
           title: 'Prepare 3 priority questions for the upcoming doctor visit together',

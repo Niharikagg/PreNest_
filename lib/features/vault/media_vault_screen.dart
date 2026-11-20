@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/providers.dart';
 import '../../app/theme.dart';
 import '../profile/profile_provider.dart';
-import '../security/vault_lock_provider.dart';
 import '../stage/stage.dart';
 import '../stage/stage_provider.dart';
 import 'media_vault_provider.dart';
@@ -25,7 +25,6 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
     final categoryFilter = ref.watch(vaultCategoryFilterProvider);
     final sharingFilter = ref.watch(vaultSharingFilterProvider);
     final couple = ref.watch(coupleProvider);
-    final lockState = ref.watch(vaultLockProvider);
     final activeStage = ref.watch(stageProvider);
     final theme = Theme.of(context);
 
@@ -53,13 +52,9 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
         actions: [
           IconButton(
             tooltip: 'Security & Lock Settings',
-            icon: Icon(
-              lockState.appLockEnabled
-                  ? Icons.lock_rounded
-                  : Icons.lock_open_rounded,
-              color: lockState.appLockEnabled
-                  ? AppTheme.primaryTeal
-                  : AppTheme.textMuted,
+            icon: const Icon(
+              Icons.shield_rounded,
+              color: AppTheme.primaryTeal,
             ),
             onPressed: () => context.push('/privacy-sync'),
           ),
@@ -99,7 +94,6 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
                             context: context,
                             item: item,
                             couple: couple,
-                            lockState: lockState,
                           );
                         },
                       ),
@@ -369,10 +363,9 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
     required BuildContext context,
     required VaultMediaItem item,
     required CoupleState couple,
-    required VaultLockState lockState,
   }) {
     final theme = Theme.of(context);
-    final isLockedLocked = item.isLocked && lockState.appLockEnabled;
+    final isLockedLocked = item.isLocked;
 
     final Color badgeColor;
     final Color badgeBg;
@@ -410,7 +403,7 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () => _handleItemTap(context, item, lockState),
+        onTap: () => _handleItemTap(context, item),
         child: Padding(
           padding: const EdgeInsets.all(14.0),
           child: Row(
@@ -623,94 +616,20 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
     );
   }
 
-  void _handleItemTap(
+  Future<void> _handleItemTap(
     BuildContext context,
     VaultMediaItem item,
-    VaultLockState lockState,
-  ) {
-    if (item.isLocked && lockState.appLockEnabled) {
-      // Require unlock PIN
-      _showPinUnlockModal(context, item);
-    } else {
+  ) async {
+    if (item.isLocked) {
+      final security = ref.read(appSecurityServiceProvider);
+      final unlocked = await security.authenticate(
+        reason: 'Authenticate to view locked keepsake',
+      );
+      if (!unlocked || !mounted) return;
+    }
+    if (mounted) {
       _showItemDetailSheet(context, item);
     }
-  }
-
-  void _showPinUnlockModal(BuildContext context, VaultMediaItem item) {
-    final pinController = TextEditingController();
-    String? localError;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          return AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.lock_rounded, color: AppTheme.primaryTeal),
-                SizedBox(width: 10),
-                Text('Unlock Keepsake', style: TextStyle(fontSize: 17)),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Enter your 4-digit PIN to access "${item.title}". (Default PIN: 1234)',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF475569),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                TextField(
-                  controller: pinController,
-                  autofocus: true,
-                  keyboardType: TextInputType.number,
-                  obscureText: true,
-                  maxLength: 4,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    letterSpacing: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  decoration: InputDecoration(
-                    counterText: '',
-                    hintText: '••••',
-                    errorText: localError,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final entered = pinController.text.trim();
-                  final success = ref
-                      .read(vaultLockProvider.notifier)
-                      .verifyAndUnlock(entered);
-                  if (success) {
-                    Navigator.pop(ctx);
-                    _showItemDetailSheet(context, item);
-                  } else {
-                    setDialogState(() {
-                      localError = 'Incorrect PIN. Try default 1234.';
-                    });
-                  }
-                },
-                child: const Text('Unlock'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
   }
 
   void _showItemDetailSheet(BuildContext context, VaultMediaItem currentItem) {

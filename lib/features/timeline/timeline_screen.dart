@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -635,6 +636,109 @@ class TimelineScreen extends ConsumerWidget {
 
   static Widget _buildCircularQuickActions({
     required BuildContext context,
+  }) {
+    const quickActions = [
+      (
+        title: 'Scan Report',
+        icon: Icons.document_scanner_rounded,
+        accentColor: Color(0xFF0F766E),
+        containerColor: Color(0xFFCCFBF1),
+        route: '/verify',
+      ),
+      (
+        title: 'Danger Signs',
+        icon: Icons.warning_amber_rounded,
+        accentColor: Color(0xFFDC2626),
+        containerColor: Color(0xFFFEE2E2),
+        route: '/danger-signs',
+      ),
+      (
+        title: 'Vitals Log',
+        icon: Icons.monitor_heart_rounded,
+        accentColor: Color(0xFF0284C7),
+        containerColor: Color(0xFFE0F2FE),
+        route: '/vitals',
+      ),
+      (
+        title: 'AI Advisor',
+        icon: Icons.support_agent_rounded,
+        accentColor: Color(0xFF7C3AED),
+        containerColor: Color(0xFFF3E8FF),
+        route: '/advisor',
+      ),
+    ];
+
+    return Card(
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: AppTheme.borderLight),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: quickActions.map((item) {
+            return InkWell(
+              onTap: () => context.push(item.route),
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: item.containerColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: item.accentColor.withOpacity(0.25),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: item.accentColor.withOpacity(0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        item.icon,
+                        color: item.accentColor,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    SizedBox(
+                      width: 72,
+                      child: Text(
+                        item.title,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  static Widget _oldBuildCircularQuickActions({
+    required BuildContext context,
     required List<ModeShortcutItem> items,
   }) {
     final isScrollable = items.length > 4;
@@ -1089,7 +1193,7 @@ class TimelineScreen extends ConsumerWidget {
     final couple = ref.watch(coupleProvider);
     final currentStage = ref.watch(stageProvider);
     final currentLang = ref.watch(languageProvider);
-    final lockState = ref.watch(vaultLockProvider);
+    final lockState = ref.watch(privacySyncProvider);
     final entryState = ref.watch(entryProvider);
     final modeState = ref.watch(modeSelectionProvider);
     final activePartner = couple.activePartner;
@@ -1567,7 +1671,7 @@ class TimelineScreen extends ConsumerWidget {
                 const SizedBox(height: 14),
 
                 // STEP 3: 4 Circular Quick-Action Buttons
-                _buildCircularQuickActions(context: context, items: shortcuts),
+                _buildCircularQuickActions(context: context),
                 const SizedBox(height: 14),
 
                 // Role-Badged Story Cards (You / Both / Her) for Partner Dashboard

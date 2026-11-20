@@ -79,6 +79,82 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
     super.dispose();
   }
 
+  Future<void> _scanDocument() async {
+    try {
+      final scanner = ref.read(documentScannerServiceProvider);
+      final scanResult = await scanner.scanDocument();
+
+      if (!mounted) return;
+
+      if (scanResult == null) {
+        // Scanning was cancelled by user
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Document scanning cancelled.'),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+
+      // Check capture quality checks
+      if (scanResult.qualityResult != null &&
+          !scanResult.qualityResult!.isAcceptable) {
+        final reasons = scanResult.qualityResult!.failureReasons.join('\n');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Capture rejected:\n$reasons'),
+            backgroundColor: const Color(0xFFBE123C),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Camera Fallback',
+              textColor: Colors.white,
+              onPressed: () => _pickImage(ImageSource.camera),
+            ),
+          ),
+        );
+        return;
+      }
+
+      if (scanResult.images.isNotEmpty) {
+        final imageFile = scanResult.images.first;
+        final Uint8List bytes = await imageFile.readAsBytes();
+        if (!mounted) return;
+
+        final controller = ref.read(verifyControllerProvider.notifier);
+        await controller.extractFromImage(path: imageFile.path, bytes: bytes);
+        return;
+      }
+
+      // No image produced; fallback gracefully to camera picker
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No scanned image was returned. Opening camera fallback...',
+          ),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      await _pickImage(ImageSource.camera);
+    } catch (e) {
+      debugPrint(
+        '[VerifyScreen] Document scanner unavailable or failed: $e. Falling back to camera...',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Scanner unavailable ($e). Falling back to camera...'),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      await _pickImage(ImageSource.camera);
+    }
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? picked = await _picker.pickImage(
@@ -374,6 +450,24 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
                   runSpacing: 6,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
+                    FilledButton.icon(
+                      onPressed: _scanDocument,
+                      icon: const Icon(Icons.document_scanner, size: 16),
+                      label: const Text('Scan Document'),
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        backgroundColor: const Color(0xFF0F766E),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                     OutlinedButton.icon(
                       onPressed: () => _pickImage(ImageSource.gallery),
                       icon: const Icon(Icons.photo_library_outlined, size: 16),

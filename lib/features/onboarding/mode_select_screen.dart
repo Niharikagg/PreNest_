@@ -3,44 +3,37 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
+import '../profile/profile_provider.dart';
 import '../stage/stage_provider.dart';
+import 'entry_state.dart';
 import 'mode_selection_state.dart';
 
-/// Configuration data for each journey mode card.
-class JourneyModeConfig {
+/// Presentation data for the 2x2 stage grid cards.
+class _StageCardInfo {
   final PreNestMode mode;
   final String title;
-  final String badge;
-  final String description;
-  final List<String> features;
+  final String subtitle;
   final IconData icon;
   final Color accentColor;
   final Color containerColor;
-  final List<String> sampleNotes;
-  final String notePlaceholder;
+  final Color borderColor;
 
-  const JourneyModeConfig({
+  const _StageCardInfo({
     required this.mode,
     required this.title,
-    required this.badge,
-    required this.description,
-    required this.features,
+    required this.subtitle,
     required this.icon,
     required this.accentColor,
     required this.containerColor,
-    required this.sampleNotes,
-    required this.notePlaceholder,
+    required this.borderColor,
   });
 }
 
-/// Enhanced Material 3 mode selection screen for PreNest at /onboarding/mode.
-/// Displays clear cards for the 4 core modes:
-/// 1. Period Tracker (PCOD/PCOS)
-/// 2. Planning for Pregnancy
-/// 3. Pregnant
-/// 4. Postpartum
-/// Includes mode-specific quick setup (e.g. irregular-cycle toggle, milestone notes)
-/// and a primary action that saves state and navigates to /timeline.
+/// Collect-first Onboarding setup flow for her ("For myself"):
+/// 1. Her Name (text field)
+/// 2. 2x2 Pastel Stage Grid (Period Tracker, Planning, Pregnant, Postpartum)
+/// 3. Key Date Screen (Last Period Date / Due Date / Delivery Date) with DatePicker & "Skip for now"
+/// 4. Generates a clean 6-character partner code (stored in her profile state) and routes to /timeline.
 class ModeSelectScreen extends ConsumerStatefulWidget {
   const ModeSelectScreen({super.key});
 
@@ -49,622 +42,740 @@ class ModeSelectScreen extends ConsumerStatefulWidget {
 }
 
 class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
-  late PreNestMode _currentMode;
-  late bool _irregularCycleMode;
-  late TextEditingController _noteController;
+  int _currentStep = 0; // 0: Name, 1: Stage Grid, 2: Key Date
+  final TextEditingController _nameController = TextEditingController();
+  PreNestMode _selectedMode = PreNestMode.pregnant;
+  DateTime? _selectedDate;
+  String? _nameError;
 
-  static const List<JourneyModeConfig> _configs = [
-    JourneyModeConfig(
+  static const List<_StageCardInfo> _stageCards = [
+    _StageCardInfo(
       mode: PreNestMode.periodTracker,
-      title: 'Period Tracker (PCOD/PCOS)',
-      badge: 'Cycle & Hormones',
-      description: 'Cycle, flow, symptoms, irregular-cycle mode (no stressful "late" alerts), and PCOD/PCOS support.',
-      features: [
-        'Stress-free irregular cycle mode (no "late" alerts)',
-        'Flow, ovulation window & basal temperature tracking',
-        'PCOD/PCOS hormonal balance & symptom logging',
-        'Cramps, mood, acne & lifestyle pattern insights',
-      ],
+      title: 'Period Tracker',
+      subtitle: 'Cycle, symptoms & PCOD/PCOS',
       icon: Icons.water_drop_rounded,
       accentColor: Color(0xFFE11D48), // Rose
       containerColor: Color(0xFFFFE4E6),
-      sampleNotes: [
-        'Irregular cycle (35-45 days)',
-        'PCOD diagnosed • Mild symptoms',
-        'LMP: 2 weeks ago',
-      ],
-      notePlaceholder: 'e.g., Irregular 35-day cycle or last period date',
+      borderColor: Color(0xFFFECDD3),
     ),
-    JourneyModeConfig(
+    _StageCardInfo(
       mode: PreNestMode.planningPregnancy,
       title: 'Planning for Pregnancy',
-      badge: 'Pre-Conception',
-      description: 'Preconception prep & actively trying ("For Her" & "For Him" checklists, fertility & habit tracking).',
-      features: [
-        'Shared "For Her" & "For Him" preconception checklists',
-        'Folic acid, micronutrients & preconception lab baselines',
-        'Fertility window & ovulation readiness tracking',
-        'Partner habit alignment & stress-reduction routines',
-      ],
+      subtitle: 'Preconception health & habits',
       icon: Icons.spa_rounded,
       accentColor: Color(0xFF0F766E), // Teal
       containerColor: Color(0xFFCCFBF1),
-      sampleNotes: [
-        'Actively trying (Month 2)',
-        'Preconception prep & lab baselines',
-        'Focus on folic acid & nutrition',
-      ],
-      notePlaceholder: 'e.g., Actively trying or pre-conception nutrition prep',
+      borderColor: Color(0xFF99F6E4),
     ),
-    JourneyModeConfig(
+    _StageCardInfo(
       mode: PreNestMode.pregnant,
       title: 'Pregnant',
-      badge: 'Trimester Care',
-      description: 'Week-by-week journey, ANC planner, Danger-Sign Checker (108), Vitals, Kick Counter & Birth Plan.',
-      features: [
-        'Week-by-week fetal development & clinical milestones',
-        'ANC visit schedule & ultrasound scan tracker',
-        'Danger-Sign Checker with immediate 108 emergency triage',
-        'Maternal Vitals (BP, Weight), Kick Counter & Birth Plan',
-      ],
+      subtitle: 'Week-by-week & ANC care',
       icon: Icons.child_care_rounded,
-      accentColor: Color(0xFF0284C7), // Sky/Blue
+      accentColor: Color(0xFF0284C7), // Sky
       containerColor: Color(0xFFE0F2FE),
-      sampleNotes: [
-        'Week 16 (Second Trimester)',
-        'Due Date: November 2026',
-        'First-time pregnancy',
-      ],
-      notePlaceholder: 'e.g., Current week (e.g. W14) or Estimated Due Date',
+      borderColor: Color(0xFFBAE6FD),
     ),
-    JourneyModeConfig(
+    _StageCardInfo(
       mode: PreNestMode.postpartum,
       title: 'Postpartum',
-      badge: 'Fourth Trimester',
-      description: 'Recovery checklist, EPDS mood check (Tele-MANAS 14416), newborn UIP vaccines & partner support.',
-      features: [
-        'Maternal healing checklist & postnatal warning signs',
-        'EPDS mental wellness check & Tele-MANAS (14416) support',
-        'Universal Immunization Programme (UIP) infant vaccines',
-        'Partner postpartum care & feeding support logs',
-      ],
+      subtitle: 'Recovery & newborn milestones',
       icon: Icons.family_restroom_rounded,
       accentColor: Color(0xFFD97706), // Amber
       containerColor: Color(0xFFFEF3C7),
-      sampleNotes: [
-        '3 weeks postpartum (Normal delivery)',
-        'Baby 2 months old • UIP Vaccine due',
-        'Focus on healing & emotional health',
-      ],
-      notePlaceholder:
-          'e.g., Baby age (e.g. 4 weeks) or birth type/recovery note',
+      borderColor: Color(0xFFFDE68A),
     ),
   ];
 
   @override
   void initState() {
     super.initState();
-    final modeState = ref.read(modeSelectionProvider);
-    final currentStage = ref.read(stageProvider);
-    _currentMode =
-        modeState.selectedMode ?? PreNestMode.fromStage(currentStage);
-    _irregularCycleMode = modeState.irregularCycleMode;
-    _noteController = TextEditingController(
-      text: modeState.timelineOrMilestoneNote ?? '',
-    );
+    // Default estimated date to 20 weeks ahead for pregnancy, or 2 weeks ago for cycle
+    _selectedDate = DateTime.now().add(const Duration(days: 140));
   }
 
   @override
   void dispose() {
-    _noteController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
-  void _onSelectModeCard(PreNestMode mode) {
+  void _onNameSubmitted() {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      setState(() {
+        _nameError = 'Please enter your name to personalize your care.';
+      });
+      return;
+    }
     setState(() {
-      _currentMode = mode;
+      _nameError = null;
+      _currentStep = 1;
     });
   }
 
-  void _saveAndProceed() {
-    final notifier = ref.read(modeSelectionProvider.notifier);
-    notifier.selectMode(_currentMode);
-    notifier.setIrregularCycleMode(_irregularCycleMode);
-    notifier.setMilestoneNote(_noteController.text);
+  void _onStageSelected(PreNestMode mode) {
+    setState(() {
+      _selectedMode = mode;
+      // Adjust default suggested date
+      switch (mode) {
+        case PreNestMode.periodTracker:
+          _selectedDate = DateTime.now().subtract(const Duration(days: 12));
+          break;
+        case PreNestMode.planningPregnancy:
+          _selectedDate = DateTime.now().subtract(const Duration(days: 14));
+          break;
+        case PreNestMode.pregnant:
+          _selectedDate = DateTime.now().add(const Duration(days: 140));
+          break;
+        case PreNestMode.postpartum:
+          _selectedDate = DateTime.now().subtract(const Duration(days: 21));
+          break;
+      }
+      _currentStep = 2;
+    });
+  }
 
-    final selectedConfig = _configs.firstWhere(
-      (cfg) => cfg.mode == _currentMode,
+  Future<void> _pickKeyDate() async {
+    final now = DateTime.now();
+    DateTime firstDate;
+    DateTime lastDate;
+
+    switch (_selectedMode) {
+      case PreNestMode.periodTracker:
+      case PreNestMode.planningPregnancy:
+        firstDate = now.subtract(const Duration(days: 90));
+        lastDate = now;
+        break;
+      case PreNestMode.pregnant:
+        firstDate = now.subtract(const Duration(days: 280));
+        lastDate = now.add(const Duration(days: 280));
+        break;
+      case PreNestMode.postpartum:
+        firstDate = now.subtract(const Duration(days: 365));
+        lastDate = now;
+        break;
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate != null &&
+              _selectedDate!.isAfter(firstDate) &&
+              _selectedDate!.isBefore(lastDate)
+          ? _selectedDate!
+          : now,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      helpText: _getDatePickerHelpText(),
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Switched to ${selectedConfig.title}'),
-        backgroundColor: selectedConfig.accentColor,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-
-    if (_currentMode == PreNestMode.planningPregnancy) {
-      context.go('/onboarding/planning-intake');
-    } else {
-      context.go('/onboarding/finale');
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
     }
   }
 
-  Widget _buildModeGridCard(JourneyModeConfig config, BuildContext context) {
-    final isSelected = _currentMode == config.mode;
-    final theme = Theme.of(context);
+  String _getDatePickerHelpText() {
+    switch (_selectedMode) {
+      case PreNestMode.periodTracker:
+        return 'Select Last Period Date (LMP)';
+      case PreNestMode.planningPregnancy:
+        return 'Select Last Period or Target Date';
+      case PreNestMode.pregnant:
+        return 'Select Estimated Due Date (EDD)';
+      case PreNestMode.postpartum:
+        return 'Select Delivery Date';
+    }
+  }
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _onSelectModeCard(config.mode),
-        borderRadius: BorderRadius.circular(20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? config.containerColor.withOpacity(0.35)
-                : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? config.accentColor : AppTheme.borderLight,
-              width: isSelected ? 2.0 : 1.0,
-            ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: config.accentColor.withOpacity(0.12),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Row: Soft Pastel Circular Icon Badge & Selection Indicator
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isSelected
-                          ? config.accentColor
-                          : config.containerColor,
-                    ),
-                    child: Icon(
-                      config.icon,
-                      size: 22,
-                      color: isSelected ? Colors.white : config.accentColor,
-                    ),
-                  ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isSelected
-                          ? config.accentColor
-                          : Colors.transparent,
-                      border: Border.all(
-                        color: isSelected
-                            ? config.accentColor
-                            : AppTheme.borderLight,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: isSelected
-                        ? const Icon(
-                            Icons.check_rounded,
-                            size: 14,
-                            color: Colors.white,
-                          )
-                        : null,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
+  String _getKeyDateTitle() {
+    switch (_selectedMode) {
+      case PreNestMode.periodTracker:
+        return 'When did your last period start?';
+      case PreNestMode.planningPregnancy:
+        return 'When was your last period or target start date?';
+      case PreNestMode.pregnant:
+        return 'What is your estimated due date (EDD)?';
+      case PreNestMode.postpartum:
+        return 'When was your baby delivered?';
+    }
+  }
 
-              // Mode Title
-              Text(
-                config.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14.5,
-                  height: 1.25,
-                  color: isSelected ? config.accentColor : AppTheme.textDark,
-                ),
-              ),
-              const SizedBox(height: 4),
+  String _getKeyDateSubtitle() {
+    switch (_selectedMode) {
+      case PreNestMode.periodTracker:
+        return 'Helps predict cycle rhythm, safe follicular window, and ovulatory timing without late alerts.';
+      case PreNestMode.planningPregnancy:
+        return 'Helps tailor preconception habit milestones, folic acid streaks, and baseline lab tracking.';
+      case PreNestMode.pregnant:
+        return 'Calculates week-by-week fetal growth, ANC scan windows, and trimester milestones.';
+      case PreNestMode.postpartum:
+        return 'Guides newborn immunization (UIP) dates, EPDS mood checkups, and maternal healing.';
+    }
+  }
 
-              // 1-Line Subtitle
-              Text(
-                config.description,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textMuted,
-                  fontSize: 11.5,
-                ),
-              ),
-              const SizedBox(height: 10),
+  void _finishOnboarding({bool skipDate = false}) {
+    final name = _nameController.text.trim();
+    final effectiveDate = skipDate ? null : _selectedDate;
 
-              // Badge Pill
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? config.accentColor.withOpacity(0.15)
-                      : config.containerColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  config.badge,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                    color: config.accentColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
+    // Generate clean 6-character partner code
+    final partnerCode = CoupleNotifier.generate6CharPartnerCode();
+
+    // 1. Save profile state
+    ref.read(coupleProvider.notifier).completeOnboardingForSelf(
+          name: name.isNotEmpty ? name : 'Friend',
+          partnerCode: partnerCode,
+          keyDate: effectiveDate,
+        );
+
+    // 2. Set mode and synchronized stage
+    ref.read(modeSelectionProvider.notifier).selectMode(_selectedMode);
+    ref.read(stageProvider.notifier).setStage(_selectedMode.stage);
+
+    if (effectiveDate != null) {
+      ref.read(modeSelectionProvider.notifier).setMilestoneNote(
+            '${_selectedMode.title} • Date: ${_formatDate(effectiveDate)}',
+          );
+    }
+
+    // 3. Update entry state invite code
+    ref.read(entryProvider.notifier).generateInviteCode();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Welcome to PreNest, ${name.isNotEmpty ? name : "Friend"}! Partner Code: $partnerCode',
         ),
+        backgroundColor: const Color(0xFF0F766E),
+        duration: const Duration(seconds: 3),
       ),
     );
+
+    // Route to /timeline
+    context.go('/timeline');
+  }
+
+  String _formatDate(DateTime d) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${d.day} ${months[d.month - 1]} ${d.year}';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final activeConfig = _configs.firstWhere((cfg) => cfg.mode == _currentMode);
 
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBg,
+      backgroundColor: const Color(0xFFFFFBFB),
       appBar: AppBar(
-        backgroundColor: AppTheme.scaffoldBg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'Back to entry options',
           onPressed: () {
-            if (context.canPop()) {
-              context.pop();
+            if (_currentStep > 0) {
+              setState(() => _currentStep--);
             } else {
               context.go('/onboarding');
             }
           },
         ),
-        title: const Text(
-          'Select Journey Mode',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        title: Text(
+          'Step ${_currentStep + 1} of 3',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF64748B),
+          ),
         ),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 640),
+            constraints: const BoxConstraints(maxWidth: 580),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Header description
-                  Text(
-                    'Where are you right now?',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.textDark,
-                      fontSize: 22,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Choose your active mode to personalize clinical checklists, danger sign alerts, and couple milestones.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textMuted,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // STEP 2: 2×2 Pastel Stage Grid
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _buildModeGridCard(_configs[0], context)),
-                      const SizedBox(width: 12),
-                      Expanded(child: _buildModeGridCard(_configs[1], context)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: _buildModeGridCard(_configs[2], context)),
-                      const SizedBox(width: 12),
-                      Expanded(child: _buildModeGridCard(_configs[3], context)),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Selected Mode Features Summary Banner
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: activeConfig.containerColor.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: activeConfig.accentColor.withOpacity(0.2),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              activeConfig.icon,
-                              size: 16,
-                              color: activeConfig.accentColor,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Includes in ${activeConfig.title}:',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: activeConfig.accentColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        ...activeConfig.features
-                            .take(3)
-                            .map(
-                              (feat) => Padding(
-                                padding: const EdgeInsets.only(bottom: 3),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      size: 14,
-                                      color: activeConfig.accentColor,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        feat,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppTheme.textDark,
-                                          height: 1.3,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Quick-Setup Options for Active Mode
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                      side: BorderSide(
-                        color: activeConfig.accentColor.withOpacity(0.35),
-                        width: 1.2,
-                      ),
-                    ),
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.tune_rounded,
-                                size: 20,
-                                color: activeConfig.accentColor,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '${activeConfig.title} Setup',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                  color: AppTheme.textDark,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Mode-specific toggle: Irregular Cycle Mode for Period Tracker
-                          if (_currentMode == PreNestMode.periodTracker) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFF1F2),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: const Color(0xFFFECDD3),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: const [
-                                        Text(
-                                          'Irregular Cycle Mode (PCOD/PCOS)',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                            color: Color(0xFF9F1239),
-                                          ),
-                                        ),
-                                        SizedBox(height: 2),
-                                        Text(
-                                          'Suppresses stressful "late" alerts and uses flexible prediction windows.',
-                                          style: TextStyle(
-                                            fontSize: 11.5,
-                                            color: Color(0xFF881337),
-                                            height: 1.3,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Switch(
-                                    value: _irregularCycleMode,
-                                    activeColor: const Color(0xFFE11D48),
-                                    onChanged: (val) {
-                                      setState(() {
-                                        _irregularCycleMode = val;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                          ],
-
-                          // Milestone / Timeline Note Input
-                          Text(
-                            'Quick Note or Milestone (Optional)',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.textDark,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: _noteController,
-                            decoration: InputDecoration(
-                              hintText: activeConfig.notePlaceholder,
-                              hintStyle: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey.shade400,
-                              ),
-                              prefixIcon: const Icon(
-                                Icons.edit_calendar_rounded,
-                                size: 20,
-                              ),
-                              suffixIcon: _noteController.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear, size: 18),
-                                      onPressed: () {
-                                        _noteController.clear();
-                                        setState(() {});
-                                      },
-                                    )
-                                  : null,
-                            ),
-                            onChanged: (_) => setState(() {}),
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Quick Sample Chips
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
-                            children: activeConfig.sampleNotes.map((sample) {
-                              return ActionChip(
-                                avatar: const Icon(Icons.add_rounded, size: 14),
-                                label: Text(
-                                  sample,
-                                  style: const TextStyle(fontSize: 11),
-                                ),
-                                onPressed: () {
-                                  _noteController.text = sample;
-                                  setState(() {});
-                                },
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Primary Action Button (Pill-shaped CTA)
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: activeConfig.accentColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: const StadiumBorder(),
-                      elevation: 1,
-                    ),
-                    onPressed: _saveAndProceed,
-                    icon: const Icon(Icons.check_circle_rounded),
-                    label: const Text(
-                      'Save & Continue to Timeline',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Skip / Continue without saving link
-                  Center(
-                    child: TextButton.icon(
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.textMuted,
-                      ),
-                      onPressed: () => context.go('/timeline'),
-                      icon: const Icon(Icons.arrow_forward, size: 16),
-                      label: const Text(
-                        'Continue to Timeline without changing',
-                        style: TextStyle(fontSize: 13),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                child: _buildCurrentStepContent(theme),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCurrentStepContent(ThemeData theme) {
+    switch (_currentStep) {
+      case 0:
+        return _buildNameStep(theme);
+      case 1:
+        return _buildStageGridStep(theme);
+      case 2:
+      default:
+        return _buildKeyDateStep(theme);
+    }
+  }
+
+  // STEP 1: Ask for her Name
+  Widget _buildNameStep(ThemeData theme) {
+    return Column(
+      key: const ValueKey('step_name'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 12),
+        Center(
+          child: Container(
+            width: 64,
+            height: 64,
+            decoration: const BoxDecoration(
+              color: Color(0xFFCCFBF1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.badge_rounded,
+              color: Color(0xFF0F766E),
+              size: 32,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'What should we call you?',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
+            letterSpacing: -0.4,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Your name personalizes your daily health timeline, clinical doctor summary, and care reminders.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: Color(0xFF64748B),
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: 32),
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Color(0xFFE2E8F0)),
+          ),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: TextField(
+              controller: _nameController,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0F172A),
+              ),
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Enter your first name',
+                hintStyle: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontWeight: FontWeight.normal,
+                ),
+                icon: const Icon(
+                  Icons.person_outline_rounded,
+                  color: Color(0xFF0F766E),
+                ),
+                errorText: _nameError,
+              ),
+              onSubmitted: (_) => _onNameSubmitted(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 28),
+        FilledButton(
+          onPressed: _onNameSubmitted,
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF0F766E),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Continue',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(width: 8),
+              Icon(Icons.arrow_forward_rounded, size: 18),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // STEP 2: 2x2 Pastel Stage Grid
+  Widget _buildStageGridStep(ThemeData theme) {
+    final herName = _nameController.text.trim();
+
+    return Column(
+      key: const ValueKey('step_stage_grid'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 8),
+        Text(
+          'Hi $herName, select your journey',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
+            letterSpacing: -0.4,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'PreNest tailors its clinical guidance, vitals trackers, and checklists to your active stage.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: Color(0xFF64748B),
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: 28),
+
+        // 2x2 Pastel Stage Grid
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            childAspectRatio: 0.98,
+          ),
+          itemCount: _stageCards.length,
+          itemBuilder: (context, index) {
+            final card = _stageCards[index];
+            final isSelected = _selectedMode == card.mode;
+
+            return Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _onStageSelected(card.mode),
+                borderRadius: BorderRadius.circular(22),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? card.containerColor.withOpacity(0.4)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: isSelected ? card.accentColor : card.borderColor,
+                      width: isSelected ? 2.2 : 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isSelected
+                            ? card.accentColor.withOpacity(0.14)
+                            : Colors.black.withOpacity(0.02),
+                        blurRadius: isSelected ? 12 : 6,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: card.containerColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: card.borderColor,
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Icon(
+                              card.icon,
+                              color: card.accentColor,
+                              size: 24,
+                            ),
+                          ),
+                          if (isSelected)
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: card.accentColor,
+                              size: 22,
+                            )
+                          else
+                            Icon(
+                              Icons.radio_button_unchecked_rounded,
+                              color: Colors.grey.shade300,
+                              size: 20,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            card.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w800,
+                              color: isSelected
+                                  ? card.accentColor
+                                  : const Color(0xFF0F172A),
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            card.subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: isSelected
+                                  ? card.accentColor.withOpacity(0.85)
+                                  : const Color(0xFF64748B),
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+
+        const SizedBox(height: 24),
+        FilledButton(
+          onPressed: () => _onStageSelected(_selectedMode),
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF0F766E),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Next with ${_selectedMode.title}',
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_forward_rounded, size: 18),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // STEP 3: Key Date Screen with DatePicker & "Skip for now"
+  Widget _buildKeyDateStep(ThemeData theme) {
+    final title = _getKeyDateTitle();
+    final subtitle = _getKeyDateSubtitle();
+
+    return Column(
+      key: const ValueKey('step_key_date'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 8),
+        Center(
+          child: Container(
+            width: 64,
+            height: 64,
+            decoration: const BoxDecoration(
+              color: Color(0xFFE0F2FE),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.calendar_month_rounded,
+              color: Color(0xFF0284C7),
+              size: 32,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
+            letterSpacing: -0.4,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          subtitle,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 13.5,
+            color: Color(0xFF64748B),
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        // Interactive Date Display Card
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Color(0xFFBAE6FD), width: 1.5),
+          ),
+          color: const Color(0xFFF0F9FF),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: _pickKeyDate,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFFBAE6FD)),
+                    ),
+                    child: const Icon(
+                      Icons.event_available_rounded,
+                      color: Color(0xFF0284C7),
+                      size: 26,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Selected Date',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF0284C7),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _selectedDate != null
+                              ? _formatDate(_selectedDate!)
+                              : 'Tap to select date',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.edit_calendar_rounded,
+                    color: Color(0xFF0284C7),
+                    size: 22,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Primary Action: Finish & Enter PreNest
+        FilledButton(
+          onPressed: () => _finishOnboarding(skipDate: false),
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF0F766E),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Complete Setup & Enter PreNest',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(width: 8),
+              Icon(Icons.check_rounded, size: 18),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 14),
+
+        // Secondary Action: Skip for now
+        TextButton(
+          onPressed: () => _finishOnboarding(skipDate: true),
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFF64748B),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+          child: const Text(
+            'Skip for now',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

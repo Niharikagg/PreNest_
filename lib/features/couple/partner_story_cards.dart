@@ -844,7 +844,7 @@ class PartnerStoryCards extends ConsumerWidget {
     final PregnancyStage activeStage = stage ?? ref.watch(stageProvider);
     final couple = ref.watch(coupleProvider);
     final hintsState = ref.watch(coupleHintsProvider);
-    final lockState = ref.watch(vaultLockProvider);
+    final lockState = ref.watch(privacySyncProvider);
 
     // Her name from primary partner
     final herName = couple.primaryPartner.name;
