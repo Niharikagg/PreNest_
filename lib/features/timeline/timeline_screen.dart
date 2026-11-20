@@ -9,6 +9,7 @@ import '../onboarding/entry_state.dart';
 import '../onboarding/mode_selection_state.dart';
 import '../profile/profile_provider.dart';
 import '../reminders/medicine_reminders_provider.dart';
+import '../security/vault_lock_provider.dart';
 import '../stage/checklist_provider.dart';
 import '../stage/stage.dart';
 import '../stage/stage_provider.dart';
@@ -217,6 +218,7 @@ class TimelineScreen extends ConsumerWidget {
     final couple = ref.watch(coupleProvider);
     final currentStage = ref.watch(stageProvider);
     final currentLang = ref.watch(languageProvider);
+    final lockState = ref.watch(vaultLockProvider);
     final entryState = ref.watch(entryProvider);
     final modeState = ref.watch(modeSelectionProvider);
     final activePartner = couple.activePartner;
@@ -240,8 +242,13 @@ class TimelineScreen extends ConsumerWidget {
         ? 0.0
         : (completedChecklistCount / totalChecklistCount);
 
-    // Medicine stats
+    // Medicine stats (respects partner data-sharing defaults and toggles)
     final partnerVisibleReminders = reminders.where((r) {
+      if (!lockState.shareMedicineReminders &&
+          r.partnerOwnerId != activePartner.id &&
+          r.partnerOwnerId != 'all') {
+        return false;
+      }
       if (r.isSharedWithPartner) return true;
       if (r.partnerOwnerId == 'all') return true;
       return r.partnerOwnerId == activePartner.id;
@@ -257,8 +264,12 @@ class TimelineScreen extends ConsumerWidget {
         ? (takenMedsCount / totalMedsCount)
         : 0.0;
 
-    // Couple hints & checkup stats
-    final activeHint = hintsState.activeSmartHint;
+    // Couple hints: cross-partner hints only appear when opted in
+    final activeHint =
+        (lockState.shareQuizPartnerHints ||
+            hintsState.activeSmartHint?.fromPartnerId == activePartner.id)
+        ? hintsState.activeSmartHint
+        : null;
     final pendingCheckupsCount = hintsState.checkupReminders
         .where(
           (c) => !c.isCompleted && (c.stage == null || c.stage == currentStage),
@@ -777,9 +788,12 @@ class TimelineScreen extends ConsumerWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Medicine & Supplement Reminders',
-                                      style: TextStyle(
+                                    Text(
+                                      AppStrings.t(
+                                        'Medicine Reminders',
+                                        currentLang,
+                                      ),
+                                      style: const TextStyle(
                                         fontSize: 14.5,
                                         fontWeight: FontWeight.bold,
                                         color: Color(0xFF0F172A),
@@ -897,9 +911,9 @@ class TimelineScreen extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Couple Check-In & Smart Hints',
-                                    style: TextStyle(
+                                  Text(
+                                    AppStrings.t('Couple Quizzes', currentLang),
+                                    style: const TextStyle(
                                       fontSize: 14.5,
                                       fontWeight: FontWeight.bold,
                                       color: Color(0xFF0F172A),
@@ -1028,9 +1042,9 @@ class TimelineScreen extends ConsumerWidget {
                                 onPressed: () =>
                                     context.push('/couple-quizzes'),
                                 icon: const Icon(Icons.quiz_outlined, size: 15),
-                                label: const Text(
-                                  'Quizzes & Hints',
-                                  style: TextStyle(
+                                label: Text(
+                                  AppStrings.t('Couple Quizzes', currentLang),
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -1057,9 +1071,9 @@ class TimelineScreen extends ConsumerWidget {
                                   Icons.support_agent_rounded,
                                   size: 15,
                                 ),
-                                label: const Text(
-                                  'Ask AI Advisor',
-                                  style: TextStyle(
+                                label: Text(
+                                  AppStrings.t('AI Advisor', currentLang),
+                                  style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -1120,9 +1134,9 @@ class TimelineScreen extends ConsumerWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 10),
-                                const Text(
-                                  'Media Vault',
-                                  style: TextStyle(
+                                Text(
+                                  AppStrings.t('Media Vault', currentLang),
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFF0F172A),
@@ -1186,9 +1200,9 @@ class TimelineScreen extends ConsumerWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 10),
-                                const Text(
-                                  'Privacy & Lock',
-                                  style: TextStyle(
+                                Text(
+                                  AppStrings.t('Privacy & Lock', currentLang),
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFF0F172A),

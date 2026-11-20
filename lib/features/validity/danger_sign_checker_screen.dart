@@ -250,7 +250,7 @@ class DangerSignCheckerScreen extends ConsumerWidget {
                           ),
                           icon: const Icon(Icons.phone_in_talk, size: 20),
                           label: Text(
-                            AppStrings.t('Call Ambulance (108)', currentLang),
+                            AppStrings.t('Call 108', currentLang),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           onPressed: () =>

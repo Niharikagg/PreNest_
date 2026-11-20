@@ -52,7 +52,12 @@ class AppStrings {
       AppLanguage.kn: 'ಟ್ರೆಂಡ್‌ಗಳು',
     },
 
-    // Stages
+    // Modes & Stages
+    'Period Tracker': {
+      AppLanguage.en: 'Period Tracker',
+      AppLanguage.hi: 'पीरियड ट्रैकर',
+      AppLanguage.kn: 'ಮುಟ್ಟು ಟ್ರ್ಯಾಕರ್',
+    },
     'Plan': {
       AppLanguage.en: 'Plan',
       AppLanguage.hi: 'योजना',
@@ -73,13 +78,18 @@ class AppStrings {
       AppLanguage.hi: 'गर्भावस्था',
       AppLanguage.kn: 'ಗರ್ಭಾವಸ್ಥೆ',
     },
+    'Pregnant': {
+      AppLanguage.en: 'Pregnant',
+      AppLanguage.hi: 'गर्भवती',
+      AppLanguage.kn: 'ಗರ್ಭಿಣಿ',
+    },
     'Postpartum': {
       AppLanguage.en: 'Postpartum',
       AppLanguage.hi: 'प्रसवोत्तर',
       AppLanguage.kn: 'ಪ್ರಸವೋತ್ತರ',
     },
 
-    // Timeline Sections & Quick Actions
+    // Key Actions & Headings
     'Checklist': {
       AppLanguage.en: 'Checklist',
       AppLanguage.hi: 'चेकलिस्ट',
@@ -94,11 +104,6 @@ class AppStrings {
       AppLanguage.en: 'Vitals Log',
       AppLanguage.hi: 'वाइटल्स लॉग',
       AppLanguage.kn: 'ಪ್ರಮುಖ ಆರೋಗ್ಯ ದಾಖಲೆ',
-    },
-    'AI Advisor': {
-      AppLanguage.en: 'AI Advisor',
-      AppLanguage.hi: 'एआई सलाहकार',
-      AppLanguage.kn: 'ಎಐ ಸಲಹೆಗಾರ',
     },
     'Kick Counter': {
       AppLanguage.en: 'Kick Counter',
@@ -115,10 +120,47 @@ class AppStrings {
       AppLanguage.hi: 'प्रसवोत्तर देखभाल',
       AppLanguage.kn: 'ಪ್ರಸವಾನಂತರದ ಆರೈಕೆ',
     },
+    'Medicine Reminders': {
+      AppLanguage.en: 'Medicine Reminders',
+      AppLanguage.hi: 'दवा अनुस्मारक',
+      AppLanguage.kn: 'ಔಷಧ ಜ್ಞಾಪನೆಗಳು',
+    },
+    'Couple Quizzes': {
+      AppLanguage.en: 'Couple Quizzes',
+      AppLanguage.hi: 'दंपति प्रश्नोत्तरी',
+      AppLanguage.kn: 'ದಂಪತಿ ರಸಪ್ರಶ್ನೆಗಳು',
+    },
+    'AI Advisor': {
+      AppLanguage.en: 'AI Advisor',
+      AppLanguage.hi: 'एआई सलाहकार',
+      AppLanguage.kn: 'ಎಐ ಸಲಹೆಗಾರ',
+    },
+    'Media Vault': {
+      AppLanguage.en: 'Media Vault',
+      AppLanguage.hi: 'मीडिया वॉल्ट',
+      AppLanguage.kn: 'ಮಾಧ್ಯಮ ವಾಲ್ಟ್',
+    },
+    'Privacy & Lock': {
+      AppLanguage.en: 'Privacy & Lock',
+      AppLanguage.hi: 'गोपनीयता और लॉक',
+      AppLanguage.kn: 'ಗೌಪ್ಯತೆ ಮತ್ತು ಲಾಕ್',
+    },
     'Language': {
       AppLanguage.en: 'Language',
       AppLanguage.hi: 'भाषा',
       AppLanguage.kn: 'ಭಾಷೆ',
+    },
+
+    // Shortcuts & Hub Titles
+    'Cycle & PCOS Hub': {
+      AppLanguage.en: 'Cycle & PCOS Hub',
+      AppLanguage.hi: 'मासिक धर्म और पीसीओएस हब',
+      AppLanguage.kn: 'ಮುಟ್ಟು ಮತ್ತು ಪಿಸಿಓಎಸ್ ಕೇಂದ್ರ',
+    },
+    'Planning Hub': {
+      AppLanguage.en: 'Planning Hub',
+      AppLanguage.hi: 'योजना केंद्र',
+      AppLanguage.kn: 'ಯೋಜನಾ ಕೇಂದ್ರ',
     },
     'Active Journey Stage': {
       AppLanguage.en: 'Active Journey Stage',

@@ -17,7 +17,6 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
   Widget build(BuildContext context) {
     final lockState = ref.watch(vaultLockProvider);
     final couple = ref.watch(coupleProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBg,
@@ -356,10 +355,428 @@ class _PrivacySyncScreenState extends ConsumerState<PrivacySyncScreen> {
                   ),
                 ),
 
+                const SizedBox(height: 20),
+
+                // 5. Explicit Partner Data-Sharing Controls & Toggles
+                _buildSectionTitle('Partner Data-Sharing Defaults & Controls'),
+                const SizedBox(height: 8),
+                Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: AppTheme.borderLight),
+                  ),
+                  child: Column(
+                    children: [
+                      // Overview Header Banner
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
+                          border: const Border(
+                            bottom: BorderSide(color: AppTheme.borderLight),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.rule_rounded,
+                              size: 20,
+                              color: AppTheme.primaryTeal,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Active Sharing Policy for ${couple.primaryPartner.name} & ${couple.secondaryPartner.name}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  const Text(
+                                    'Clinical records & schedules are shared by default for unified care. Emotional reflections, AI chats & quiz hints remain private until you explicitly opt in.',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      height: 1.35,
+                                      color: Color(0xFF475569),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Category 1: Lab Reports & Diagnostics (Shared by default)
+                      SwitchListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        secondary: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFECFDF5),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.science_rounded,
+                            color: Color(0xFF059669),
+                            size: 20,
+                          ),
+                        ),
+                        title: Row(
+                          children: [
+                            const Text(
+                              'Lab Reports & Tests',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildSharingBadge(
+                              isDefaultShared: true,
+                              isActive: lockState.shareLabReports,
+                            ),
+                          ],
+                        ),
+                        subtitle: const Text(
+                          'Share CBC, ultrasound scans, urinalysis & verified doctor reports',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        value: lockState.shareLabReports,
+                        onChanged: (val) {
+                          ref
+                              .read(vaultLockProvider.notifier)
+                              .toggleShareLabReports(val);
+                        },
+                      ),
+                      const Divider(height: 1),
+
+                      // Category 2: Medicine Reminders (Shared by default)
+                      SwitchListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        secondary: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCCFBF1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.medication_rounded,
+                            color: Color(0xFF0F766E),
+                            size: 20,
+                          ),
+                        ),
+                        title: Row(
+                          children: [
+                            const Text(
+                              'Medicine Reminders',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildSharingBadge(
+                              isDefaultShared: true,
+                              isActive: lockState.shareMedicineReminders,
+                            ),
+                          ],
+                        ),
+                        subtitle: const Text(
+                          'Synchronize daily supplements & adherence (IFA, Calcium, Inositol)',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        value: lockState.shareMedicineReminders,
+                        onChanged: (val) {
+                          ref
+                              .read(vaultLockProvider.notifier)
+                              .toggleShareMedicineReminders(val);
+                        },
+                      ),
+                      const Divider(height: 1),
+
+                      // Category 3: Health Trends & Vitals Log (Shared by default)
+                      SwitchListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        secondary: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0F2FE),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.insights_rounded,
+                            color: Color(0xFF0284C7),
+                            size: 20,
+                          ),
+                        ),
+                        title: Row(
+                          children: [
+                            const Text(
+                              'Trends & Vitals Analysis',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildSharingBadge(
+                              isDefaultShared: true,
+                              isActive: lockState.shareTrendAnalysis,
+                            ),
+                          ],
+                        ),
+                        subtitle: const Text(
+                          'Share blood pressure records, weight progression & cycle trends',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        value: lockState.shareTrendAnalysis,
+                        onChanged: (val) {
+                          ref
+                              .read(vaultLockProvider.notifier)
+                              .toggleShareTrendAnalysis(val);
+                        },
+                      ),
+                      const Divider(height: 1),
+
+                      // Category 4: Personal Reflections & Daily Notes (Private by default)
+                      SwitchListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        secondary: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF1F2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.menu_book_rounded,
+                            color: Color(0xFFE11D48),
+                            size: 20,
+                          ),
+                        ),
+                        title: Row(
+                          children: [
+                            const Text(
+                              'Personal Reflections',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildSharingBadge(
+                              isDefaultShared: false,
+                              isActive: lockState.sharePersonalReflections,
+                            ),
+                          ],
+                        ),
+                        subtitle: const Text(
+                          'Private by default. Opt in to allow partner to read your personal reflections',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        value: lockState.sharePersonalReflections,
+                        onChanged: (val) {
+                          ref
+                              .read(vaultLockProvider.notifier)
+                              .toggleSharePersonalReflections(val);
+                        },
+                      ),
+                      const Divider(height: 1),
+
+                      // Category 5: Private AI Advisor Chats (Private by default)
+                      SwitchListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        secondary: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3E8FF),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.smart_toy_rounded,
+                            color: Color(0xFF7C3AED),
+                            size: 20,
+                          ),
+                        ),
+                        title: Row(
+                          children: [
+                            const Text(
+                              'Private AI Advisor Chats',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildSharingBadge(
+                              isDefaultShared: false,
+                              isActive: lockState.sharePrivateAiChats,
+                            ),
+                          ],
+                        ),
+                        subtitle: const Text(
+                          'Private by default. Opt in to share confidential AI emotional companion chat sessions',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        value: lockState.sharePrivateAiChats,
+                        onChanged: (val) {
+                          ref
+                              .read(vaultLockProvider.notifier)
+                              .toggleSharePrivateAiChats(val);
+                        },
+                      ),
+                      const Divider(height: 1),
+
+                      // Category 6: Quiz Cross-Partner Hints (Private by default)
+                      SwitchListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        secondary: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF3C7),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.volunteer_activism_rounded,
+                            color: Color(0xFFD97706),
+                            size: 20,
+                          ),
+                        ),
+                        title: Row(
+                          children: [
+                            const Text(
+                              'Quiz Cross-Partner Hints',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            _buildSharingBadge(
+                              isDefaultShared: false,
+                              isActive: lockState.shareQuizPartnerHints,
+                            ),
+                          ],
+                        ),
+                        subtitle: const Text(
+                          'Private by default. Opt in to display gentle caring hints from check-in quizzes',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        value: lockState.shareQuizPartnerHints,
+                        onChanged: (val) {
+                          ref
+                              .read(vaultLockProvider.notifier)
+                              .toggleShareQuizPartnerHints(val);
+                        },
+                      ),
+                      const Divider(height: 1),
+
+                      // Reset to Defaults Action Button
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AppTheme.borderLight),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: const Icon(
+                            Icons.restore_rounded,
+                            size: 16,
+                            color: AppTheme.primaryTeal,
+                          ),
+                          label: const Text(
+                            'Reset to PreNest Recommended Defaults',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: AppTheme.primaryTeal,
+                            ),
+                          ),
+                          onPressed: () {
+                            ref
+                                .read(vaultLockProvider.notifier)
+                                .resetSharingDefaults();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Partner data sharing restored to recommended defaults.',
+                                ),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
                 const SizedBox(height: 24),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSharingBadge({
+    required bool isDefaultShared,
+    required bool isActive,
+  }) {
+    final text = isDefaultShared
+        ? (isActive ? 'Shared (Default)' : 'Unshared')
+        : (isActive ? 'Shared (Opt-in)' : 'Private (Default)');
+
+    final bgColor = isDefaultShared
+        ? (isActive ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9))
+        : (isActive ? const Color(0xFFE0F2FE) : const Color(0xFFFFF1F2));
+
+    final textColor = isDefaultShared
+        ? (isActive ? const Color(0xFF15803D) : const Color(0xFF64748B))
+        : (isActive ? const Color(0xFF0284C7) : const Color(0xFFBE123C));
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: textColor,
         ),
       ),
     );
