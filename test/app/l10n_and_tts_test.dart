@@ -4,6 +4,8 @@ import 'package:prenest/core/l10n/app_l10n.dart';
 import 'package:prenest/core/l10n/tts_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('AppLanguage and Translations', () {
     test('AppLanguage en, hi, kn metadata', () {
       expect(AppLanguage.en.label, 'English');
@@ -27,15 +29,23 @@ void main() {
     });
 
     test('AppStrings translations for danger sign checker and emergency', () {
-      expect(AppStrings.t('Danger-Sign Checker', AppLanguage.en),
-          'Danger-Sign Checker');
-      expect(AppStrings.t('Danger-Sign Checker', AppLanguage.hi),
-          'खतरे के संकेत जांच');
-      expect(AppStrings.t('Danger-Sign Checker', AppLanguage.kn),
-          'ಅಪಾಯದ ಚಿಹ್ನೆಗಳ ಪರಿಶೀಲಕ');
+      expect(
+        AppStrings.t('Danger-Sign Checker', AppLanguage.en),
+        'Danger-Sign Checker',
+      );
+      expect(
+        AppStrings.t('Danger-Sign Checker', AppLanguage.hi),
+        'खतरे के संकेत जांच',
+      );
+      expect(
+        AppStrings.t('Danger-Sign Checker', AppLanguage.kn),
+        'ಅಪಾಯದ ಚಿಹ್ನೆಗಳ ಪರಿಶೀಲಕ',
+      );
 
-      expect(AppStrings.t('Seek medical care immediately', AppLanguage.hi),
-          'तुरंत चिकित्सा सहायता लें');
+      expect(
+        AppStrings.t('Seek medical care immediately', AppLanguage.hi),
+        'तुरंत चिकित्सा सहायता लें',
+      );
       expect(AppStrings.t('Call 108', AppLanguage.kn), '108 ಗೆ ಕರೆ ಮಾಡಿ');
     });
 
