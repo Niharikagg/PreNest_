@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../app/theme.dart';
 
 class VitalEntry {
   final String id;
@@ -110,6 +113,386 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
   final _diastolicController = TextEditingController();
   final _weightController = TextEditingController();
   final _noteController = TextEditingController();
+  int _waterGlasses = 6;
+
+  void _incrementWater() {
+    if (_waterGlasses < 16) {
+      setState(() {
+        _waterGlasses++;
+      });
+    }
+  }
+
+  void _decrementWater() {
+    if (_waterGlasses > 0) {
+      setState(() {
+        _waterGlasses--;
+      });
+    }
+  }
+
+  void _openWeightPicker() {
+    double currentVal = double.tryParse(_weightController.text.trim()) ?? 58.5;
+    if (currentVal < 35.0 || currentVal > 150.0) currentVal = 58.5;
+    int initialInt = currentVal.floor();
+    int initialDec = ((currentVal - initialInt) * 10).round().clamp(0, 9);
+
+    int selectedInt = initialInt;
+    int selectedDec = initialDec;
+
+    final intController = FixedExtentScrollController(
+      initialItem: (initialInt - 35).clamp(0, 115),
+    );
+    final decController = FixedExtentScrollController(
+      initialItem: initialDec.clamp(0, 9),
+    );
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              height: 340,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 4,
+                      margin: const EdgeInsets.only(top: 12, bottom: 8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.borderLight,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(color: AppTheme.textMuted),
+                          ),
+                        ),
+                        Column(
+                          children: [
+                            const Text(
+                              'Select Weight',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textDark,
+                              ),
+                            ),
+                            Text(
+                              '$selectedInt.$selectedDec kg',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryTeal,
+                              ),
+                            ),
+                          ],
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            _weightController.text =
+                                '$selectedInt.$selectedDec';
+                            setState(() {});
+                            Navigator.pop(ctx);
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppTheme.primaryTeal,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 8,
+                            ),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: const Text('Done'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(color: AppTheme.borderLight, height: 1),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: CupertinoPicker(
+                            scrollController: intController,
+                            itemExtent: 44,
+                            useMagnifier: true,
+                            magnification: 1.15,
+                            onSelectedItemChanged: (index) {
+                              setSheetState(() {
+                                selectedInt = 35 + index;
+                              });
+                            },
+                            children: List.generate(
+                              116,
+                              (i) => Center(
+                                child: Text(
+                                  '${35 + i}',
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textDark,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Text(
+                          '.',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textDark,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 80,
+                          child: CupertinoPicker(
+                            scrollController: decController,
+                            itemExtent: 44,
+                            useMagnifier: true,
+                            magnification: 1.15,
+                            onSelectedItemChanged: (index) {
+                              setSheetState(() {
+                                selectedDec = index;
+                              });
+                            },
+                            children: List.generate(
+                              10,
+                              (i) => Center(
+                                child: Text(
+                                  '$i',
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textDark,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'kg',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildWaterIntakeTracker(ThemeData theme) {
+    final waterLiters = (_waterGlasses * 0.25).toStringAsFixed(1);
+    final isGoalReached = _waterGlasses >= 8;
+
+    return Card(
+      elevation: 0,
+      color: const Color(0xFFF0F9FF),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFBAE6FD), width: 1.2),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0F2FE),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.water_drop_rounded,
+                    color: Color(0xFF0284C7),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Daily Hydration Tracker',
+                        style: TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                      Text(
+                        'Goal: 8–10 glasses (~2.0–2.5 L) daily',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isGoalReached)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCFCE7),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 14,
+                          color: Color(0xFF16A34A),
+                        ),
+                        SizedBox(width: 4),
+                        Text(
+                          'Goal Met',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF15803D),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      '$_waterGlasses',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0369A1),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'glasses',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0284C7),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '($waterLiters L)',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Material(
+                      color: Colors.white,
+                      shape: const CircleBorder(),
+                      elevation: 0.5,
+                      child: IconButton(
+                        icon: const Icon(Icons.remove_rounded),
+                        iconSize: 20,
+                        color: const Color(0xFF0284C7),
+                        tooltip: 'Remove 1 glass',
+                        onPressed: _decrementWater,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Material(
+                      color: const Color(0xFF0284C7),
+                      shape: const CircleBorder(),
+                      elevation: 1,
+                      child: IconButton(
+                        icon: const Icon(Icons.add_rounded),
+                        iconSize: 20,
+                        color: Colors.white,
+                        tooltip: 'Add 1 glass',
+                        onPressed: _incrementWater,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: List.generate(10, (index) {
+                final isFilled = index < _waterGlasses;
+                return Expanded(
+                  child: Container(
+                    height: 6,
+                    margin: EdgeInsets.only(right: index < 9 ? 4.0 : 0.0),
+                    decoration: BoxDecoration(
+                      color: isFilled
+                          ? const Color(0xFF0284C7)
+                          : const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -289,30 +672,78 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
                             ],
                           ),
                           const SizedBox(height: 14),
-                          // Weight
-                          TextFormField(
-                            controller: _weightController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: const InputDecoration(
-                              labelText: 'Weight',
-                              hintText: '58.5',
-                              suffixText: 'kg',
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Enter maternal/partner weight';
-                              }
-                              final parsed = double.tryParse(value.trim());
-                              if (parsed == null) {
-                                return 'Enter a valid number';
-                              }
-                              if (parsed < 30 || parsed > 250) {
-                                return 'Enter realistic weight (30-250 kg)';
-                              }
-                              return null;
-                            },
+                          // Weight with Scroll-Wheel Picker Option (STEP 5)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: _weightController,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                  decoration: InputDecoration(
+                                    labelText: 'Weight',
+                                    hintText: '58.5',
+                                    suffixText: 'kg',
+                                    suffixIcon: IconButton(
+                                      icon: const Icon(
+                                        Icons.unfold_more_rounded,
+                                      ),
+                                      tooltip: 'Quick Wheel Picker',
+                                      onPressed: _openWeightPicker,
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Enter maternal/partner weight';
+                                    }
+                                    final parsed = double.tryParse(
+                                      value.trim(),
+                                    );
+                                    if (parsed == null) {
+                                      return 'Enter a valid number';
+                                    }
+                                    if (parsed < 30 || parsed > 250) {
+                                      return 'Enter realistic weight (30-250 kg)';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2.0),
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: theme.colorScheme.primary,
+                                    side: BorderSide(
+                                      color: theme.colorScheme.primaryContainer,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: _openWeightPicker,
+                                  icon: const Icon(
+                                    Icons.view_carousel_rounded,
+                                    size: 18,
+                                  ),
+                                  label: const Text(
+                                    'Wheel',
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 14),
                           // Notes (Optional)
@@ -337,6 +768,10 @@ class _VitalsLogScreenState extends ConsumerState<VitalsLogScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+
+                // STEP 5: Inline - / + Stepper for Quick Daily Water Intake Logging
+                _buildWaterIntakeTracker(theme),
                 const SizedBox(height: 20),
 
                 // History Header

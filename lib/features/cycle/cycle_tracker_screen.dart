@@ -224,6 +224,269 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
     );
   }
 
+  IconData _getSymptomIcon(String symptom) {
+    switch (symptom) {
+      case 'Cramps':
+        return Icons.bolt_rounded;
+      case 'Bloating':
+        return Icons.bubble_chart_rounded;
+      case 'Fatigue':
+        return Icons.bedtime_rounded;
+      case 'Acne':
+        return Icons.flare_rounded;
+      case 'Mood shifts':
+        return Icons.sentiment_neutral_rounded;
+      case 'Pelvic discomfort':
+        return Icons.healing_rounded;
+      case 'Hair thinning':
+        return Icons.spa_rounded;
+      default:
+        return Icons.check_circle_outline_rounded;
+    }
+  }
+
+  Color _getSymptomAccent(String symptom) {
+    switch (symptom) {
+      case 'Cramps':
+        return const Color(0xFFE11D48);
+      case 'Bloating':
+        return const Color(0xFF0284C7);
+      case 'Fatigue':
+        return const Color(0xFF7C3AED);
+      case 'Acne':
+        return const Color(0xFFD97706);
+      case 'Mood shifts':
+        return const Color(0xFF0F766E);
+      case 'Pelvic discomfort':
+        return const Color(0xFFBE123C);
+      case 'Hair thinning':
+        return const Color(0xFF059669);
+      default:
+        return AppTheme.warmRose;
+    }
+  }
+
+  Color _getSymptomContainer(String symptom) {
+    switch (symptom) {
+      case 'Cramps':
+        return const Color(0xFFFFE4E6);
+      case 'Bloating':
+        return const Color(0xFFE0F2FE);
+      case 'Fatigue':
+        return const Color(0xFFF3E8FF);
+      case 'Acne':
+        return const Color(0xFFFEF3C7);
+      case 'Mood shifts':
+        return const Color(0xFFCCFBF1);
+      case 'Pelvic discomfort':
+        return const Color(0xFFFFF1F2);
+      case 'Hair thinning':
+        return const Color(0xFFECFDF5);
+      default:
+        return const Color(0xFFFFE4E6);
+    }
+  }
+
+  Widget _buildSymptomChip({
+    required String symptom,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final icon = _getSymptomIcon(symptom);
+    final accent = _getSymptomAccent(symptom);
+    final container = _getSymptomContainer(symptom);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? container : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: isSelected ? accent : AppTheme.borderLight,
+              width: isSelected ? 1.5 : 1.0,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: accent.withOpacity(0.12),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? accent : AppTheme.textMuted,
+              ),
+              const SizedBox(width: 7),
+              Text(
+                symptom,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected ? accent : AppTheme.textDark,
+                ),
+              ),
+              if (isSelected) ...[
+                const SizedBox(width: 5),
+                Icon(Icons.check_rounded, size: 14, color: accent),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCycleDotTimeline(CycleTrackerState state) {
+    final currentDay = state.currentCycleDay;
+    final startDay = (currentDay - 4).clamp(1, 100);
+    final dayWindow = List.generate(8, (i) => startDay + i);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFDF2F4).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFECDD3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: const [
+                  Icon(
+                    Icons.timeline_rounded,
+                    size: 16,
+                    color: AppTheme.warmRose,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'Recent Cycle & Habit Days',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textDark,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFE4E6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Day $currentDay Active',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.warmRose,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: dayWindow.map((dayNum) {
+              final isToday = dayNum == currentDay;
+              final isPast = dayNum < currentDay;
+
+              return Column(
+                children: [
+                  Text(
+                    'D$dayNum',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+                      color: isToday
+                          ? AppTheme.warmRoseDark
+                          : AppTheme.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: isToday ? 26 : 20,
+                    height: isToday ? 26 : 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isToday
+                          ? AppTheme.warmRose
+                          : (isPast
+                                ? const Color(0xFFFFE4E6)
+                                : const Color(0xFFF1F5F9)),
+                      border: Border.all(
+                        color: isToday
+                            ? AppTheme.warmRoseDark
+                            : (isPast
+                                  ? const Color(0xFFFDA4AF)
+                                  : AppTheme.borderLight),
+                        width: isToday ? 2 : 1,
+                      ),
+                      boxShadow: isToday
+                          ? [
+                              BoxShadow(
+                                color: AppTheme.warmRose.withOpacity(0.3),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Center(
+                      child: isToday
+                          ? const Icon(
+                              Icons.check_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            )
+                          : (isPast
+                                ? Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: const BoxDecoration(
+                                      color: AppTheme.warmRose,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  )
+                                : null),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isToday ? 'Today' : (isPast ? 'Logged' : 'Est.'),
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                      color: isToday ? AppTheme.warmRose : AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSummaryRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -540,6 +803,11 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
+
+                        // STEP 4: Lightweight Dot-Timeline Row showing recent cycle/habit days visually
+                        _buildCycleDotTimeline(state),
+
+                        const SizedBox(height: 16),
                         // Flow Intensity Selector
                         const Text(
                           'Flow Intensity',
@@ -585,7 +853,7 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // 3. PCOD / PCOS Symptom Tracking Chips
+                // 3. PCOD / PCOS Symptom Tracking Chips (STEP 4: Pastel Icon Pill Chips)
                 Card(
                   elevation: 0,
                   color: Colors.white,
@@ -640,6 +908,8 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
                           ),
                         ),
                         const SizedBox(height: 14),
+
+                        // STEP 4: Rounded Pastel Icon Pill Chips
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
@@ -647,34 +917,10 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
                             final isSelected = state.selectedSymptoms.contains(
                               symptom,
                             );
-                            return FilterChip(
-                              avatar: isSelected
-                                  ? const Icon(
-                                      Icons.check_circle_rounded,
-                                      size: 16,
-                                      color: AppTheme.warmRose,
-                                    )
-                                  : null,
-                              label: Text(symptom),
-                              selected: isSelected,
-                              selectedColor: const Color(0xFFFFE4E6),
-                              backgroundColor: AppTheme.scaffoldBg,
-                              labelStyle: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                color: isSelected
-                                    ? AppTheme.warmRoseDark
-                                    : AppTheme.textDark,
-                              ),
-                              side: BorderSide(
-                                color: isSelected
-                                    ? AppTheme.warmRose
-                                    : AppTheme.borderLight,
-                                width: isSelected ? 1.2 : 1,
-                              ),
-                              onSelected: (_) {
+                            return _buildSymptomChip(
+                              symptom: symptom,
+                              isSelected: isSelected,
+                              onTap: () {
                                 notifier.toggleSymptom(symptom);
                               },
                             );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/theme.dart';
 import '../../core/l10n/app_l10n.dart';
 import '../../core/l10n/tts_service.dart';
 import '../couple/couple_hints_provider.dart';
@@ -26,6 +27,26 @@ class ModeShortcutItem {
   const ModeShortcutItem({
     required this.title,
     required this.subtitle,
+    required this.icon,
+    required this.accentColor,
+    required this.containerColor,
+    required this.route,
+  });
+}
+
+class _DailyInsightData {
+  final String title;
+  final String subtitle;
+  final String badge;
+  final IconData icon;
+  final Color accentColor;
+  final Color containerColor;
+  final String route;
+
+  const _DailyInsightData({
+    required this.title,
+    required this.subtitle,
+    required this.badge,
     required this.icon,
     required this.accentColor,
     required this.containerColor,
@@ -213,6 +234,506 @@ class TimelineScreen extends ConsumerWidget {
     }
   }
 
+  static String _getPartnerSupportCue(PreNestMode mode) {
+    switch (mode) {
+      case PreNestMode.periodTracker:
+        return 'Daily Partner Cue: Offer a warm soothing tea and extra emotional space today.';
+      case PreNestMode.planningPregnancy:
+        return 'Daily Partner Cue: Check in on shared hydration and folic acid habit streaks tonight.';
+      case PreNestMode.pregnant:
+        return 'Daily Partner Cue: Offer a gentle foot massage; baby is hearing outside voices now!';
+      case PreNestMode.postpartum:
+        return 'Daily Partner Cue: Take the next burping & soothing shift so she gets restful uninterrupted sleep.';
+    }
+  }
+
+  static String _getGestationalMilestoneTitle(PreNestMode mode) {
+    switch (mode) {
+      case PreNestMode.periodTracker:
+        return 'Cycle Day 12';
+      case PreNestMode.planningPregnancy:
+        return 'Preconception Prep';
+      case PreNestMode.pregnant:
+        return '17 weeks, 1 day';
+      case PreNestMode.postpartum:
+        return 'Postpartum Week 3';
+    }
+  }
+
+  static String _getGestationalMilestoneSubtitle(
+    PreNestMode mode,
+    ModeSelectionState modeState,
+  ) {
+    switch (mode) {
+      case PreNestMode.periodTracker:
+        return modeState.irregularCycleMode
+            ? 'Cycle Day 12 • Irregular Mode On'
+            : 'Cycle Day 12 • Follicular Phase (~16 days left)';
+      case PreNestMode.planningPregnancy:
+        return 'Fertility Readiness & Micronutrient Baselines';
+      case PreNestMode.pregnant:
+        return 'Pregnancy Day 120 • Second Trimester';
+      case PreNestMode.postpartum:
+        return 'Mother & Baby • Fourth Trimester Recovery';
+    }
+  }
+
+  static Widget _getGestationalBadge(PreNestMode mode, Color stageColor) {
+    String emoji;
+    String text;
+    switch (mode) {
+      case PreNestMode.periodTracker:
+        emoji = '🌸';
+        text = 'Cycle Day 12 • Follicular Window';
+        break;
+      case PreNestMode.planningPregnancy:
+        emoji = '🌱';
+        text = 'Preconception Baseline • Week 6';
+        break;
+      case PreNestMode.pregnant:
+        emoji = '🍏';
+        text = 'Baby is the size of an Apple (~13 cm)';
+        break;
+      case PreNestMode.postpartum:
+        emoji = '👶';
+        text = 'Postpartum Week 3 • Mother & Baby';
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: stageColor.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: stageColor.withOpacity(0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 13)),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.bold,
+              color: stageColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _buildCalendarStrip(BuildContext context, Color stageColor) {
+    final now = DateTime.now();
+    final days = List.generate(7, (i) => now.subtract(Duration(days: 3 - i)));
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppTheme.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    size: 14,
+                    color: stageColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${months[now.month - 1]} ${now.year}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textDark,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: stageColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'Today • Day ${now.day}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: stageColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: days.map((day) {
+              final isToday =
+                  day.year == now.year &&
+                  day.month == now.month &&
+                  day.day == now.day;
+              final weekdayName = weekdays[day.weekday - 1];
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 40,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: isToday ? stageColor : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isToday ? stageColor : AppTheme.borderLight,
+                    width: isToday ? 1.5 : 1,
+                  ),
+                  boxShadow: isToday
+                      ? [
+                          BoxShadow(
+                            color: stageColor.withOpacity(0.25),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      weekdayName,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        color: isToday
+                            ? Colors.white.withOpacity(0.9)
+                            : AppTheme.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isToday ? Colors.white : AppTheme.textDark,
+                      ),
+                    ),
+                    if (isToday) ...[
+                      const SizedBox(height: 3),
+                      Container(
+                        width: 4,
+                        height: 4,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _buildCircularQuickActions({
+    required BuildContext context,
+    required List<ModeShortcutItem> items,
+  }) {
+    return Card(
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: AppTheme.borderLight),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: items.map((item) {
+            return InkWell(
+              onTap: () => context.push(item.route),
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: item.containerColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: item.accentColor.withOpacity(0.25),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: item.accentColor.withOpacity(0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(item.icon, color: item.accentColor, size: 24),
+                    ),
+                    const SizedBox(height: 7),
+                    SizedBox(
+                      width: 68,
+                      child: Text(
+                        item.title,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  static Widget _buildDailyInsightsCards({
+    required BuildContext context,
+    required PreNestMode mode,
+    required int takenMedsCount,
+    required int totalMedsCount,
+    required double medProgress,
+    required dynamic activeHint,
+    required AppLanguage lang,
+  }) {
+    final insights = [
+      _DailyInsightData(
+        title: 'Next ANC Visit',
+        subtitle: 'Ultrasound & clinical panel due',
+        badge: 'In 6 Days',
+        icon: Icons.event_available_rounded,
+        accentColor: const Color(0xFF0284C7),
+        containerColor: const Color(0xFFE0F2FE),
+        route: '/records',
+      ),
+      _DailyInsightData(
+        title: 'Weekly Vitals',
+        subtitle: 'BP & maternal weight check',
+        badge: 'Up to Date',
+        icon: Icons.monitor_heart_rounded,
+        accentColor: const Color(0xFF0F766E),
+        containerColor: const Color(0xFFCCFBF1),
+        route: '/vitals',
+      ),
+      _DailyInsightData(
+        title: 'Medicine Progress',
+        subtitle: '$takenMedsCount of $totalMedsCount taken today',
+        badge: medProgress == 1.0 && totalMedsCount > 0
+            ? 'All Taken'
+            : 'Pending',
+        icon: Icons.medication_rounded,
+        accentColor: const Color(0xFFD97706),
+        containerColor: const Color(0xFFFEF3C7),
+        route: '/reminders',
+      ),
+      _DailyInsightData(
+        title: 'Couple Check-in',
+        subtitle: activeHint?.hintText != null
+            ? activeHint!.hintText
+            : 'Send partner an effortless daily care hint',
+        badge: '1-min Quiz',
+        icon: Icons.volunteer_activism_rounded,
+        accentColor: const Color(0xFFE11D48),
+        containerColor: const Color(0xFFFFE4E6),
+        route: '/couple-quizzes',
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: const [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 16,
+                    color: AppTheme.primaryTeal,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'Daily Insights',
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textDark,
+                    ),
+                  ),
+                ],
+              ),
+              const Text(
+                'Swipe to explore',
+                style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 115,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: insights.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final item = insights[index];
+              return InkWell(
+                onTap: () => context.push(item.route),
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  width: 185,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: item.accentColor.withOpacity(0.2),
+                      width: 1.1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: item.accentColor.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: item.containerColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              item.icon,
+                              size: 16,
+                              color: item.accentColor,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: item.containerColor,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              item.badge,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: item.accentColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textDark,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textMuted,
+                              height: 1.25,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final couple = ref.watch(coupleProvider);
@@ -288,7 +809,10 @@ class TimelineScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 1. Welcoming Hero & Active Mode Summary Card
+                // STEP 3: Compact Horizontal 7-Day Calendar Strip
+                _buildCalendarStrip(context, stageColor),
+
+                // STEP 3: Flo-Style Warm Gradient Hero Header
                 Card(
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -305,7 +829,11 @@ class TimelineScreen extends ConsumerWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [stageColor.withOpacity(0.08), Colors.white],
+                        colors: [
+                          stageColor.withOpacity(0.18),
+                          stageColor.withOpacity(0.04),
+                          Colors.white,
+                        ],
                       ),
                     ),
                     padding: const EdgeInsets.all(18.0),
@@ -416,6 +944,72 @@ class TimelineScreen extends ConsumerWidget {
                               ),
                             ),
                           ],
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        // Gestational / Cycle Milestone Header
+                        Text(
+                          _getGestationalMilestoneTitle(activeMode),
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4,
+                            color: stageColor,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          _getGestationalMilestoneSubtitle(
+                            activeMode,
+                            modeState,
+                          ),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.textDark.withOpacity(0.8),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Warm Milestone Visual Badge
+                        _getGestationalBadge(activeMode, stageColor),
+
+                        // Actionable Daily Partner Support Cue
+                        Container(
+                          margin: const EdgeInsets.only(top: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 9,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: stageColor.withOpacity(0.2),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.lightbulb_outline_rounded,
+                                size: 16,
+                                color: stageColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _getPartnerSupportCue(activeMode),
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.textDark.withOpacity(0.85),
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
 
                         const SizedBox(height: 12),
@@ -610,6 +1204,22 @@ class TimelineScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 14),
 
+                // STEP 3: 4 Circular Quick-Action Buttons
+                _buildCircularQuickActions(context: context, items: shortcuts),
+                const SizedBox(height: 14),
+
+                // STEP 3: Swipeable "Daily Insights" Cards
+                _buildDailyInsightsCards(
+                  context: context,
+                  mode: activeMode,
+                  takenMedsCount: takenMedsCount,
+                  totalMedsCount: totalMedsCount,
+                  medProgress: medProgress,
+                  activeHint: activeHint,
+                  lang: currentLang,
+                ),
+                const SizedBox(height: 14),
+
                 // 2. Stage Switcher Segmented Button
                 Card(
                   elevation: 0,
@@ -709,44 +1319,6 @@ class TimelineScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 14),
-
-                // 3. Mode-Specific Quick Access Shortcuts (2x2 Grid)
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildShortcutCard(
-                        context: context,
-                        item: shortcuts[0],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildShortcutCard(
-                        context: context,
-                        item: shortcuts[1],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildShortcutCard(
-                        context: context,
-                        item: shortcuts[2],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildShortcutCard(
-                        context: context,
-                        item: shortcuts[3],
-                      ),
-                    ),
-                  ],
                 ),
                 const SizedBox(height: 14),
 

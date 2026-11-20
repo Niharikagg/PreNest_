@@ -187,6 +187,145 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
     context.go('/timeline');
   }
 
+  Widget _buildModeGridCard(JourneyModeConfig config, BuildContext context) {
+    final isSelected = _currentMode == config.mode;
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _onSelectModeCard(config.mode),
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? config.containerColor.withOpacity(0.35)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? config.accentColor : AppTheme.borderLight,
+              width: isSelected ? 2.0 : 1.0,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: config.accentColor.withOpacity(0.12),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top Row: Soft Pastel Circular Icon Badge & Selection Indicator
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected
+                          ? config.accentColor
+                          : config.containerColor,
+                    ),
+                    child: Icon(
+                      config.icon,
+                      size: 22,
+                      color: isSelected ? Colors.white : config.accentColor,
+                    ),
+                  ),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isSelected
+                          ? config.accentColor
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: isSelected
+                            ? config.accentColor
+                            : AppTheme.borderLight,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: isSelected
+                        ? const Icon(
+                            Icons.check_rounded,
+                            size: 14,
+                            color: Colors.white,
+                          )
+                        : null,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
+              // Mode Title
+              Text(
+                config.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14.5,
+                  height: 1.25,
+                  color: isSelected ? config.accentColor : AppTheme.textDark,
+                ),
+              ),
+              const SizedBox(height: 4),
+
+              // 1-Line Subtitle
+              Text(
+                config.description,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppTheme.textMuted,
+                  fontSize: 11.5,
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Badge Pill
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? config.accentColor.withOpacity(0.15)
+                      : config.containerColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  config.badge,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    color: config.accentColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -240,172 +379,92 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 20),
 
-                  // 4 Mode selection cards
-                  ..._configs.map((config) {
-                    final isSelected = _currentMode == config.mode;
+                  // STEP 2: 2×2 Pastel Stage Grid
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _buildModeGridCard(_configs[0], context)),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildModeGridCard(_configs[1], context)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _buildModeGridCard(_configs[2], context)),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildModeGridCard(_configs[3], context)),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: Card(
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          side: BorderSide(
-                            color: isSelected
-                                ? config.accentColor
-                                : AppTheme.borderLight,
-                            width: isSelected ? 2.2 : 1,
-                          ),
+                  // Selected Mode Features Summary Banner
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: activeConfig.containerColor.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: activeConfig.accentColor.withOpacity(0.2),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              activeConfig.icon,
+                              size: 16,
+                              color: activeConfig.accentColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Includes in ${activeConfig.title}:',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: activeConfig.accentColor,
+                              ),
+                            ),
+                          ],
                         ),
-                        color: Colors.white,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(18),
-                          onTap: () => _onSelectModeCard(config.mode),
-                          child: Padding(
-                            padding: const EdgeInsets.all(18),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                        const SizedBox(height: 8),
+                        ...activeConfig.features
+                            .take(3)
+                            .map(
+                              (feat) => Padding(
+                                padding: const EdgeInsets.only(bottom: 3),
+                                child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: config.containerColor,
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: Icon(
-                                        config.icon,
-                                        color: config.accentColor,
-                                        size: 26,
-                                      ),
+                                    Icon(
+                                      Icons.check_circle_rounded,
+                                      size: 14,
+                                      color: activeConfig.accentColor,
                                     ),
-                                    const SizedBox(width: 14),
+                                    const SizedBox(width: 8),
                                     Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 2.5,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: config.containerColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(6),
-                                                ),
-                                                child: Text(
-                                                  config.badge,
-                                                  style: TextStyle(
-                                                    fontSize: 10.5,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: config.accentColor,
-                                                  ),
-                                                ),
-                                              ),
-                                              const Spacer(),
-                                              Radio<PreNestMode>(
-                                                value: config.mode,
-                                                groupValue: _currentMode,
-                                                activeColor: config.accentColor,
-                                                onChanged: (val) {
-                                                  if (val != null) {
-                                                    _onSelectModeCard(val);
-                                                  }
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            config.title,
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 16.5,
-                                                  color: isSelected
-                                                      ? config.accentColor
-                                                      : AppTheme.textDark,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            config.description,
-                                            style: theme.textTheme.bodySmall
-                                                ?.copyWith(
-                                                  color: AppTheme.textMuted,
-                                                  height: 1.35,
-                                                ),
-                                          ),
-                                        ],
+                                      child: Text(
+                                        feat,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppTheme.textDark,
+                                          height: 1.3,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
-
-                                // Expanded feature highlights
-                                const SizedBox(height: 12),
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: config.containerColor.withOpacity(
-                                      0.4,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: config.features
-                                        .map(
-                                          (feature) => Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 2.5,
-                                            ),
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Icon(
-                                                  Icons.check_circle_rounded,
-                                                  size: 14,
-                                                  color: config.accentColor,
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Expanded(
-                                                  child: Text(
-                                                    feature,
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: AppTheme.textDark,
-                                                      height: 1.3,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-
-                  const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   // Quick-Setup Options for Active Mode
                   Card(
@@ -413,8 +472,8 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(18),
                       side: BorderSide(
-                        color: activeConfig.accentColor.withOpacity(0.4),
-                        width: 1.5,
+                        color: activeConfig.accentColor.withOpacity(0.35),
+                        width: 1.2,
                       ),
                     ),
                     color: Colors.white,
@@ -433,7 +492,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 '${activeConfig.title} Setup',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                   color: AppTheme.textDark,
@@ -559,22 +618,22 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Primary Action Button
+                  // Primary Action Button (Pill-shaped CTA)
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
                       backgroundColor: activeConfig.accentColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
+                      shape: const StadiumBorder(),
+                      elevation: 1,
                     ),
                     onPressed: _saveAndProceed,
                     icon: const Icon(Icons.check_circle_rounded),
-                    label: Text(
+                    label: const Text(
                       'Save & Continue to Timeline',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        letterSpacing: -0.2,
                       ),
                     ),
                   ),
