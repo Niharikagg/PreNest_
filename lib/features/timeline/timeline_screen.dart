@@ -99,6 +99,22 @@ class TimelineScreen extends ConsumerWidget {
             route: '/cycle',
           ),
           ModeShortcutItem(
+            title: AppStrings.t('PCOS Self-Check', lang),
+            subtitle: 'Rule-based check',
+            icon: Icons.checklist_rtl_rounded,
+            accentColor: const Color(0xFFE11D48),
+            containerColor: const Color(0xFFFFE4E6),
+            route: '/pcos-self-check',
+          ),
+          ModeShortcutItem(
+            title: AppStrings.t('PCOS Lab Panel', lang),
+            subtitle: '10 clinical markers',
+            icon: Icons.biotech_rounded,
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
+            route: '/pcos-lab-panel',
+          ),
+          ModeShortcutItem(
             title: AppStrings.t('Vitals Log', lang),
             subtitle: 'Flow, BBT & vitals',
             icon: Icons.monitor_heart,
@@ -639,48 +655,94 @@ class TimelineScreen extends ConsumerWidget {
     required dynamic activeHint,
     required AppLanguage lang,
   }) {
-    final insights = [
-      _DailyInsightData(
-        title: 'Next ANC Visit',
-        subtitle: 'Ultrasound & clinical panel due',
-        badge: 'In 6 Days',
-        icon: Icons.event_available_rounded,
-        accentColor: const Color(0xFF0284C7),
-        containerColor: const Color(0xFFE0F2FE),
-        route: '/anc-planner',
-      ),
-      _DailyInsightData(
-        title: 'Weekly Vitals',
-        subtitle: 'BP & maternal weight check',
-        badge: 'Up to Date',
-        icon: Icons.monitor_heart_rounded,
-        accentColor: const Color(0xFF0F766E),
-        containerColor: const Color(0xFFCCFBF1),
-        route: '/vitals',
-      ),
-      _DailyInsightData(
-        title: 'Medicine Progress',
-        subtitle: '$takenMedsCount of $totalMedsCount taken today',
-        badge: medProgress == 1.0 && totalMedsCount > 0
-            ? 'All Taken'
-            : 'Pending',
-        icon: Icons.medication_rounded,
-        accentColor: const Color(0xFFD97706),
-        containerColor: const Color(0xFFFEF3C7),
-        route: '/reminders',
-      ),
-      _DailyInsightData(
-        title: 'Couple Check-in',
-        subtitle: activeHint?.hintText != null
-            ? activeHint!.hintText
-            : 'Send partner an effortless daily care hint',
-        badge: '1-min Quiz',
-        icon: Icons.volunteer_activism_rounded,
-        accentColor: const Color(0xFFE11D48),
-        containerColor: const Color(0xFFFFE4E6),
-        route: '/couple-quizzes',
-      ),
-    ];
+    final List<_DailyInsightData> insights;
+    if (mode == PreNestMode.periodTracker) {
+      insights = [
+        const _DailyInsightData(
+          title: 'PCOS Self-Check',
+          subtitle: 'Review 7 key indicators & doctor talking points',
+          badge: 'Self-Check',
+          icon: Icons.checklist_rtl_rounded,
+          accentColor: Color(0xFFE11D48),
+          containerColor: Color(0xFFFFE4E6),
+          route: '/pcos-self-check',
+        ),
+        const _DailyInsightData(
+          title: 'PCOS Lab Panel',
+          subtitle: 'Track 10 hormone & metabolic lab markers',
+          badge: 'Lab Panel',
+          icon: Icons.biotech_rounded,
+          accentColor: Color(0xFF0F766E),
+          containerColor: Color(0xFFCCFBF1),
+          route: '/pcos-lab-panel',
+        ),
+        _DailyInsightData(
+          title: 'Medicine Progress',
+          subtitle: '$takenMedsCount of $totalMedsCount taken today',
+          badge: medProgress == 1.0 && totalMedsCount > 0
+              ? 'All Taken'
+              : 'Pending',
+          icon: Icons.medication_rounded,
+          accentColor: const Color(0xFFD97706),
+          containerColor: const Color(0xFFFEF3C7),
+          route: '/reminders',
+        ),
+        _DailyInsightData(
+          title: 'Couple Check-in',
+          subtitle: activeHint?.hintText != null
+              ? activeHint!.hintText
+              : 'Send partner an effortless daily care hint',
+          badge: '1-min Quiz',
+          icon: Icons.volunteer_activism_rounded,
+          accentColor: const Color(0xFFE11D48),
+          containerColor: const Color(0xFFFFE4E6),
+          route: '/couple-quizzes',
+        ),
+      ];
+    } else {
+      insights = [
+        const _DailyInsightData(
+          title: 'Next ANC Visit',
+          subtitle: 'Ultrasound & clinical panel due',
+          badge: 'In 6 Days',
+          icon: Icons.event_available_rounded,
+          accentColor: Color(0xFF0284C7),
+          containerColor: Color(0xFFE0F2FE),
+          route: '/anc-planner',
+        ),
+        const _DailyInsightData(
+          title: 'Weekly Vitals',
+          subtitle: 'BP & maternal weight check',
+          badge: 'Up to Date',
+          icon: Icons.monitor_heart_rounded,
+          accentColor: Color(0xFF0F766E),
+          containerColor: Color(0xFFCCFBF1),
+          route: '/vitals',
+        ),
+        _DailyInsightData(
+          title: 'Medicine Progress',
+          subtitle: '$takenMedsCount of $totalMedsCount taken today',
+          badge: medProgress == 1.0 && totalMedsCount > 0
+              ? 'All Taken'
+              : 'Pending',
+          icon: Icons.medication_rounded,
+          accentColor: const Color(0xFFD97706),
+          containerColor: const Color(0xFFFEF3C7),
+          route: '/reminders',
+        ),
+        _DailyInsightData(
+          title: 'Couple Check-in',
+          subtitle: activeHint?.hintText != null
+              ? activeHint!.hintText
+              : 'Send partner an effortless daily care hint',
+          badge: '1-min Quiz',
+          icon: Icons.volunteer_activism_rounded,
+          accentColor: const Color(0xFFE11D48),
+          containerColor: const Color(0xFFFFE4E6),
+          route: '/couple-quizzes',
+        ),
+      ];
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

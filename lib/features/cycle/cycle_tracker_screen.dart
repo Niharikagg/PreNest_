@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import 'cycle_tracker_provider.dart';
+import 'pcos_lab_panel_provider.dart';
+import 'pcos_self_check_provider.dart';
 
 class CycleTrackerScreen extends ConsumerStatefulWidget {
   const CycleTrackerScreen({super.key});
@@ -65,6 +68,10 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
     BuildContext context,
     CycleTrackerState state,
   ) {
+    final selfCheckState = ref.read(pcosSelfCheckProvider);
+    final labPanelState = ref.read(pcosLabPanelProvider);
+    final loggedLabs = labPanelState.loggedMarkers;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -75,149 +82,396 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(ctx).size.height * 0.88,
+          ),
           padding: EdgeInsets.only(
             left: 20,
             right: 20,
             top: 20,
             bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.borderLight,
-                    borderRadius: BorderRadius.circular(2),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.borderLight,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFE4E6),
-                      borderRadius: BorderRadius.circular(10),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFE4E6),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.assignment_ind_outlined,
+                        color: AppTheme.warmRose,
+                        size: 22,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.assignment_ind_outlined,
-                      color: AppTheme.warmRose,
-                      size: 22,
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Doctor Visit Summary',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textDark,
+                            ),
+                          ),
+                          Text(
+                            'Share these observations with your gynecologist',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // 1. Cycle Baseline Section
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceMuted,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppTheme.borderLight),
                   ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Cycle Baseline',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildSummaryRow(
+                        'Last Period Start',
+                        _formatDate(state.lastPeriodStartDate),
+                      ),
+                      _buildSummaryRow(
+                        'Current Cycle Day',
+                        'Day ${state.currentCycleDay}',
+                      ),
+                      _buildSummaryRow(
+                        'Cycle Mode',
+                        state.irregularCycleMode
+                            ? 'Irregular / Flexible (PCOD/PCOS)'
+                            : 'Regular (~${state.averageCycleLength} days)',
+                      ),
+                      _buildSummaryRow('Flow Intensity', state.flowIntensity),
+                      _buildSummaryRow(
+                        'Active Symptoms',
+                        state.selectedSymptoms.isEmpty
+                            ? 'None reported this cycle'
+                            : state.selectedSymptoms.join(', '),
+                      ),
+                      if (state.hormoneNotes.isNotEmpty)
+                        _buildSummaryRow(
+                          'Hormone / Lab Notes',
+                          state.hormoneNotes,
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // 2. PCOS Symptom Self-Check & Tailored Questions Section
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF1F2),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFFECDD3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.checklist_rtl_rounded,
+                            size: 18,
+                            color: AppTheme.warmRose,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'PCOS Symptom Self-Check',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.warmRoseDark,
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFE4E6),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '${selfCheckState.selectedCount} of ${selfCheckState.totalCount} flagged',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.warmRoseDark,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      if (selfCheckState.hasSelected) ...[
                         Text(
-                          'Doctor Visit Summary',
+                          'Flagged Indicators: ${selfCheckState.selectedIds.map((id) {
+                            final match = kPcosSelfCheckIndicators.where((i) => i.id == id);
+                            return match.isNotEmpty ? match.first.title : id;
+                          }).join('; ')}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textDark,
+                            height: 1.35,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Questions to Ask Your Gynaecologist:',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.textDark,
                           ),
                         ),
-                        Text(
-                          'Share these observations with your gynecologist',
+                        const SizedBox(height: 6),
+                        ...selfCheckState.gynaecologistQuestions.map((q) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 5.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  '• ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.warmRose,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    q,
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      color: AppTheme.textDark,
+                                      height: 1.35,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ] else ...[
+                        const Text(
+                          'No specific PCOS self-check indicators flagged yet.',
                           style: TextStyle(
                             fontSize: 12,
+                            fontStyle: FontStyle.italic,
                             color: AppTheme.textMuted,
                           ),
                         ),
                       ],
-                    ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceMuted,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppTheme.borderLight),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSummaryRow(
-                      'Last Period Start',
-                      _formatDate(state.lastPeriodStartDate),
-                    ),
-                    _buildSummaryRow(
-                      'Current Cycle Day',
-                      'Day ${state.currentCycleDay}',
-                    ),
-                    _buildSummaryRow(
-                      'Cycle Mode',
-                      state.irregularCycleMode
-                          ? 'Irregular / Flexible (PCOD/PCOS)'
-                          : 'Regular (~${state.averageCycleLength} days)',
-                    ),
-                    _buildSummaryRow('Flow Intensity', state.flowIntensity),
-                    _buildSummaryRow(
-                      'Active Symptoms',
-                      state.selectedSymptoms.isEmpty
-                          ? 'None reported this cycle'
-                          : state.selectedSymptoms.join(', '),
-                    ),
-                    if (state.hormoneNotes.isNotEmpty)
-                      _buildSummaryRow(
-                        'Hormone / Lab Notes',
-                        state.hormoneNotes,
+                const SizedBox(height: 14),
+
+                // 3. PCOS Hormone & Metabolic Lab Values Section
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDFA),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFF99F6E4)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.science_outlined,
+                            size: 18,
+                            color: AppTheme.primaryTeal,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'PCOS Lab Panel Values',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryTealDark,
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFCCFBF1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '${loggedLabs.length} of ${labPanelState.totalCount} logged',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryTealDark,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                  ],
+                      const SizedBox(height: 10),
+                      if (loggedLabs.isNotEmpty) ...[
+                        ...loggedLabs.map((lab) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: 130,
+                                  child: Text(
+                                    lab.name,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.textMuted,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${lab.value} ${lab.activeUnit}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.textDark,
+                                        ),
+                                      ),
+                                      Text(
+                                        '(${lab.rangeStatusLabel})',
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          color:
+                                              lab.rangeStatus ==
+                                                  PcosRangeStatus.outsideRange
+                                              ? const Color(0xFFD97706)
+                                              : (lab.rangeStatus ==
+                                                        PcosRangeStatus
+                                                            .withinRange
+                                                    ? const Color(0xFF059669)
+                                                    : AppTheme.textMuted),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ] else ...[
+                        const Text(
+                          'No PCOS lab values logged yet.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              // Clinical Note
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBEB),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFFDE68A)),
-                ),
-                child: const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.medical_services_outlined,
-                      color: Color(0xFFD97706),
-                      size: 18,
-                    ),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Informational only: PreNest does not diagnose conditions or prescribe medications. '
-                        'If you experience sudden severe pelvic pain, unusually heavy bleeding (soaking >2 pads/hr), '
-                        'or persistent cycle irregularities, please consult your healthcare provider promptly.',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: Color(0xFF92400E),
-                          height: 1.35,
+                const SizedBox(height: 14),
+
+                // Clinical Note
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFFBEB),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFFDE68A)),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.medical_services_outlined,
+                        color: Color(0xFFD97706),
+                        size: 18,
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Informational only: PreNest does not diagnose conditions or prescribe medications. '
+                          'If you experience sudden severe pelvic pain, unusually heavy bleeding (soaking >2 pads/hr), '
+                          'or persistent cycle irregularities, please consult your healthcare provider promptly.',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: Color(0xFF92400E),
+                            height: 1.35,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 18),
-              FilledButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppTheme.primaryTeal,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                const SizedBox(height: 18),
+                FilledButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.primaryTeal,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text('Close Summary'),
                 ),
-                child: const Text('Close Summary'),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -523,6 +777,8 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(cycleTrackerProvider);
     final notifier = ref.read(cycleTrackerProvider.notifier);
+    final selfCheckState = ref.watch(pcosSelfCheckProvider);
+    final labPanelState = ref.watch(pcosLabPanelProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -659,6 +915,178 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
                       ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 16),
+
+                // Mode 1 Clinical PCOD/PCOS Action Cards
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => context.push('/pcos-self-check'),
+                        borderRadius: BorderRadius.circular(18),
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: const Color(0xFFFECDD3),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.warmRose.withOpacity(0.04),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFE4E6),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.checklist_rtl_rounded,
+                                      color: AppTheme.warmRose,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFE4E6),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      '${selfCheckState.selectedCount} / ${selfCheckState.totalCount}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.warmRoseDark,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                'PCOS Self-Check',
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              const Text(
+                                '7 indicators & doctor questions',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => context.push('/pcos-lab-panel'),
+                        borderRadius: BorderRadius.circular(18),
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: const Color(0xFF99F6E4),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primaryTeal.withOpacity(0.04),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFCCFBF1),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.science_outlined,
+                                      color: AppTheme.primaryTeal,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFCCFBF1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      '${labPanelState.loggedCount} / 10',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primaryTealDark,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                'PCOS Lab Panel',
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              const Text(
+                                '10 metabolic & hormone markers',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
 

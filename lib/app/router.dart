@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../features/advisor/chat_screen.dart';
 import '../features/couple/couple_quizzes_screen.dart';
 import '../features/cycle/cycle_tracker_screen.dart';
+import '../features/cycle/pcos_lab_panel_screen.dart';
+import '../features/cycle/pcos_self_check_screen.dart';
 import '../features/onboarding/entry_choice_screen.dart';
 import '../features/onboarding/mode_select_screen.dart';
 import '../features/onboarding/onboarding_finale_screen.dart';
@@ -127,6 +129,18 @@ final appRouter = GoRouter(
       name: 'cycle',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const CycleTrackerScreen(),
+    ),
+    GoRoute(
+      path: '/pcos-self-check',
+      name: 'pcosSelfCheck',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const PcosSelfCheckScreen(),
+    ),
+    GoRoute(
+      path: '/pcos-lab-panel',
+      name: 'pcosLabPanel',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const PcosLabPanelScreen(),
     ),
     GoRoute(
       path: '/planning',
