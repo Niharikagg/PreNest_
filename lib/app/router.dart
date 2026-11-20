@@ -14,9 +14,11 @@ import '../features/records/records_screen.dart';
 import '../features/records/test_detail_screen.dart';
 import '../features/records/vitals_log_screen.dart';
 import '../features/reminders/medicine_reminders_screen.dart';
+import '../features/security/privacy_sync_screen.dart';
 import '../features/timeline/timeline_screen.dart';
 import '../features/trends/trends_screen.dart';
 import '../features/validity/danger_sign_checker_screen.dart';
+import '../features/vault/media_vault_screen.dart';
 import '../features/verify/verify_screen.dart';
 import 'app_shell.dart';
 
@@ -144,6 +146,18 @@ final appRouter = GoRouter(
       name: 'postpartum',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const PostpartumScreen(),
+    ),
+    GoRoute(
+      path: '/vault',
+      name: 'mediaVault',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const MediaVaultScreen(),
+    ),
+    GoRoute(
+      path: '/privacy-sync',
+      name: 'privacySync',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const PrivacySyncScreen(),
     ),
     GoRoute(
       path: '/onboarding',
