@@ -142,6 +142,14 @@ class TimelineScreen extends ConsumerWidget {
             route: '/trends',
           ),
           ModeShortcutItem(
+            title: AppStrings.t('Doctor Summary', lang),
+            subtitle: 'One-page PDF & talking points',
+            icon: Icons.picture_as_pdf_rounded,
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
+            route: '/doctor-summary',
+          ),
+          ModeShortcutItem(
             title: AppStrings.t('Danger Signs', lang),
             subtitle: AppStrings.t('Critical triage & 108 dispatch', lang),
             icon: Icons.warning_amber_rounded,
@@ -184,6 +192,14 @@ class TimelineScreen extends ConsumerWidget {
             accentColor: const Color(0xFF0284C7),
             containerColor: const Color(0xFFE0F2FE),
             route: '/records',
+          ),
+          ModeShortcutItem(
+            title: AppStrings.t('Doctor Summary', lang),
+            subtitle: 'One-page PDF & talking points',
+            icon: Icons.picture_as_pdf_rounded,
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
+            route: '/doctor-summary',
           ),
           ModeShortcutItem(
             title: AppStrings.t('Danger Signs', lang),
@@ -238,6 +254,14 @@ class TimelineScreen extends ConsumerWidget {
             route: '/birth-plan',
           ),
           ModeShortcutItem(
+            title: AppStrings.t('Doctor Summary', lang),
+            subtitle: 'One-page PDF & talking points',
+            icon: Icons.picture_as_pdf_rounded,
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
+            route: '/doctor-summary',
+          ),
+          ModeShortcutItem(
             title: AppStrings.t('Danger Signs', lang),
             subtitle: AppStrings.t('Critical triage & 108 dispatch', lang),
             icon: Icons.warning_amber_rounded,
@@ -280,6 +304,14 @@ class TimelineScreen extends ConsumerWidget {
             accentColor: Color(0xFF0F766E),
             containerColor: Color(0xFFCCFBF1),
             route: '/guides',
+          ),
+          ModeShortcutItem(
+            title: AppStrings.t('Doctor Summary', lang),
+            subtitle: 'One-page PDF & talking points',
+            icon: Icons.picture_as_pdf_rounded,
+            accentColor: const Color(0xFF0F766E),
+            containerColor: const Color(0xFFCCFBF1),
+            route: '/doctor-summary',
           ),
           ModeShortcutItem(
             title: AppStrings.t('Danger Signs', lang),
@@ -821,9 +853,27 @@ class TimelineScreen extends ConsumerWidget {
           containerColor: Color(0xFFCCFBF1),
           route: '/guides',
         ),
+        const _DailyInsightData(
+          title: 'Doctor Summary PDF',
+          subtitle: 'One-page visit summary & doctor questions',
+          badge: 'Export PDF',
+          icon: Icons.picture_as_pdf_rounded,
+          accentColor: Color(0xFF0F766E),
+          containerColor: Color(0xFFCCFBF1),
+          route: '/doctor-summary',
+        ),
       ];
     } else {
       insights = [
+        const _DailyInsightData(
+          title: 'Doctor Summary PDF',
+          subtitle: 'One-page visit summary & doctor questions',
+          badge: 'Export PDF',
+          icon: Icons.picture_as_pdf_rounded,
+          accentColor: Color(0xFF0F766E),
+          containerColor: Color(0xFFCCFBF1),
+          route: '/doctor-summary',
+        ),
         const _DailyInsightData(
           title: 'Symptom Checker',
           subtitle: 'Guided review: stage discomforts vs red flags',

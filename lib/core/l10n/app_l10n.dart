@@ -51,6 +51,11 @@ class AppStrings {
       AppLanguage.hi: 'ट्रेंड्स',
       AppLanguage.kn: 'ಟ್ರೆಂಡ್‌ಗಳು',
     },
+    'Doctor Summary': {
+      AppLanguage.en: 'Doctor Summary',
+      AppLanguage.hi: 'डॉक्टर सारांश',
+      AppLanguage.kn: 'ವೈದ್ಯರ ಸಾರಾಂಶ',
+    },
 
     // Modes & Stages
     'Period Tracker': {

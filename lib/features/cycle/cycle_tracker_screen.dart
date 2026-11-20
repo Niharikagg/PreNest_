@@ -462,13 +462,28 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                FilledButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    context.push('/doctor-summary');
+                  },
+                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                  label: const Text(
+                    'Export One-Page Doctor Summary (PDF)',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.primaryTeal,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Close Summary'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text('Close'),
                 ),
               ],
             ),
@@ -1468,18 +1483,33 @@ class _CycleTrackerScreenState extends ConsumerState<CycleTrackerScreen> {
                           ],
                         ),
                         const SizedBox(height: 14),
-                        FilledButton.tonalIcon(
+                        FilledButton.icon(
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFFCCFBF1),
-                            foregroundColor: AppTheme.primaryTealDark,
+                            backgroundColor: AppTheme.primaryTeal,
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          icon: const Icon(
+                            Icons.picture_as_pdf_outlined,
+                            size: 18,
+                          ),
+                          label: const Text(
+                            'Export One-Page Doctor Summary (PDF)',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () => context.push('/doctor-summary'),
+                        ),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 11),
                           ),
                           icon: const Icon(
                             Icons.description_outlined,
                             size: 18,
                           ),
                           label: const Text(
-                            'Open Doctor Visit Summary Sheet',
+                            'Quick In-App Summary Sheet',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           onPressed: () =>

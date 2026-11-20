@@ -841,7 +841,7 @@ class PartnerStoryCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activeStage = stage ?? ref.watch(stageProvider);
+    final PregnancyStage activeStage = stage ?? ref.watch(stageProvider);
     final couple = ref.watch(coupleProvider);
     final hintsState = ref.watch(coupleHintsProvider);
     final lockState = ref.watch(vaultLockProvider);

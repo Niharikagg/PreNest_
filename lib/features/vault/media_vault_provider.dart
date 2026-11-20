@@ -333,12 +333,34 @@ final mediaVaultProvider =
       return MediaVaultNotifier();
     });
 
+/// Notifier for vault category filter state.
+class VaultCategoryFilterNotifier extends Notifier<VaultCategoryFilter> {
+  @override
+  VaultCategoryFilter build() => VaultCategoryFilter.all;
+
+  void setFilter(VaultCategoryFilter filter) {
+    state = filter;
+  }
+}
+
 /// Filter state provider for active category filter.
-final vaultCategoryFilterProvider = StateProvider<VaultCategoryFilter>((ref) {
-  return VaultCategoryFilter.all;
-});
+final vaultCategoryFilterProvider =
+    NotifierProvider<VaultCategoryFilterNotifier, VaultCategoryFilter>(
+      VaultCategoryFilterNotifier.new,
+    );
+
+/// Notifier for vault sharing filter state.
+class VaultSharingFilterNotifier extends Notifier<VaultSharingFilter> {
+  @override
+  VaultSharingFilter build() => VaultSharingFilter.all;
+
+  void setFilter(VaultSharingFilter filter) {
+    state = filter;
+  }
+}
 
 /// Filter state provider for sharing filter (All / Shared / Private).
-final vaultSharingFilterProvider = StateProvider<VaultSharingFilter>((ref) {
-  return VaultSharingFilter.all;
-});
+final vaultSharingFilterProvider =
+    NotifierProvider<VaultSharingFilterNotifier, VaultSharingFilter>(
+      VaultSharingFilterNotifier.new,
+    );

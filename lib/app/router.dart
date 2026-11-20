@@ -24,6 +24,7 @@ import '../features/records/test_detail_screen.dart';
 import '../features/records/vitals_log_screen.dart';
 import '../features/reminders/medicine_reminders_screen.dart';
 import '../features/security/privacy_sync_screen.dart';
+import '../features/summary/doctor_summary_screen.dart';
 import '../features/symptoms/symptom_checker_screen.dart';
 import '../features/timeline/timeline_screen.dart';
 import '../features/trends/trends_screen.dart';
@@ -156,6 +157,12 @@ final appRouter = GoRouter(
       name: 'pcosLabPanel',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const PcosLabPanelScreen(),
+    ),
+    GoRoute(
+      path: '/doctor-summary',
+      name: 'doctorSummary',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const DoctorSummaryScreen(),
     ),
     GoRoute(
       path: '/planning',

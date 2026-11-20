@@ -79,7 +79,7 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
               _buildClinicalNoticeBanner(),
 
               // 2. Filter Controls (Category Chips & Sharing Segment)
-              _buildFilterSection(categoryFilter, sharingFilter),
+              _buildFilterSection(categoryFilter, sharingFilter, vaultItems),
 
               const Divider(height: 1, thickness: 1),
 
@@ -172,6 +172,7 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
   Widget _buildFilterSection(
     VaultCategoryFilter categoryFilter,
     VaultSharingFilter sharingFilter,
+    List<VaultMediaItem> vaultItems,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -242,8 +243,9 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
                     ],
                     selected: {sharingFilter},
                     onSelectionChanged: (val) {
-                      ref.read(vaultSharingFilterProvider.notifier).state =
-                          val.first;
+                      ref
+                          .read(vaultSharingFilterProvider.notifier)
+                          .setFilter(val.first);
                     },
                   ),
                 ),
@@ -358,7 +360,7 @@ class _MediaVaultScreenState extends ConsumerState<MediaVaultScreen> {
         ),
       ),
       onSelected: (_) {
-        ref.read(vaultCategoryFilterProvider.notifier).state = filter;
+        ref.read(vaultCategoryFilterProvider.notifier).setFilter(filter);
       },
     );
   }

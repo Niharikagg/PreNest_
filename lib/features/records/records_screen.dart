@@ -61,6 +61,15 @@ class RecordsScreen extends ConsumerWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: () => context.push('/doctor-summary'),
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  label: const Text('Export One-Page Doctor Summary'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F766E),
+                  ),
+                ),
               ],
             ),
           ),
@@ -75,9 +84,73 @@ class RecordsScreen extends ConsumerWidget {
         constraints: const BoxConstraints(maxWidth: 640),
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: testNames.length,
+          itemCount: testNames.length + 1,
           itemBuilder: (context, index) {
-            final testName = testNames[index];
+            if (index == 0) {
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: const BorderSide(color: Color(0xFF99F6E4), width: 1.5),
+                ),
+                color: const Color(0xFFF0FDFA),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => context.push('/doctor-summary'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFCCFBF1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.picture_as_pdf_rounded,
+                            color: Color(0xFF0F766E),
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Export One-Page Doctor Summary',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14.5,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Single-page A4 PDF: verified labs, vitals, cycle & doctor questions',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: Color(0xFF0F766E),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 14,
+                          color: Color(0xFF0F766E),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            final testName = testNames[index - 1];
             final records = groupedRecords[testName]!;
             // Sort chronologically to find latest
             records.sort((a, b) => a.date.compareTo(b.date));
