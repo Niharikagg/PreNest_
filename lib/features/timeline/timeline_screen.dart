@@ -38,26 +38,6 @@ class ModeShortcutItem {
   });
 }
 
-class _DailyInsightData {
-  final String title;
-  final String subtitle;
-  final String badge;
-  final IconData icon;
-  final Color accentColor;
-  final Color containerColor;
-  final String route;
-
-  const _DailyInsightData({
-    required this.title,
-    required this.subtitle,
-    required this.badge,
-    required this.icon,
-    required this.accentColor,
-    required this.containerColor,
-    required this.route,
-  });
-}
-
 class TimelineScreen extends ConsumerWidget {
   const TimelineScreen({super.key});
 
@@ -77,13 +57,13 @@ class TimelineScreen extends ConsumerWidget {
   static Color _getStageAccentColor(PregnancyStage stage) {
     switch (stage) {
       case PregnancyStage.plan:
-        return const Color(0xFF0F766E); // Teal
+        return const Color(0xFF6D1D32);
       case PregnancyStage.trying:
-        return const Color(0xFFE11D48); // Rose
+        return const Color(0xFFB23C59);
       case PregnancyStage.pregnancy:
-        return const Color(0xFF0284C7); // Sky
+        return const Color(0xFF8E2B44);
       case PregnancyStage.postpartum:
-        return const Color(0xFFD97706); // Amber
+        return const Color(0xFF4B0F1E);
     }
   }
 
@@ -538,13 +518,13 @@ class TimelineScreen extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.calendar_month_rounded,
-                        size: 12,
+                        Icons.expand_more_rounded,
+                        size: 16,
                         color: stageColor,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Full Calendar',
+                        'Expand',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -629,562 +609,203 @@ class TimelineScreen extends ConsumerWidget {
               );
             }).toList(),
           ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF1F4),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE7A8B6)),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.event_available_rounded,
+                  size: 18,
+                  color: Color(0xFF6D1D32),
+                ),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Checkup today',
+                    style: TextStyle(
+                      color: Color(0xFF4B0F1E),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF7D6DC),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'DEMO',
+                    style: TextStyle(
+                      color: Color(0xFF6D1D32),
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  static Widget _buildCircularQuickActions({
-    required BuildContext context,
+  static Widget _buildJourneyStageTile({
+    required WidgetRef ref,
+    required PregnancyStage stage,
+    required PregnancyStage selectedStage,
+    required String label,
+    required IconData icon,
   }) {
-    const quickActions = [
-      (
-        title: 'Scan Report',
-        icon: Icons.document_scanner_rounded,
-        accentColor: Color(0xFF0F766E),
-        containerColor: Color(0xFFCCFBF1),
-        route: '/verify',
-      ),
-      (
-        title: 'Danger Signs',
-        icon: Icons.warning_amber_rounded,
-        accentColor: Color(0xFFDC2626),
-        containerColor: Color(0xFFFEE2E2),
-        route: '/danger-signs',
-      ),
-      (
-        title: 'Vitals Log',
-        icon: Icons.monitor_heart_rounded,
-        accentColor: Color(0xFF0284C7),
-        containerColor: Color(0xFFE0F2FE),
-        route: '/vitals',
-      ),
-      (
-        title: 'AI Advisor',
-        icon: Icons.support_agent_rounded,
-        accentColor: Color(0xFF7C3AED),
-        containerColor: Color(0xFFF3E8FF),
-        route: '/advisor',
-      ),
-    ];
+    final isSelected = stage == selectedStage;
+    final accentColor = _getStageAccentColor(stage);
+    final foregroundColor = isSelected ? Colors.white : const Color(0xFF6D1D32);
 
-    return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppTheme.borderLight),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: quickActions.map((item) {
-            return InkWell(
-              onTap: () => context.push(item.route),
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: item.containerColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: item.accentColor.withOpacity(0.25),
-                          width: 1.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: item.accentColor.withOpacity(0.08),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        item.icon,
-                        color: item.accentColor,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(height: 7),
-                    SizedBox(
-                      width: 72,
-                      child: Text(
-                        item.title,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textDark,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  static Widget _oldBuildCircularQuickActions({
-    required BuildContext context,
-    required List<ModeShortcutItem> items,
-  }) {
-    final isScrollable = items.length > 4;
-
-    return Card(
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppTheme.borderLight),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
-        child: isScrollable
-            ? SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: items.map((item) {
-                    return InkWell(
-                      onTap: () => context.push(item.route),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color: item.containerColor,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: item.accentColor.withOpacity(0.25),
-                                  width: 1.2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: item.accentColor.withOpacity(0.08),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                item.icon,
-                                color: item.accentColor,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(height: 7),
-                            SizedBox(
-                              width: 72,
-                              child: Text(
-                                item.title,
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.textDark,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: items.map((item) {
-                  return InkWell(
-                    onTap: () => context.push(item.route),
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 4,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 52,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              color: item.containerColor,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: item.accentColor.withOpacity(0.25),
-                                width: 1.2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: item.accentColor.withOpacity(0.08),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              item.icon,
-                              color: item.accentColor,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 7),
-                          SizedBox(
-                            width: 68,
-                            child: Text(
-                              item.title,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.textDark,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-      ),
-    );
-  }
-
-  static Widget _buildDailyInsightsCards({
-    required BuildContext context,
-    required PreNestMode mode,
-    required int takenMedsCount,
-    required int totalMedsCount,
-    required double medProgress,
-    required dynamic activeHint,
-    required AppLanguage lang,
-  }) {
-    final List<_DailyInsightData> insights;
-    if (mode == PreNestMode.periodTracker) {
-      insights = [
-        const _DailyInsightData(
-          title: 'Symptom Checker',
-          subtitle: 'Guided review: stage discomforts vs red flags',
-          badge: 'Checker',
-          icon: Icons.health_and_safety_rounded,
-          accentColor: Color(0xFF0F766E),
-          containerColor: Color(0xFFCCFBF1),
-          route: '/symptom-checker',
-        ),
-        const _DailyInsightData(
-          title: 'Shared Calendar',
-          subtitle: 'Visits, vaccines, fertile days & reminders',
-          badge: 'Calendar',
-          icon: Icons.calendar_month_rounded,
-          accentColor: Color(0xFF7C3AED),
-          containerColor: Color(0xFFF3E8FF),
-          route: '/calendar',
-        ),
-        const _DailyInsightData(
-          title: 'PCOS Self-Check',
-          subtitle: 'Review 7 key indicators & doctor talking points',
-          badge: 'Self-Check',
-          icon: Icons.checklist_rtl_rounded,
-          accentColor: Color(0xFFE11D48),
-          containerColor: Color(0xFFFFE4E6),
-          route: '/pcos-self-check',
-        ),
-        const _DailyInsightData(
-          title: 'PCOS Lab Panel',
-          subtitle: 'Track 10 hormone & metabolic lab markers',
-          badge: 'Lab Panel',
-          icon: Icons.biotech_rounded,
-          accentColor: Color(0xFF0F766E),
-          containerColor: Color(0xFFCCFBF1),
-          route: '/pcos-lab-panel',
-        ),
-        _DailyInsightData(
-          title: 'Medicine Progress',
-          subtitle: '$takenMedsCount of $totalMedsCount taken today',
-          badge: medProgress == 1.0 && totalMedsCount > 0
-              ? 'All Taken'
-              : 'Pending',
-          icon: Icons.medication_rounded,
-          accentColor: const Color(0xFFD97706),
-          containerColor: const Color(0xFFFEF3C7),
-          route: '/reminders',
-        ),
-        _DailyInsightData(
-          title: 'Couple Check-in',
-          subtitle: activeHint?.hintText != null
-              ? activeHint!.hintText
-              : 'Send partner an effortless daily care hint',
-          badge: '1-min Quiz',
-          icon: Icons.volunteer_activism_rounded,
-          accentColor: const Color(0xFFE11D48),
-          containerColor: const Color(0xFFFFE4E6),
-          route: '/couple-quizzes',
-        ),
-        const _DailyInsightData(
-          title: 'Articles & Guides',
-          subtitle: 'Indian maternal & infant library',
-          badge: 'Library',
-          icon: Icons.auto_stories_rounded,
-          accentColor: Color(0xFF0F766E),
-          containerColor: Color(0xFFCCFBF1),
-          route: '/guides',
-        ),
-        const _DailyInsightData(
-          title: 'Doctor Summary PDF',
-          subtitle: 'One-page visit summary & doctor questions',
-          badge: 'Export PDF',
-          icon: Icons.picture_as_pdf_rounded,
-          accentColor: Color(0xFF0F766E),
-          containerColor: Color(0xFFCCFBF1),
-          route: '/doctor-summary',
-        ),
-      ];
-    } else {
-      insights = [
-        const _DailyInsightData(
-          title: 'Doctor Summary PDF',
-          subtitle: 'One-page visit summary & doctor questions',
-          badge: 'Export PDF',
-          icon: Icons.picture_as_pdf_rounded,
-          accentColor: Color(0xFF0F766E),
-          containerColor: Color(0xFFCCFBF1),
-          route: '/doctor-summary',
-        ),
-        const _DailyInsightData(
-          title: 'Symptom Checker',
-          subtitle: 'Guided review: stage discomforts vs red flags',
-          badge: 'Checker',
-          icon: Icons.health_and_safety_rounded,
-          accentColor: Color(0xFF0F766E),
-          containerColor: Color(0xFFCCFBF1),
-          route: '/symptom-checker',
-        ),
-        const _DailyInsightData(
-          title: 'Shared Calendar',
-          subtitle: 'Visits, vaccines, fertile days & reminders',
-          badge: 'Calendar',
-          icon: Icons.calendar_month_rounded,
-          accentColor: Color(0xFF7C3AED),
-          containerColor: Color(0xFFF3E8FF),
-          route: '/calendar',
-        ),
-        const _DailyInsightData(
-          title: 'Next ANC Visit',
-          subtitle: 'Ultrasound & clinical panel due',
-          badge: 'In 6 Days',
-          icon: Icons.event_available_rounded,
-          accentColor: Color(0xFF0284C7),
-          containerColor: Color(0xFFE0F2FE),
-          route: '/anc-planner',
-        ),
-        const _DailyInsightData(
-          title: 'Weekly Vitals',
-          subtitle: 'BP & maternal weight check',
-          badge: 'Up to Date',
-          icon: Icons.monitor_heart_rounded,
-          accentColor: Color(0xFF0F766E),
-          containerColor: Color(0xFFCCFBF1),
-          route: '/vitals',
-        ),
-        _DailyInsightData(
-          title: 'Medicine Progress',
-          subtitle: '$takenMedsCount of $totalMedsCount taken today',
-          badge: medProgress == 1.0 && totalMedsCount > 0
-              ? 'All Taken'
-              : 'Pending',
-          icon: Icons.medication_rounded,
-          accentColor: const Color(0xFFD97706),
-          containerColor: const Color(0xFFFEF3C7),
-          route: '/reminders',
-        ),
-        _DailyInsightData(
-          title: 'Couple Check-in',
-          subtitle: activeHint?.hintText != null
-              ? activeHint!.hintText
-              : 'Send partner an effortless daily care hint',
-          badge: '1-min Quiz',
-          icon: Icons.volunteer_activism_rounded,
-          accentColor: const Color(0xFFE11D48),
-          containerColor: const Color(0xFFFFE4E6),
-          route: '/couple-quizzes',
-        ),
-        const _DailyInsightData(
-          title: 'Articles & Guides',
-          subtitle: 'Indian maternal & infant library',
-          badge: 'Library',
-          icon: Icons.auto_stories_rounded,
-          accentColor: Color(0xFF0F766E),
-          containerColor: Color(0xFFCCFBF1),
-          route: '/guides',
-        ),
-      ];
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          ref.read(stageProvider.notifier).setStage(stage);
+          ref
+              .read(modeSelectionProvider.notifier)
+              .selectMode(PreNestMode.fromStage(stage));
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isSelected ? accentColor : const Color(0xFFFFF1F4),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected ? accentColor : const Color(0xFFE7A8B6),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                children: const [
-                  Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 16,
-                    color: AppTheme.primaryTeal,
+              Icon(icon, size: 32, color: foregroundColor),
+              const SizedBox(height: 12),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: TextStyle(
+                    color: foregroundColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
                   ),
-                  SizedBox(width: 6),
-                  Text(
-                    'Daily Insights',
-                    style: TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textDark,
-                    ),
-                  ),
-                ],
-              ),
-              const Text(
-                'Swipe to explore',
-                style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
-        SizedBox(
-          height: 115,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: insights.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final item = insights[index];
-              return InkWell(
-                onTap: () => context.push(item.route),
-                borderRadius: BorderRadius.circular(18),
-                child: Container(
-                  width: 185,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: item.accentColor.withOpacity(0.2),
-                      width: 1.1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: item.accentColor.withOpacity(0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: item.containerColor,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              item.icon,
-                              size: 16,
-                              color: item.accentColor,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: item.containerColor,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              item.badge,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: item.accentColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.textDark,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.subtitle,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppTheme.textMuted,
-                              height: 1.25,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+      ),
+    );
+  }
+
+  static Widget _buildCurrentJourneyCard({
+    required BuildContext context,
+    required WidgetRef ref,
+    required ThemeData theme,
+    required PregnancyStage currentStage,
+    required AppLanguage currentLang,
+    required Color stageColor,
+  }) {
+    return Card(
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.route_rounded, size: 18, color: stageColor),
+                const SizedBox(width: 8),
+                Text(
+                  'Current Journey',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF4B0F1E),
                   ),
                 ),
-              );
-            },
-          ),
+                const Spacer(),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () => context.push('/onboarding/mode'),
+                  child: const Text(
+                    'Change Mode',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 1,
+              children: [
+                _buildJourneyStageTile(
+                  ref: ref,
+                  stage: PregnancyStage.trying,
+                  selectedStage: currentStage,
+                  label: AppStrings.t('Trying', currentLang),
+                  icon: Icons.water_drop_rounded,
+                ),
+                _buildJourneyStageTile(
+                  ref: ref,
+                  stage: PregnancyStage.plan,
+                  selectedStage: currentStage,
+                  label: AppStrings.t('Planning Pregnancy', currentLang),
+                  icon: Icons.spa_rounded,
+                ),
+                _buildJourneyStageTile(
+                  ref: ref,
+                  stage: PregnancyStage.pregnancy,
+                  selectedStage: currentStage,
+                  label: AppStrings.t('Pregnancy', currentLang),
+                  icon: Icons.child_care_rounded,
+                ),
+                _buildJourneyStageTile(
+                  ref: ref,
+                  stage: PregnancyStage.postpartum,
+                  selectedStage: currentStage,
+                  label: AppStrings.t('Postpartum', currentLang),
+                  icon: Icons.family_restroom_rounded,
+                ),
+              ],
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -1203,13 +824,30 @@ class TimelineScreen extends ConsumerWidget {
     final reminders = ref.watch(medicineRemindersProvider);
     final hintsState = ref.watch(coupleHintsProvider);
     final postpartumState = ref.watch(postpartumProvider);
-    final theme = Theme.of(context);
+    final baseTheme = Theme.of(context);
+    final theme = baseTheme.copyWith(
+      colorScheme: baseTheme.colorScheme.copyWith(
+        primary: const Color(0xFF6D1D32),
+        onPrimary: Colors.white,
+        primaryContainer: const Color(0xFFF7D6DC),
+        onPrimaryContainer: const Color(0xFF6D1D32),
+        secondary: const Color(0xFFB23C59),
+        secondaryContainer: const Color(0xFFF7D6DC),
+        onSecondaryContainer: const Color(0xFF4B0F1E),
+      ),
+    );
 
     final activeMode = modeState.activeMode(currentStage);
     final stageColor = _getStageAccentColor(currentStage);
     final isPartner =
         activePartner.id == couple.secondaryPartner.id ||
         activePartner.role.toLowerCase() == 'him';
+    final otherName = otherPartner.name.trim();
+    final dashboardPairName = isPartner
+        ? '${activePartner.name.trim()} & ${otherName.isNotEmpty ? otherName : 'Her'}'
+        : (otherName.isNotEmpty
+              ? '${activePartner.name.trim()} & $otherName'
+              : activePartner.name.trim());
 
     // Checklist stats
     final checklistItems = checklistAsync.asData?.value ?? [];
@@ -1255,661 +893,539 @@ class TimelineScreen extends ConsumerWidget {
         )
         .length;
 
-    final shortcuts = _getShortcutsForMode(activeMode, currentLang);
-
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // STEP 3: Compact Horizontal 7-Day Calendar Strip
-                _buildCalendarStrip(context, stageColor),
-
-                // STEP 3: Flo-Style Warm Gradient Hero Header
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(
-                      color: stageColor.withOpacity(0.3),
-                      width: 1.2,
-                    ),
+      backgroundColor: const Color(0xFFFFF9FA),
+      body: Theme(
+        data: theme,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // STEP 3: Compact Horizontal 7-Day Calendar Strip
+                  _buildCalendarStrip(context, stageColor),
+                  const SizedBox(height: 14),
+                  _buildCurrentJourneyCard(
+                    context: context,
+                    ref: ref,
+                    theme: theme,
+                    currentStage: currentStage,
+                    currentLang: currentLang,
+                    stageColor: stageColor,
                   ),
-                  color: Colors.white,
-                  child: Container(
-                    decoration: BoxDecoration(
+                  const SizedBox(height: 14),
+
+                  // STEP 3: Flo-Style Warm Gradient Hero Header
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          stageColor.withOpacity(0.18),
-                          stageColor.withOpacity(0.04),
-                          Colors.white,
-                        ],
+                      side: BorderSide(
+                        color: stageColor.withOpacity(0.3),
+                        width: 1.2,
                       ),
                     ),
-                    padding: const EdgeInsets.all(18.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Partner Profile & Partner Pairing Status Pill
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CircleAvatar(
-                              radius: 24,
-                              backgroundColor: stageColor,
-                              foregroundColor: Colors.white,
-                              child: Text(
-                                activePartner.initials,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                    color: Colors.white,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            stageColor.withOpacity(0.18),
+                            stageColor.withOpacity(0.04),
+                            Colors.white,
+                          ],
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(18.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Partner Profile & Partner Pairing Status Pill
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CircleAvatar(
+                                radius: 24,
+                                backgroundColor: stageColor,
+                                foregroundColor: Colors.white,
+                                child: Text(
+                                  activePartner.initials,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          activePartner.name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: stageColor.withOpacity(0.12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            activePartner.role,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: stageColor,
+                                            ),
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        // Switch active partner button
+                                        TextButton.icon(
+                                          style: TextButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            visualDensity:
+                                                VisualDensity.compact,
+                                          ),
+                                          onPressed: () {
+                                            ref
+                                                .read(coupleProvider.notifier)
+                                                .togglePartner();
+                                          },
+                                          icon: const Icon(
+                                            Icons.switch_account_outlined,
+                                            size: 14,
+                                          ),
+                                          label: Text(
+                                            couple.otherPartner.name,
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          _getStageIcon(currentStage),
+                                          size: 14,
+                                          color: stageColor,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            dashboardPairName,
+                                            style: TextStyle(
+                                              fontSize: 12.5,
+                                              fontWeight: FontWeight.w600,
+                                              color: stageColor,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          // Gestational / Cycle Milestone Header
+                          Text(
+                            _getGestationalMilestoneTitle(
+                              activeMode,
+                              postpartumState,
+                            ),
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.4,
+                              color: stageColor,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            _getGestationalMilestoneSubtitle(
+                              activeMode,
+                              modeState,
+                              postpartumState,
+                            ),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.textDark.withOpacity(0.8),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Warm Milestone Visual Badge
+                          _getGestationalBadge(
+                            activeMode,
+                            stageColor,
+                            postpartumState,
+                          ),
+
+                          // Actionable Daily Partner Support Cue
+                          Container(
+                            margin: const EdgeInsets.only(top: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 9,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: stageColor.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.lightbulb_outline_rounded,
+                                  size: 16,
+                                  color: stageColor,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _getPartnerSupportCue(activeMode),
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.textDark.withOpacity(
+                                        0.85,
+                                      ),
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Partner Pairing Status Banner
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: entryState.isPaired
+                                  ? const Color(0xFFF0FDF4)
+                                  : Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: entryState.isPaired
+                                    ? const Color(0xFFBBF7D0)
+                                    : Colors.grey.shade300,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  entryState.isPaired
+                                      ? Icons.favorite_rounded
+                                      : Icons.person_outline_rounded,
+                                  size: 16,
+                                  color: entryState.isPaired
+                                      ? const Color(0xFF16A34A)
+                                      : Colors.grey.shade600,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    entryState.isPaired
+                                        ? 'Paired with ${couple.otherPartner.name} (Code: ${entryState.partnerCode ?? "PN2026"}) • Sync Active'
+                                        : 'Individual Mode • Tap to connect partner anytime',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: entryState.isPaired
+                                          ? FontWeight.w600
+                                          : FontWeight.normal,
+                                      color: entryState.isPaired
+                                          ? const Color(0xFF15803D)
+                                          : Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ),
+                                if (!entryState.isPaired)
+                                  InkWell(
+                                    onTap: () => context.push('/onboarding'),
+                                    child: const Text(
+                                      'Pair',
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0F766E),
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+
+                          // Mode metadata / Milestone note / Irregular cycle indicator
+                          if (modeState.timelineOrMilestoneNote != null &&
+                              modeState
+                                  .timelineOrMilestoneNote!
+                                  .isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.bookmark_added_rounded,
+                                  size: 14,
+                                  color: stageColor,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    modeState.timelineOrMilestoneNote!,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontStyle: FontStyle.italic,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () => context.push('/onboarding/mode'),
+                                  child: const Text(
+                                    'Edit Mode',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+
+                          // Irregular cycle mode indicator for Period Tracker
+                          if (activeMode == PreNestMode.periodTracker &&
+                              modeState.irregularCycleMode) ...[
+                            const SizedBox(height: 6),
+                            InkWell(
+                              onTap: () => context.push('/cycle'),
+                              borderRadius: BorderRadius.circular(6),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFE4E6),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'PCOD/PCOS Irregular Cycle Mode Active • Tap for Cycle & PCOS Hub',
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFFBE123C),
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 10,
+                                      color: Color(0xFFBE123C),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 14),
+                          ],
+
+                          const SizedBox(height: 14),
+
+                          // Checklist completion progress bar
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppStrings.t(
+                                  'Stage Checklist Progress',
+                                  currentLang,
+                                ),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              Text(
+                                '$completedChecklistCount / $totalChecklistCount',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      completedChecklistCount ==
+                                              totalChecklistCount &&
+                                          totalChecklistCount > 0
+                                      ? Colors.green.shade700
+                                      : stageColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: LinearProgressIndicator(
+                              value: checklistProgress,
+                              minHeight: 8,
+                              backgroundColor: theme.colorScheme.outlineVariant,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                checklistProgress == 1.0
+                                    ? Colors.green.shade600
+                                    : stageColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Role-Badged Story Cards (You / Both / Her) for Partner Dashboard
+                  if (isPartner) ...[
+                    PartnerStoryCards(stage: currentStage, showHeader: true),
+                    const SizedBox(height: 14),
+                  ],
+
+                  // Mood & State Professional Insights (Her & Partner views)
+                  const MoodStateInsightCard(),
+                  const SizedBox(height: 14),
+
+                  // Articles & Guides Shortcut Tile
+                  Card(
+                    elevation: 0,
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: AppTheme.borderLight),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => context.push('/guides'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF7D6DC),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.auto_stories_rounded,
+                                color: Color(0xFF6D1D32),
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
-                                      Text(
-                                        activePartner.name,
-                                        style: const TextStyle(
+                                      const Text(
+                                        'Articles & Guides Library',
+                                        style: TextStyle(
+                                          fontSize: 14,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 18,
+                                          color: AppTheme.textDark,
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 6),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 2,
+                                          horizontal: 6,
+                                          vertical: 1.5,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: stageColor.withOpacity(0.12),
+                                          color: const Color(0xFFDCFCE7),
                                           borderRadius: BorderRadius.circular(
-                                            12,
+                                            6,
                                           ),
                                         ),
-                                        child: Text(
-                                          activePartner.role,
+                                        child: const Text(
+                                          'WHO • ICMR • MoHFW',
                                           style: TextStyle(
-                                            fontSize: 11,
+                                            fontSize: 9.5,
                                             fontWeight: FontWeight.bold,
-                                            color: stageColor,
+                                            color: Color(0xFF15803D),
                                           ),
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      // Switch active partner button
-                                      TextButton.icon(
-                                        style: TextButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          visualDensity: VisualDensity.compact,
-                                        ),
-                                        onPressed: () {
-                                          ref
-                                              .read(coupleProvider.notifier)
-                                              .togglePartner();
-                                        },
-                                        icon: const Icon(
-                                          Icons.switch_account_outlined,
-                                          size: 14,
-                                        ),
-                                        label: Text(
-                                          couple.otherPartner.name,
-                                          style: const TextStyle(fontSize: 11),
                                         ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 2),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        _getStageIcon(currentStage),
-                                        size: 14,
-                                        color: stageColor,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          '${activeMode.title} • ${couple.coupleName}',
-                                          style: TextStyle(
-                                            fontSize: 12.5,
-                                            fontWeight: FontWeight.w600,
-                                            color: stageColor,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        // Gestational / Cycle Milestone Header
-                        Text(
-                          _getGestationalMilestoneTitle(
-                            activeMode,
-                            postpartumState,
-                          ),
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.4,
-                            color: stageColor,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          _getGestationalMilestoneSubtitle(
-                            activeMode,
-                            modeState,
-                            postpartumState,
-                          ),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            color: AppTheme.textDark.withOpacity(0.8),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        // Warm Milestone Visual Badge
-                        _getGestationalBadge(
-                          activeMode,
-                          stageColor,
-                          postpartumState,
-                        ),
-
-                        // Actionable Daily Partner Support Cue
-                        Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 9,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: stageColor.withOpacity(0.2),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.lightbulb_outline_rounded,
-                                size: 16,
-                                color: stageColor,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _getPartnerSupportCue(activeMode),
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.textDark.withOpacity(0.85),
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        // Partner Pairing Status Banner
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: entryState.isPaired
-                                ? const Color(0xFFF0FDF4)
-                                : Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: entryState.isPaired
-                                  ? const Color(0xFFBBF7D0)
-                                  : Colors.grey.shade300,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                entryState.isPaired
-                                    ? Icons.favorite_rounded
-                                    : Icons.person_outline_rounded,
-                                size: 16,
-                                color: entryState.isPaired
-                                    ? const Color(0xFF16A34A)
-                                    : Colors.grey.shade600,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  entryState.isPaired
-                                      ? 'Paired with ${couple.otherPartner.name} (Code: ${entryState.partnerCode ?? "PN2026"}) • Sync Active'
-                                      : 'Individual Mode • Tap to connect partner anytime',
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: entryState.isPaired
-                                        ? FontWeight.w600
-                                        : FontWeight.normal,
-                                    color: entryState.isPaired
-                                        ? const Color(0xFF15803D)
-                                        : Colors.grey.shade700,
-                                  ),
-                                ),
-                              ),
-                              if (!entryState.isPaired)
-                                InkWell(
-                                  onTap: () => context.push('/onboarding'),
-                                  child: const Text(
-                                    'Pair',
+                                  const Text(
+                                    'Indian nutrition, recovery, danger signs, PCOS & partner guides',
                                     style: TextStyle(
                                       fontSize: 11.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0F766E),
-                                      decoration: TextDecoration.underline,
+                                      color: AppTheme.textMuted,
                                     ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-
-                        // Mode metadata / Milestone note / Irregular cycle indicator
-                        if (modeState.timelineOrMilestoneNote != null &&
-                            modeState.timelineOrMilestoneNote!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.bookmark_added_rounded,
-                                size: 14,
-                                color: stageColor,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  modeState.timelineOrMilestoneNote!,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontStyle: FontStyle.italic,
-                                    color: Colors.grey.shade800,
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => context.push('/onboarding/mode'),
-                                child: const Text(
-                                  'Edit Mode',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-
-                        // Irregular cycle mode indicator for Period Tracker
-                        if (activeMode == PreNestMode.periodTracker &&
-                            modeState.irregularCycleMode) ...[
-                          const SizedBox(height: 6),
-                          InkWell(
-                            onTap: () => context.push('/cycle'),
-                            borderRadius: BorderRadius.circular(6),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFE4E6),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      'PCOD/PCOS Irregular Cycle Mode Active • Tap for Cycle & PCOS Hub',
-                                      style: TextStyle(
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFFBE123C),
-                                      ),
-                                    ),
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 10,
-                                    color: Color(0xFFBE123C),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                        ],
-
-                        const SizedBox(height: 14),
-
-                        // Checklist completion progress bar
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              AppStrings.t(
-                                'Stage Checklist Progress',
-                                currentLang,
-                              ),
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            Text(
-                              '$completedChecklistCount / $totalChecklistCount',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    completedChecklistCount ==
-                                            totalChecklistCount &&
-                                        totalChecklistCount > 0
-                                    ? Colors.green.shade700
-                                    : stageColor,
-                              ),
+                            const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 13,
+                              color: Color(0xFF6D1D32),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: LinearProgressIndicator(
-                            value: checklistProgress,
-                            minHeight: 8,
-                            backgroundColor: theme.colorScheme.outlineVariant,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              checklistProgress == 1.0
-                                  ? Colors.green.shade600
-                                  : stageColor,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 14),
-
-                // STEP 3: 4 Circular Quick-Action Buttons
-                _buildCircularQuickActions(context: context),
-                const SizedBox(height: 14),
-
-                // Role-Badged Story Cards (You / Both / Her) for Partner Dashboard
-                if (isPartner) ...[
-                  PartnerStoryCards(stage: currentStage, showHeader: true),
                   const SizedBox(height: 14),
-                ],
 
-                // Mood & State Professional Insights (Her & Partner views)
-                const MoodStateInsightCard(),
-                const SizedBox(height: 14),
-
-                // STEP 3: Swipeable "Daily Insights" Cards
-                _buildDailyInsightsCards(
-                  context: context,
-                  mode: activeMode,
-                  takenMedsCount: takenMedsCount,
-                  totalMedsCount: totalMedsCount,
-                  medProgress: medProgress,
-                  activeHint: activeHint,
-                  lang: currentLang,
-                ),
-                const SizedBox(height: 14),
-
-                // Articles & Guides Shortcut Tile
-                Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(color: AppTheme.borderLight),
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () => context.push('/guides'),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFCCFBF1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(
-                              Icons.auto_stories_rounded,
-                              color: AppTheme.primaryTeal,
-                              size: 22,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'Articles & Guides Library',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.textDark,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 1.5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFDCFCE7),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: const Text(
-                                        'WHO • ICMR • MoHFW',
-                                        style: TextStyle(
-                                          fontSize: 9.5,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF15803D),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                const Text(
-                                  'Indian nutrition, recovery, danger signs, PCOS & partner guides',
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: AppTheme.textMuted,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 13,
-                            color: AppTheme.primaryTeal,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                // Cross-Mode Core Hubs: Shared Calendar & Symptom Checker
-                Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        elevation: 0,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(
-                            color: const Color(0xFF7C3AED).withOpacity(0.3),
-                            width: 1.1,
-                          ),
-                        ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => context.push('/calendar'),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(7),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF3E8FF),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Icon(
-                                    Icons.calendar_month_rounded,
-                                    size: 18,
-                                    color: Color(0xFF7C3AED),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Shared Calendar',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.textDark,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                const Text(
-                                  'Visits, vaccines & cycle dots',
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    color: AppTheme.textMuted,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Card(
-                        elevation: 0,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(
-                            color: const Color(0xFF0F766E).withOpacity(0.3),
-                            width: 1.1,
-                          ),
-                        ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => context.push('/symptom-checker'),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(7),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFCCFBF1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Icon(
-                                    Icons.health_and_safety_rounded,
-                                    size: 18,
-                                    color: Color(0xFF0F766E),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Symptom Checker',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.textDark,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                const Text(
-                                  'Discomforts vs red flags',
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    color: AppTheme.textMuted,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                // Mode 3 (Pregnancy) Dedicated Clinical Tools Quick-Access Cards
-                if (activeMode == PreNestMode.pregnant) ...[
+                  // Cross-Mode Core Hub: Symptom Checker
                   Row(
                     children: [
                       Expanded(
@@ -1919,13 +1435,611 @@ class TimelineScreen extends ConsumerWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: BorderSide(
-                              color: const Color(0xFF0F766E).withOpacity(0.3),
+                              color: const Color(0xFFE7A8B6),
                               width: 1.1,
                             ),
                           ),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
-                            onTap: () => context.push('/anc-planner'),
+                            onTap: () => context.push('/symptom-checker'),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF7D6DC),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.health_and_safety_rounded,
+                                      size: 18,
+                                      color: Color(0xFF6D1D32),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Symptom Checker',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textDark,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  const Text(
+                                    'Discomforts vs red flags',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      color: AppTheme.textMuted,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Mode 3 (Pregnancy) Dedicated Clinical Tools Quick-Access Cards
+                  if (activeMode == PreNestMode.pregnant) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Card(
+                            elevation: 0,
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(
+                                color: const Color(0xFF0F766E).withOpacity(0.3),
+                                width: 1.1,
+                              ),
+                            ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () => context.push('/anc-planner'),
+                              child: Padding(
+                                padding: const EdgeInsets.all(14.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFCCFBF1),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.event_note_rounded,
+                                            size: 20,
+                                            color: Color(0xFF0F766E),
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFCCFBF1),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            '4+ Visits',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF0F766E),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      AppStrings.t(
+                                        'ANC Visit Planner',
+                                        currentLang,
+                                      ),
+                                      style: const TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 3),
+                                    const Text(
+                                      '4 visits, scans & IFA/Calcium',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.textMuted,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Card(
+                            elevation: 0,
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(
+                                color: const Color(0xFFE11D48).withOpacity(0.3),
+                                width: 1.1,
+                              ),
+                            ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () => context.push('/contraction-timer'),
+                              child: Padding(
+                                padding: const EdgeInsets.all(14.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFFE4E6),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.timer_outlined,
+                                            size: 20,
+                                            color: Color(0xFFE11D48),
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFFE4E6),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            '5-1-1 Rule',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFFE11D48),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      AppStrings.t(
+                                        'Contraction Timer',
+                                        currentLang,
+                                      ),
+                                      style: const TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 3),
+                                    const Text(
+                                      'Labor timer & frequency cue',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.textMuted,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+
+                  // 4. Medicine Reminders Dashboard Card
+                  Card(
+                    elevation: 0,
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: const Color(0xFF0F766E).withOpacity(0.3),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => context.push('/reminders'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFCCFBF1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.medication_rounded,
+                                    size: 20,
+                                    color: Color(0xFF0F766E),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        AppStrings.t(
+                                          'Medicine Reminders',
+                                          currentLang,
+                                        ),
+                                        style: const TextStyle(
+                                          fontSize: 14.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                      Text(
+                                        'Shared doctor-advised schedule adherence',
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        takenMedsCount == totalMedsCount &&
+                                            totalMedsCount > 0
+                                        ? const Color(0xFFDCFCE7)
+                                        : const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '$takenMedsCount of $totalMedsCount Taken',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          takenMedsCount == totalMedsCount &&
+                                              totalMedsCount > 0
+                                          ? const Color(0xFF15803D)
+                                          : const Color(0xFF0F766E),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: medProgress,
+                                minHeight: 6,
+                                backgroundColor: const Color(0xFFE2E8F0),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  medProgress == 1.0
+                                      ? const Color(0xFF059669)
+                                      : const Color(0xFF0F766E),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'View full list & timings for ${activePartner.name} & ${otherPartner.name}',
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 12,
+                                  color: Color(0xFF0F766E),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // 5. Couple Check-In & Smart Hints Dashboard Card
+                  Card(
+                    elevation: 0,
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: const Color(0xFFE11D48).withOpacity(0.3),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFE4E6),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.volunteer_activism_rounded,
+                                  size: 20,
+                                  color: Color(0xFFE11D48),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      AppStrings.t(
+                                        'Couple Quizzes',
+                                        currentLang,
+                                      ),
+                                      style: const TextStyle(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                    Text(
+                                      pendingCheckupsCount > 0
+                                          ? '$pendingCheckupsCount checkup & helping reminders pending'
+                                          : 'All partner tasks up to date',
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Active Smart Hint banner if present
+                          if (activeHint != null) ...[
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF1F2),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFFFDA4AF),
+                                ),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(
+                                    Icons.favorite_rounded,
+                                    size: 16,
+                                    color: Color(0xFFE11D48),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          activeHint.fromPartnerId ==
+                                                  activePartner.id
+                                              ? 'Your Active Hint for ${otherPartner.name}:'
+                                              : 'Gentle Hint from ${activeHint.fromPartnerName}:',
+                                          style: const TextStyle(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFFBE123C),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          activeHint.hintText,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            height: 1.35,
+                                            color: Color(0xFF881337),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ] else ...[
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFFE2E8F0),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.lightbulb_outline_rounded,
+                                    size: 16,
+                                    color: Color(0xFFE11D48),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Take a 1-min check-in to send ${otherPartner.name} an effortless care hint.',
+                                      style: const TextStyle(
+                                        fontSize: 11.5,
+                                        color: Color(0xFF475569),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
+                          // Quick action buttons
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: const Color(0xFFBE123C),
+                                    side: const BorderSide(
+                                      color: Color(0xFFFDA4AF),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 8,
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                  onPressed: () =>
+                                      context.push('/couple-quizzes'),
+                                  icon: const Icon(
+                                    Icons.quiz_outlined,
+                                    size: 15,
+                                  ),
+                                  label: Text(
+                                    AppStrings.t('Couple Quizzes', currentLang),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: FilledButton.icon(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF0F766E),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 8,
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                  onPressed: () => context.push('/advisor'),
+                                  icon: const Icon(
+                                    Icons.support_agent_rounded,
+                                    size: 15,
+                                  ),
+                                  label: Text(
+                                    AppStrings.t('AI Advisor', currentLang),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // 6. Media Vault & Security Hub Quick Access
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Card(
+                          elevation: 0,
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: const Color(0xFF0F766E).withOpacity(0.25),
+                              width: 1,
+                            ),
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () => context.push('/vault'),
                             child: Padding(
                               padding: const EdgeInsets.all(14.0),
                               child: Column(
@@ -1944,56 +2058,34 @@ class TimelineScreen extends ConsumerWidget {
                                           ),
                                         ),
                                         child: const Icon(
-                                          Icons.event_note_rounded,
+                                          Icons.photo_library_rounded,
                                           size: 20,
                                           color: Color(0xFF0F766E),
                                         ),
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFCCFBF1),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          '4+ Visits',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF0F766E),
-                                          ),
-                                        ),
+                                      const Icon(
+                                        Icons.arrow_forward_ios,
+                                        size: 12,
+                                        color: Color(0xFF0F766E),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 10),
                                   Text(
-                                    AppStrings.t(
-                                      'ANC Visit Planner',
-                                      currentLang,
-                                    ),
+                                    AppStrings.t('Media Vault', currentLang),
                                     style: const TextStyle(
-                                      fontSize: 13.5,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                       color: Color(0xFF0F172A),
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 3),
-                                  const Text(
-                                    '4 visits, scans & IFA/Calcium',
+                                  Text(
+                                    'Scans & Keepsakes',
                                     style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppTheme.textMuted,
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade600,
                                     ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
@@ -2009,13 +2101,13 @@ class TimelineScreen extends ConsumerWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                             side: BorderSide(
-                              color: const Color(0xFFE11D48).withOpacity(0.3),
-                              width: 1.1,
+                              color: const Color(0xFF0284C7).withOpacity(0.25),
+                              width: 1,
                             ),
                           ),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
-                            onTap: () => context.push('/contraction-timer'),
+                            onTap: () => context.push('/privacy-sync'),
                             child: Padding(
                               padding: const EdgeInsets.all(14.0),
                               child: Column(
@@ -2028,62 +2120,40 @@ class TimelineScreen extends ConsumerWidget {
                                       Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFFFE4E6),
+                                          color: const Color(0xFFE0F2FE),
                                           borderRadius: BorderRadius.circular(
                                             10,
                                           ),
                                         ),
                                         child: const Icon(
-                                          Icons.timer_outlined,
+                                          Icons.shield_outlined,
                                           size: 20,
-                                          color: Color(0xFFE11D48),
+                                          color: Color(0xFF0284C7),
                                         ),
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFFFE4E6),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          '5-1-1 Rule',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFFE11D48),
-                                          ),
-                                        ),
+                                      const Icon(
+                                        Icons.arrow_forward_ios,
+                                        size: 12,
+                                        color: Color(0xFF0284C7),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 10),
                                   Text(
-                                    AppStrings.t(
-                                      'Contraction Timer',
-                                      currentLang,
-                                    ),
+                                    AppStrings.t('Privacy & Lock', currentLang),
                                     style: const TextStyle(
-                                      fontSize: 13.5,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                       color: Color(0xFF0F172A),
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 3),
-                                  const Text(
-                                    'Labor timer & frequency cue',
+                                  Text(
+                                    'PIN & Offline Sync',
                                     style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppTheme.textMuted,
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade600,
                                     ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
@@ -2094,784 +2164,210 @@ class TimelineScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                ],
 
-                // 2. Stage Switcher Segmented Button
-                Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: theme.colorScheme.outlineVariant,
-                      width: 1,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.swap_horiz, size: 18, color: stageColor),
-                            const SizedBox(width: 8),
-                            Text(
-                              AppStrings.t('Active Journey Stage', currentLang),
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Spacer(),
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                              onPressed: () => context.push('/onboarding/mode'),
-                              child: const Text(
-                                'Change Mode',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: double.infinity,
-                          child: SegmentedButton<PregnancyStage>(
-                            segments: [
-                              ButtonSegment(
-                                value: PregnancyStage.trying,
-                                label: Text(
-                                  AppStrings.t('Trying', currentLang),
-                                ),
-                                icon: const Icon(
-                                  Icons.water_drop_outlined,
-                                  size: 16,
-                                ),
-                              ),
-                              ButtonSegment(
-                                value: PregnancyStage.plan,
-                                label: Text(AppStrings.t('Plan', currentLang)),
-                                icon: const Icon(Icons.spa_outlined, size: 16),
-                              ),
-                              ButtonSegment(
-                                value: PregnancyStage.pregnancy,
-                                label: Text(
-                                  AppStrings.t('Pregnancy', currentLang),
-                                ),
-                                icon: const Icon(
-                                  Icons.child_care_outlined,
-                                  size: 16,
-                                ),
-                              ),
-                              ButtonSegment(
-                                value: PregnancyStage.postpartum,
-                                label: Text(
-                                  AppStrings.t('Postpartum', currentLang),
-                                ),
-                                icon: const Icon(
-                                  Icons.family_restroom_outlined,
-                                  size: 16,
-                                ),
-                              ),
-                            ],
-                            selected: {currentStage},
-                            onSelectionChanged: (newSelection) {
-                              final selected = newSelection.first;
-                              ref
-                                  .read(stageProvider.notifier)
-                                  .setStage(selected);
-                              ref
-                                  .read(modeSelectionProvider.notifier)
-                                  .selectMode(PreNestMode.fromStage(selected));
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                // 4. Medicine Reminders Dashboard Card
-                Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: const Color(0xFF0F766E).withOpacity(0.3),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () => context.push('/reminders'),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  // 7. Filtered Stage Checklist Section
+                  checklistAsync.when(
+                    data: (items) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFCCFBF1),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                  Icons.medication_rounded,
-                                  size: 20,
-                                  color: Color(0xFF0F766E),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      AppStrings.t(
-                                        'Medicine Reminders',
-                                        currentLang,
-                                      ),
-                                      style: const TextStyle(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF0F172A),
-                                      ),
-                                    ),
-                                    Text(
-                                      'Shared doctor-advised schedule adherence',
-                                      style: TextStyle(
-                                        fontSize: 11.5,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color:
-                                      takenMedsCount == totalMedsCount &&
-                                          totalMedsCount > 0
-                                      ? const Color(0xFFDCFCE7)
-                                      : const Color(0xFFF1F5F9),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  '$takenMedsCount of $totalMedsCount Taken',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        takenMedsCount == totalMedsCount &&
-                                            totalMedsCount > 0
-                                        ? const Color(0xFF15803D)
-                                        : const Color(0xFF0F766E),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: medProgress,
-                              minHeight: 6,
-                              backgroundColor: const Color(0xFFE2E8F0),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                medProgress == 1.0
-                                    ? const Color(0xFF059669)
-                                    : const Color(0xFF0F766E),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'View full list & timings for ${activePartner.name} & ${otherPartner.name}',
-                                style: const TextStyle(
-                                  fontSize: 11.5,
-                                  color: Color(0xFF64748B),
+                                '${AppStrings.t(currentStage.displayName, currentLang)} ${AppStrings.t('Checklist', currentLang)}',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 12,
-                                color: Color(0xFF0F766E),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                // 5. Couple Check-In & Smart Hints Dashboard Card
-                Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: const Color(0xFFE11D48).withOpacity(0.3),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFE4E6),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(
-                                Icons.volunteer_activism_rounded,
-                                size: 20,
-                                color: Color(0xFFE11D48),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    AppStrings.t('Couple Quizzes', currentLang),
-                                    style: const TextStyle(
-                                      fontSize: 14.5,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0F172A),
-                                    ),
-                                  ),
-                                  Text(
-                                    pendingCheckupsCount > 0
-                                        ? '$pendingCheckupsCount checkup & helping reminders pending'
-                                        : 'All partner tasks up to date',
-                                    style: TextStyle(
-                                      fontSize: 11.5,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Active Smart Hint banner if present
-                        if (activeHint != null) ...[
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFF1F2),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFFFDA4AF),
-                              ),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.favorite_rounded,
-                                  size: 16,
-                                  color: Color(0xFFE11D48),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
                                 ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        activeHint.fromPartnerId ==
-                                                activePartner.id
-                                            ? 'Your Active Hint for ${otherPartner.name}:'
-                                            : 'Gentle Hint from ${activeHint.fromPartnerName}:',
-                                        style: const TextStyle(
-                                          fontSize: 11.5,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFFBE123C),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        activeHint.hintText,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          height: 1.35,
-                                          color: Color(0xFF881337),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                        ] else ...[
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFFE2E8F0),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.lightbulb_outline_rounded,
-                                  size: 16,
-                                  color: Color(0xFFE11D48),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Take a 1-min check-in to send ${otherPartner.name} an effortless care hint.',
-                                    style: const TextStyle(
-                                      fontSize: 11.5,
-                                      color: Color(0xFF475569),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-
-                        // Quick action buttons
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: const Color(0xFFBE123C),
-                                  side: const BorderSide(
-                                    color: Color(0xFFFDA4AF),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 8,
-                                  ),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                                onPressed: () =>
-                                    context.push('/couple-quizzes'),
-                                icon: const Icon(Icons.quiz_outlined, size: 15),
-                                label: Text(
-                                  AppStrings.t('Couple Quizzes', currentLang),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: FilledButton.icon(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFF0F766E),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 8,
-                                  ),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                                onPressed: () => context.push('/advisor'),
-                                icon: const Icon(
-                                  Icons.support_agent_rounded,
-                                  size: 15,
-                                ),
-                                label: Text(
-                                  AppStrings.t('AI Advisor', currentLang),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-
-                // 6. Media Vault & Security Hub Quick Access
-                Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        elevation: 0,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(
-                            color: const Color(0xFF0F766E).withOpacity(0.25),
-                            width: 1,
-                          ),
-                        ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => context.push('/vault'),
-                          child: Padding(
-                            padding: const EdgeInsets.all(14.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFCCFBF1),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: const Icon(
-                                        Icons.photo_library_rounded,
-                                        size: 20,
-                                        color: Color(0xFF0F766E),
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_forward_ios,
-                                      size: 12,
-                                      color: Color(0xFF0F766E),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  AppStrings.t('Media Vault', currentLang),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0F172A),
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  'Scans & Keepsakes',
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Card(
-                        elevation: 0,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(
-                            color: const Color(0xFF0284C7).withOpacity(0.25),
-                            width: 1,
-                          ),
-                        ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => context.push('/privacy-sync'),
-                          child: Padding(
-                            padding: const EdgeInsets.all(14.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFE0F2FE),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: const Icon(
-                                        Icons.shield_outlined,
-                                        size: 20,
-                                        color: Color(0xFF0284C7),
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_forward_ios,
-                                      size: 12,
-                                      color: Color(0xFF0284C7),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  AppStrings.t('Privacy & Lock', currentLang),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF0F172A),
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  'PIN & Offline Sync',
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                // 7. Filtered Stage Checklist Section
-                checklistAsync.when(
-                  data: (items) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${AppStrings.t(currentStage.displayName, currentLang)} ${AppStrings.t('Checklist', currentLang)}',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    completedChecklistCount ==
-                                            totalChecklistCount &&
-                                        totalChecklistCount > 0
-                                    ? Colors.green.shade50
-                                    : theme.colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
+                                decoration: BoxDecoration(
                                   color:
                                       completedChecklistCount ==
                                               totalChecklistCount &&
                                           totalChecklistCount > 0
-                                      ? Colors.green.shade200
-                                      : theme.colorScheme.outlineVariant,
-                                ),
-                              ),
-                              child: Text(
-                                '$completedChecklistCount / $totalChecklistCount',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color:
-                                      completedChecklistCount ==
-                                              totalChecklistCount &&
-                                          totalChecklistCount > 0
-                                      ? Colors.green.shade700
-                                      : theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        if (items.isEmpty)
-                          Card(
-                            elevation: 0,
-                            color: theme.colorScheme.surfaceContainerHighest
-                                .withOpacity(0.4),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              side: BorderSide(
-                                color: theme.colorScheme.outlineVariant,
-                              ),
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(28.0),
-                              child: Center(
-                                child: Text(
-                                  'No checklist items configured for this stage and profile.',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          ...items.map((item) {
-                            final isDone = completedIds.contains(item.id);
-
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                side: BorderSide(
-                                  color: isDone
-                                      ? const Color(0xFFBBF7D0)
-                                      : theme.colorScheme.outlineVariant,
-                                  width: 1,
-                                ),
-                              ),
-                              color: isDone
-                                  ? const Color(0xFFF0FDF4)
-                                  : Colors.white,
-                              child: CheckboxListTile(
-                                value: isDone,
-                                onChanged: (_) {
-                                  ref
-                                      .read(completedChecklistProvider.notifier)
-                                      .toggle(item.id);
-                                },
-                                activeColor: const Color(0xFF059669),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 4,
-                                ),
-                                title: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        item.title,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
-                                          decoration: isDone
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                          color: isDone
-                                              ? const Color(0xFF64748B)
-                                              : const Color(0xFF0F172A),
-                                        ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.volume_up_outlined,
-                                        size: 20,
-                                      ),
-                                      tooltip: AppStrings.t(
-                                        'Read aloud',
-                                        currentLang,
-                                      ),
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                      visualDensity: VisualDensity.compact,
-                                      onPressed: () {
-                                        ref
-                                            .read(ttsServiceProvider)
-                                            .speak(
-                                              '${item.title}. ${item.description}',
-                                              currentLang,
-                                            );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Padding(
-                                  padding: const EdgeInsets.only(top: 4.0),
-                                  child: Text(
-                                    item.description,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: isDone
-                                          ? const Color(0xFF94A3B8)
-                                          : const Color(0xFF475569),
-                                    ),
-                                  ),
-                                ),
-                                secondary: CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor: isDone
-                                      ? const Color(0xFFDCFCE7)
+                                      ? Colors.green.shade50
                                       : theme
                                             .colorScheme
                                             .surfaceContainerHighest,
-                                  child: Icon(
-                                    isDone
-                                        ? Icons.check
-                                        : Icons.assignment_outlined,
-                                    size: 18,
-                                    color: isDone
-                                        ? const Color(0xFF15803D)
-                                        : const Color(0xFF64748B),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color:
+                                        completedChecklistCount ==
+                                                totalChecklistCount &&
+                                            totalChecklistCount > 0
+                                        ? Colors.green.shade200
+                                        : theme.colorScheme.outlineVariant,
                                   ),
                                 ),
-                                controlAffinity:
-                                    ListTileControlAffinity.trailing,
+                                child: Text(
+                                  '$completedChecklistCount / $totalChecklistCount',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        completedChecklistCount ==
+                                                totalChecklistCount &&
+                                            totalChecklistCount > 0
+                                        ? Colors.green.shade700
+                                        : theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
                               ),
-                            );
-                          }),
-                        const SizedBox(height: 16),
-                      ],
-                    );
-                  },
-                  loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: CircularProgressIndicator(),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          if (items.isEmpty)
+                            Card(
+                              elevation: 0,
+                              color: theme.colorScheme.surfaceContainerHighest
+                                  .withOpacity(0.4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                side: BorderSide(
+                                  color: theme.colorScheme.outlineVariant,
+                                ),
+                              ),
+                              child: const Padding(
+                                padding: EdgeInsets.all(28.0),
+                                child: Center(
+                                  child: Text(
+                                    'No checklist items configured for this stage and profile.',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            ...items.map((item) {
+                              final isDone = completedIds.contains(item.id);
+
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  side: BorderSide(
+                                    color: isDone
+                                        ? const Color(0xFFBBF7D0)
+                                        : theme.colorScheme.outlineVariant,
+                                    width: 1,
+                                  ),
+                                ),
+                                color: isDone
+                                    ? const Color(0xFFF0FDF4)
+                                    : Colors.white,
+                                child: CheckboxListTile(
+                                  value: isDone,
+                                  onChanged: (_) {
+                                    ref
+                                        .read(
+                                          completedChecklistProvider.notifier,
+                                        )
+                                        .toggle(item.id);
+                                  },
+                                  activeColor: const Color(0xFF059669),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 4,
+                                  ),
+                                  title: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item.title,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            decoration: isDone
+                                                ? TextDecoration.lineThrough
+                                                : null,
+                                            color: isDone
+                                                ? const Color(0xFF64748B)
+                                                : const Color(0xFF0F172A),
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.volume_up_outlined,
+                                          size: 20,
+                                        ),
+                                        tooltip: AppStrings.t(
+                                          'Read aloud',
+                                          currentLang,
+                                        ),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        visualDensity: VisualDensity.compact,
+                                        onPressed: () {
+                                          ref
+                                              .read(ttsServiceProvider)
+                                              .speak(
+                                                '${item.title}. ${item.description}',
+                                                currentLang,
+                                              );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  subtitle: Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      item.description,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isDone
+                                            ? const Color(0xFF94A3B8)
+                                            : const Color(0xFF475569),
+                                      ),
+                                    ),
+                                  ),
+                                  secondary: CircleAvatar(
+                                    radius: 18,
+                                    backgroundColor: isDone
+                                        ? const Color(0xFFDCFCE7)
+                                        : theme
+                                              .colorScheme
+                                              .surfaceContainerHighest,
+                                    child: Icon(
+                                      isDone
+                                          ? Icons.check
+                                          : Icons.assignment_outlined,
+                                      size: 18,
+                                      color: isDone
+                                          ? const Color(0xFF15803D)
+                                          : const Color(0xFF64748B),
+                                    ),
+                                  ),
+                                  controlAffinity:
+                                      ListTileControlAffinity.trailing,
+                                ),
+                              );
+                            }),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    },
+                    loading: () => const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                    error: (err, stack) => Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text('Failed to load checklist: $err'),
+                      ),
                     ),
                   ),
-                  error: (err, stack) => Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text('Failed to load checklist: $err'),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -2880,71 +2376,6 @@ class TimelineScreen extends ConsumerWidget {
         onPressed: () => context.push('/advisor'),
         icon: const Icon(Icons.support_agent),
         label: Text(AppStrings.t('AI Advisor', currentLang)),
-      ),
-    );
-  }
-
-  Widget _buildShortcutCard({
-    required BuildContext context,
-    required ModeShortcutItem item,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push(item.route),
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: item.containerColor.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: item.accentColor.withOpacity(0.25),
-              width: 1,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: item.containerColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(item.icon, color: item.accentColor, size: 22),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 13,
-                    color: item.accentColor,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                item.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13.5,
-                  color: item.accentColor,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                item.subtitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

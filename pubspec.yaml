@@ -36,3 +36,7 @@ flutter:
 
   assets:
     - assets/content/
+    - lib/features/onboarding/Aesthetic_green_leaf_wallpaper-removebg-preview.png
+    - lib/features/onboarding/Kağıt_Mürekkep_Baskı_Toner_Boya__boya__sıçrama__Yaprak__Metin_png-removebg-preview.png
+    - lib/features/onboarding/Male_and_female_symbols____AFF___pink_blue_white_isolated__Ad-removebg-preview.png
+    - lib/features/onboarding/SmallSquareLogoJpg-removebg-preview.png

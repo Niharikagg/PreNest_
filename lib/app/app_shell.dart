@@ -32,21 +32,34 @@ class AppShell extends ConsumerWidget {
     final activePartner = couple.activePartner;
     final currentIndex = navigationShell.currentIndex;
     final theme = Theme.of(context);
+    final activeName = activePartner.name.trim();
+    final otherName = couple.otherPartner.name.trim();
+    final coupleDisplayName = activePartner.role.toLowerCase() == 'him'
+        ? '$activeName & ${otherName.isNotEmpty ? otherName : 'Her'}'
+        : (otherName.isNotEmpty ? '$activeName & $otherName' : activeName);
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0xFFB23C59),
+        foregroundColor: const Color(0xFFF7D6DC),
+        titleTextStyle: const TextStyle(
+          color: Color(0xFFF7D6DC),
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.3,
+        ),
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
+                color: const Color(0xFF4B0F1E).withValues(alpha: 0.55),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 Icons.favorite_rounded,
                 size: 18,
-                color: theme.colorScheme.primary,
+                color: const Color(0xFFF7D6DC),
               ),
             ),
             const SizedBox(width: 10),
@@ -66,35 +79,36 @@ class AppShell extends ConsumerWidget {
                           letterSpacing: -0.3,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          _getTabTitle(currentIndex, currentLang),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurfaceVariant,
+                      if (currentIndex != 0) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF7D6DC)
+                                .withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            _getTabTitle(currentIndex, currentLang),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFF7D6DC),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                   Text(
-                    activePartner.name.isNotEmpty
-                        ? (couple.coupleName.isNotEmpty
-                            ? couple.coupleName
-                            : activePartner.name)
+                    coupleDisplayName.isNotEmpty
+                        ? coupleDisplayName
                         : 'Your Calm Care Circle',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: const Color(0xFFF7D6DC).withValues(alpha: 0.9),
                       fontSize: 11,
                     ),
                     maxLines: 1,
@@ -149,44 +163,57 @@ class AppShell extends ConsumerWidget {
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFFFFF9FA),
           border: Border(
-            top: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
+            top: BorderSide(
+              color: const Color(0xFF8E2B44).withValues(alpha: 0.18),
+              width: 1,
+            ),
           ),
         ),
-        child: NavigationBar(
-          selectedIndex: currentIndex,
-          elevation: 0,
-          backgroundColor: Colors.white,
-          indicatorColor: theme.colorScheme.primaryContainer,
-          onDestinationSelected: (index) {
-            navigationShell.goBranch(
-              index,
-              initialLocation: index == currentIndex,
-            );
-          },
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.timeline_outlined),
-              selectedIcon: const Icon(Icons.timeline),
-              label: AppStrings.t('Timeline', currentLang),
+        child: Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: const Color(0xFF6D1D32),
+              onPrimary: Colors.white,
+              primaryContainer: const Color(0xFFF7D6DC),
+              onPrimaryContainer: const Color(0xFF6D1D32),
             ),
-            NavigationDestination(
-              icon: const Icon(Icons.description_outlined),
-              selectedIcon: const Icon(Icons.description),
-              label: AppStrings.t('Records', currentLang),
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.fact_check_outlined),
-              selectedIcon: const Icon(Icons.fact_check),
-              label: AppStrings.t('Verify', currentLang),
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.trending_up_outlined),
-              selectedIcon: const Icon(Icons.trending_up),
-              label: AppStrings.t('Trends', currentLang),
-            ),
-          ],
+          ),
+          child: NavigationBar(
+            selectedIndex: currentIndex,
+            elevation: 0,
+            backgroundColor: const Color(0xFFFFF9FA),
+            indicatorColor: const Color(0xFFF7D6DC),
+            onDestinationSelected: (index) {
+              navigationShell.goBranch(
+                index,
+                initialLocation: index == currentIndex,
+              );
+            },
+            destinations: [
+              NavigationDestination(
+                icon: const Icon(Icons.timeline_outlined),
+                selectedIcon: const Icon(Icons.timeline),
+                label: AppStrings.t('Timeline', currentLang),
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.description_outlined),
+                selectedIcon: const Icon(Icons.description),
+                label: AppStrings.t('Records', currentLang),
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.fact_check_outlined),
+                selectedIcon: const Icon(Icons.fact_check),
+                label: AppStrings.t('Verify', currentLang),
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.trending_up_outlined),
+                selectedIcon: const Icon(Icons.trending_up),
+                label: AppStrings.t('Trends', currentLang),
+              ),
+            ],
+          ),
         ),
       ),
     );

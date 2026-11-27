@@ -44,6 +44,11 @@ class _StoryCardData {
 /// Renders ~165×190px rounded story cards with role badge pills (`You`, `Both`, `Her`)
 /// in distinct soft pastel containers, dynamically adapting to the active [PregnancyStage].
 class PartnerStoryCards extends ConsumerWidget {
+  static const _dark = Color(0xFF6D1D32);
+  static const _deep = Color(0xFF8E2B44);
+  static const _light = Color(0xFFF7D6DC);
+  static const _border = Color(0xFFE7A8B6);
+
   final PregnancyStage? stage;
   final bool showHeader;
   final String? headerTitle;
@@ -735,13 +740,10 @@ class PartnerStoryCards extends ConsumerWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: card.accentColor.withOpacity(0.22),
-            width: 1.1,
-          ),
+          border: Border.all(color: _border, width: 1.1),
           boxShadow: [
             BoxShadow(
-              color: card.accentColor.withOpacity(0.05),
+              color: _dark.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -761,26 +763,26 @@ class PartnerStoryCards extends ConsumerWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: card.badgeBg,
+                    color: _light,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: card.badgeBorder, width: 0.8),
+                    border: Border.all(color: _border, width: 0.8),
                   ),
                   child: Text(
                     card.badgeText,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: card.badgeTextCol,
+                      color: _dark,
                     ),
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: card.iconBg,
+                    color: _light,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(card.icon, size: 16, color: card.accentColor),
+                  child: Icon(card.icon, size: 16, color: _deep),
                 ),
               ],
             ),
@@ -822,15 +824,11 @@ class PartnerStoryCards extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: card.accentColor,
+                    color: _deep,
                   ),
                 ),
                 const SizedBox(width: 4),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 10,
-                  color: card.accentColor,
-                ),
+                Icon(Icons.arrow_forward_ios_rounded, size: 10, color: _deep),
               ],
             ),
           ],
@@ -869,45 +867,89 @@ class PartnerStoryCards extends ConsumerWidget {
       ),
     ];
 
-    return Padding(
+    return _PartnerStoryCarousel(
+      cards: cards.map(_buildCard).toList(growable: false),
+      showHeader: showHeader,
+      headerTitle: headerTitle ?? 'For You, Both & Her',
       padding: padding,
+    );
+  }
+}
+
+class _PartnerStoryCarousel extends StatefulWidget {
+  const _PartnerStoryCarousel({
+    required this.cards,
+    required this.showHeader,
+    required this.headerTitle,
+    required this.padding,
+  });
+
+  final List<Widget> cards;
+  final bool showHeader;
+  final String headerTitle;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  State<_PartnerStoryCarousel> createState() => _PartnerStoryCarouselState();
+}
+
+class _PartnerStoryCarouselState extends State<_PartnerStoryCarousel> {
+  late final PageController _pageController;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _goToPage(int page) {
+    if (page < 0 || page >= widget.cards.length) return;
+    _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: widget.padding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (showHeader) ...[
+          if (widget.showHeader) ...[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFCCFBF1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(
-                          Icons.people_alt_rounded,
-                          size: 15,
-                          color: Color(0xFF0F766E),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        headerTitle ?? 'For You, Both & Her',
-                        style: const TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textDark,
-                        ),
-                      ),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: PartnerStoryCards._light,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.people_alt_rounded,
+                      size: 15,
+                      color: PartnerStoryCards._dark,
+                    ),
                   ),
-                  const Text(
-                    'Swipe cards',
-                    style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.headerTitle,
+                    style: const TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.bold,
+                      color: PartnerStoryCards._dark,
+                    ),
                   ),
                 ],
               ),
@@ -916,12 +958,54 @@ class PartnerStoryCards extends ConsumerWidget {
           ],
           SizedBox(
             height: 190,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: cards.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 12),
-              itemBuilder: (context, index) => _buildCard(cards[index]),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 36,
+                  child: IconButton(
+                    onPressed: _currentPage > 0
+                        ? () => _goToPage(_currentPage - 1)
+                        : null,
+                    tooltip: 'Previous card',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 36,
+                      height: 40,
+                    ),
+                    icon: const Icon(Icons.arrow_back_ios_rounded, size: 16),
+                    color: PartnerStoryCards._deep,
+                    disabledColor: PartnerStoryCards._border,
+                  ),
+                ),
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: widget.cards.length,
+                    onPageChanged: (page) =>
+                        setState(() => _currentPage = page),
+                    itemBuilder: (context, index) =>
+                        Center(child: widget.cards[index]),
+                  ),
+                ),
+                SizedBox(
+                  width: 36,
+                  child: IconButton(
+                    onPressed: _currentPage < widget.cards.length - 1
+                        ? () => _goToPage(_currentPage + 1)
+                        : null,
+                    tooltip: 'Next card',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 36,
+                      height: 40,
+                    ),
+                    icon: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                    color: PartnerStoryCards._deep,
+                    disabledColor: PartnerStoryCards._border,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

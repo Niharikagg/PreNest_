@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme.dart';
 import '../profile/profile_provider.dart';
 import '../stage/stage_provider.dart';
 import 'entry_state.dart';
@@ -42,6 +41,13 @@ class ModeSelectScreen extends ConsumerStatefulWidget {
 }
 
 class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
+  static const _backgroundColor = Color(0xFFB23C59);
+  static const _wine = Color(0xFF4B0F1E);
+  static const _dark = Color(0xFF6D1D32);
+  static const _deep = Color(0xFF8E2B44);
+  static const _pink = Color(0xFFE07A94);
+  static const _light = Color(0xFFF7D6DC);
+
   int _currentStep = 0; // 0: Name, 1: Stage Grid, 2: Key Date
   final TextEditingController _nameController = TextEditingController();
   PreNestMode _selectedMode = PreNestMode.pregnant;
@@ -54,36 +60,36 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
       title: 'Period Tracker',
       subtitle: 'Cycle, symptoms & PCOD/PCOS',
       icon: Icons.water_drop_rounded,
-      accentColor: Color(0xFFE11D48), // Rose
-      containerColor: Color(0xFFFFE4E6),
-      borderColor: Color(0xFFFECDD3),
+      accentColor: Color(0xFF8E2B44),
+      containerColor: Color(0xFFF7D6DC),
+      borderColor: Color(0xFFE7A8B6),
     ),
     _StageCardInfo(
       mode: PreNestMode.planningPregnancy,
       title: 'Planning for Pregnancy',
       subtitle: 'Preconception health & habits',
       icon: Icons.spa_rounded,
-      accentColor: Color(0xFF0F766E), // Teal
-      containerColor: Color(0xFFCCFBF1),
-      borderColor: Color(0xFF99F6E4),
+      accentColor: Color(0xFF6D1D32),
+      containerColor: Color(0xFFFCE8EC),
+      borderColor: Color(0xFFE7A8B6),
     ),
     _StageCardInfo(
       mode: PreNestMode.pregnant,
       title: 'Pregnant',
       subtitle: 'Week-by-week & ANC care',
       icon: Icons.child_care_rounded,
-      accentColor: Color(0xFF0284C7), // Sky
-      containerColor: Color(0xFFE0F2FE),
-      borderColor: Color(0xFFBAE6FD),
+      accentColor: Color(0xFFB23C59),
+      containerColor: Color(0xFFF7D6DC),
+      borderColor: Color(0xFFE9A3B2),
     ),
     _StageCardInfo(
       mode: PreNestMode.postpartum,
       title: 'Postpartum',
       subtitle: 'Recovery & newborn milestones',
       icon: Icons.family_restroom_rounded,
-      accentColor: Color(0xFFD97706), // Amber
-      containerColor: Color(0xFFFEF3C7),
-      borderColor: Color(0xFFFDE68A),
+      accentColor: Color(0xFF4B0F1E),
+      containerColor: Color(0xFFF2C2CD),
+      borderColor: Color(0xFFD98A9C),
     ),
   ];
 
@@ -159,7 +165,8 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
 
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate != null &&
+      initialDate:
+          _selectedDate != null &&
               _selectedDate!.isAfter(firstDate) &&
               _selectedDate!.isBefore(lastDate)
           ? _selectedDate!
@@ -167,6 +174,21 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
       firstDate: firstDate,
       lastDate: lastDate,
       helpText: _getDatePickerHelpText(),
+      builder: (context, child) {
+        final theme = Theme.of(context);
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: _dark,
+              onPrimary: Colors.white,
+              surface: _light,
+              onSurface: _wine,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: _light),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -223,7 +245,9 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
     final partnerCode = CoupleNotifier.generate6CharPartnerCode();
 
     // 1. Save profile state
-    ref.read(coupleProvider.notifier).completeOnboardingForSelf(
+    ref
+        .read(coupleProvider.notifier)
+        .completeOnboardingForSelf(
           name: name.isNotEmpty ? name : 'Friend',
           partnerCode: partnerCode,
           keyDate: effectiveDate,
@@ -234,7 +258,9 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
     ref.read(stageProvider.notifier).setStage(_selectedMode.stage);
 
     if (effectiveDate != null) {
-      ref.read(modeSelectionProvider.notifier).setMilestoneNote(
+      ref
+          .read(modeSelectionProvider.notifier)
+          .setMilestoneNote(
             '${_selectedMode.title} • Date: ${_formatDate(effectiveDate)}',
           );
     }
@@ -247,7 +273,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
         content: Text(
           'Welcome to PreNest, ${name.isNotEmpty ? name : "Friend"}! Partner Code: $partnerCode',
         ),
-        backgroundColor: const Color(0xFF0F766E),
+        backgroundColor: _dark,
         duration: const Duration(seconds: 3),
       ),
     );
@@ -276,15 +302,16 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBFB),
+      backgroundColor: _backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        foregroundColor: _light,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
+          color: _light,
           onPressed: () {
             if (_currentStep > 0) {
               setState(() => _currentStep--);
@@ -298,42 +325,96 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF64748B),
+            color: _light,
           ),
         ),
         centerTitle: true,
       ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 580),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: _buildCurrentStepContent(theme),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [_backgroundColor, _deep],
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -110,
+              right: -100,
+              width: 300,
+              height: 300,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        _light.withValues(alpha: 0.14),
+                        _light.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-          ),
+            Positioned(
+              bottom: -130,
+              left: -100,
+              width: 340,
+              height: 340,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        _pink.withValues(alpha: 0.14),
+                        _pink.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 580),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: _buildCurrentStepContent(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildCurrentStepContent(ThemeData theme) {
+  Widget _buildCurrentStepContent() {
     switch (_currentStep) {
       case 0:
-        return _buildNameStep(theme);
+        return _buildNameStep();
       case 1:
-        return _buildStageGridStep(theme);
+        return _buildStageGridStep();
       case 2:
       default:
-        return _buildKeyDateStep(theme);
+        return _buildKeyDateStep();
     }
   }
 
   // STEP 1: Ask for her Name
-  Widget _buildNameStep(ThemeData theme) {
+  Widget _buildNameStep() {
     return Column(
       key: const ValueKey('step_name'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -343,15 +424,12 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
           child: Container(
             width: 64,
             height: 64,
-            decoration: const BoxDecoration(
-              color: Color(0xFFCCFBF1),
+            decoration: BoxDecoration(
+              color: _wine.withValues(alpha: 0.3),
               shape: BoxShape.circle,
+              border: Border.all(color: _light.withValues(alpha: 0.35)),
             ),
-            child: const Icon(
-              Icons.badge_rounded,
-              color: Color(0xFF0F766E),
-              size: 32,
-            ),
+            child: const Icon(Icons.badge_rounded, color: _light, size: 32),
           ),
         ),
         const SizedBox(height: 20),
@@ -361,7 +439,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
+            color: _light,
             letterSpacing: -0.4,
           ),
         ),
@@ -369,20 +447,16 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
         const Text(
           'Your name personalizes your daily health timeline, clinical doctor summary, and care reminders.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: Color(0xFF64748B),
-            height: 1.45,
-          ),
+          style: TextStyle(fontSize: 14, color: _light, height: 1.45),
         ),
         const SizedBox(height: 32),
         Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: Color(0xFFE2E8F0)),
+            side: const BorderSide(color: Color(0xFFE9A3B2)),
           ),
-          color: Colors.white,
+          color: const Color(0xE6F7D6DC),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: TextField(
@@ -392,19 +466,16 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF0F172A),
+                color: _wine,
               ),
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Enter your first name',
                 hintStyle: TextStyle(
-                  color: Colors.grey.shade400,
+                  color: _dark.withValues(alpha: 0.55),
                   fontWeight: FontWeight.normal,
                 ),
-                icon: const Icon(
-                  Icons.person_outline_rounded,
-                  color: Color(0xFF0F766E),
-                ),
+                icon: const Icon(Icons.person_outline_rounded, color: _deep),
                 errorText: _nameError,
               ),
               onSubmitted: (_) => _onNameSubmitted(),
@@ -415,7 +486,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
         FilledButton(
           onPressed: _onNameSubmitted,
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFF0F766E),
+            backgroundColor: _dark,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -439,7 +510,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
   }
 
   // STEP 2: 2x2 Pastel Stage Grid
-  Widget _buildStageGridStep(ThemeData theme) {
+  Widget _buildStageGridStep() {
     final herName = _nameController.text.trim();
 
     return Column(
@@ -453,7 +524,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
+            color: _light,
             letterSpacing: -0.4,
           ),
         ),
@@ -461,11 +532,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
         const Text(
           'PreNest tailors its clinical guidance, vitals trackers, and checklists to your active stage.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: Color(0xFF64748B),
-            height: 1.45,
-          ),
+          style: TextStyle(fontSize: 14, color: _light, height: 1.45),
         ),
         const SizedBox(height: 28),
 
@@ -477,7 +544,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
             crossAxisCount: 2,
             crossAxisSpacing: 14,
             mainAxisSpacing: 14,
-            childAspectRatio: 0.98,
+            childAspectRatio: 0.88,
           ),
           itemCount: _stageCards.length,
           itemBuilder: (context, index) {
@@ -494,8 +561,8 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? card.containerColor.withOpacity(0.4)
-                        : Colors.white,
+                        ? card.containerColor.withValues(alpha: 0.96)
+                        : const Color(0xD9F7D6DC),
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(
                       color: isSelected ? card.accentColor : card.borderColor,
@@ -504,8 +571,8 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                     boxShadow: [
                       BoxShadow(
                         color: isSelected
-                            ? card.accentColor.withOpacity(0.14)
-                            : Colors.black.withOpacity(0.02),
+                            ? card.accentColor.withValues(alpha: 0.14)
+                            : _wine.withValues(alpha: 0.05),
                         blurRadius: isSelected ? 12 : 6,
                         offset: const Offset(0, 4),
                       ),
@@ -544,7 +611,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                           else
                             Icon(
                               Icons.radio_button_unchecked_rounded,
-                              color: Colors.grey.shade300,
+                              color: _dark.withValues(alpha: 0.25),
                               size: 20,
                             ),
                         ],
@@ -560,9 +627,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                             style: TextStyle(
                               fontSize: 14.5,
                               fontWeight: FontWeight.w800,
-                              color: isSelected
-                                  ? card.accentColor
-                                  : const Color(0xFF0F172A),
+                              color: isSelected ? card.accentColor : _wine,
                               letterSpacing: -0.2,
                             ),
                           ),
@@ -574,8 +639,8 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                             style: TextStyle(
                               fontSize: 11.5,
                               color: isSelected
-                                  ? card.accentColor.withOpacity(0.85)
-                                  : const Color(0xFF64748B),
+                                  ? card.accentColor.withValues(alpha: 0.85)
+                                  : _dark.withValues(alpha: 0.8),
                               height: 1.3,
                             ),
                           ),
@@ -593,7 +658,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
         FilledButton(
           onPressed: () => _onStageSelected(_selectedMode),
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFF0F766E),
+            backgroundColor: _dark,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -605,8 +670,10 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
             children: [
               Text(
                 'Next with ${_selectedMode.title}',
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(width: 8),
               const Icon(Icons.arrow_forward_rounded, size: 18),
@@ -618,7 +685,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
   }
 
   // STEP 3: Key Date Screen with DatePicker & "Skip for now"
-  Widget _buildKeyDateStep(ThemeData theme) {
+  Widget _buildKeyDateStep() {
     final title = _getKeyDateTitle();
     final subtitle = _getKeyDateSubtitle();
 
@@ -631,13 +698,14 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
           child: Container(
             width: 64,
             height: 64,
-            decoration: const BoxDecoration(
-              color: Color(0xFFE0F2FE),
+            decoration: BoxDecoration(
+              color: _wine.withValues(alpha: 0.3),
               shape: BoxShape.circle,
+              border: Border.all(color: _light.withValues(alpha: 0.35)),
             ),
             child: const Icon(
               Icons.calendar_month_rounded,
-              color: Color(0xFF0284C7),
+              color: _light,
               size: 32,
             ),
           ),
@@ -649,7 +717,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
+            color: _light,
             letterSpacing: -0.4,
           ),
         ),
@@ -657,11 +725,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
         Text(
           subtitle,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 13.5,
-            color: Color(0xFF64748B),
-            height: 1.45,
-          ),
+          style: const TextStyle(fontSize: 13.5, color: _light, height: 1.45),
         ),
         const SizedBox(height: 32),
 
@@ -670,9 +734,9 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: Color(0xFFBAE6FD), width: 1.5),
+            side: const BorderSide(color: Color(0xFFE7A8B6), width: 1.5),
           ),
-          color: const Color(0xFFF0F9FF),
+          color: const Color(0xE6F7D6DC),
           child: InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: _pickKeyDate,
@@ -685,11 +749,11 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFBAE6FD)),
+                      border: Border.all(color: const Color(0xFFE7A8B6)),
                     ),
                     child: const Icon(
                       Icons.event_available_rounded,
-                      color: Color(0xFF0284C7),
+                      color: _deep,
                       size: 26,
                     ),
                   ),
@@ -703,7 +767,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF0284C7),
+                            color: _deep,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -714,7 +778,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
+                            color: _wine,
                           ),
                         ),
                       ],
@@ -722,7 +786,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
                   ),
                   const Icon(
                     Icons.edit_calendar_rounded,
-                    color: Color(0xFF0284C7),
+                    color: _deep,
                     size: 22,
                   ),
                 ],
@@ -737,7 +801,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
         FilledButton(
           onPressed: () => _finishOnboarding(skipDate: false),
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFF0F766E),
+            backgroundColor: _dark,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -763,7 +827,7 @@ class _ModeSelectScreenState extends ConsumerState<ModeSelectScreen> {
         TextButton(
           onPressed: () => _finishOnboarding(skipDate: true),
           style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFF64748B),
+            foregroundColor: _light,
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),
           child: const Text(

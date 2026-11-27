@@ -2,324 +2,335 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/theme.dart';
 import 'entry_state.dart';
 
-/// Clean, spacious Material 3 entry choice screen for PreNest.
-/// Provides two guided paths:
-/// 1. "For myself" -> leads to her setup flow (/onboarding/mode)
-/// 2. "I have a partner code" -> leads to his partner login flow (/onboarding/partner-intake)
-class EntryChoiceScreen extends ConsumerWidget {
+class EntryChoiceScreen extends ConsumerStatefulWidget {
   const EntryChoiceScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+  ConsumerState<EntryChoiceScreen> createState() => _EntryChoiceScreenState();
+}
 
+class _EntryChoiceScreenState extends ConsumerState<EntryChoiceScreen>
+    with SingleTickerProviderStateMixin {
+  static const _backgroundColor = Color(0xFFB23C59);
+  static const _light = Color(0xFFF7D6DC);
+
+  late final AnimationController _swayController;
+  late final Animation<double> _sway;
+
+  @override
+  void initState() {
+    super.initState();
+    _swayController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
+    _sway = Tween<double>(begin: -0.04, end: 0.04).animate(
+      CurvedAnimation(parent: _swayController, curve: Curves.easeInOutSine),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.of(context).disableAnimations) {
+      _swayController
+        ..stop()
+        ..value = 0.5;
+    } else if (!_swayController.isAnimating) {
+      _swayController.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _swayController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBFB),
+      backgroundColor: const Color(0xFF222222),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 580),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 16),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final appWidth = constraints.maxWidth.clamp(0.0, 450.0);
+            final compact = appWidth <= 380;
 
-                  // Brand & Welcome Icon Badge
-                  Center(
-                    child: Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            const Color(0xFFFFE4E6),
-                            const Color(0xFFCCFBF1).withOpacity(0.8),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFE11D48).withOpacity(0.08),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+            return Center(
+              child: SizedBox(
+                width: appWidth,
+                height: constraints.maxHeight,
+                child: ClipRect(
+                  child: Stack(
+                    children: [
+                      const Positioned.fill(
+                        child: ColoredBox(color: _backgroundColor),
                       ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.favorite_rounded,
-                          size: 34,
-                          color: Color(0xFF0F766E),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Greeting Title & Calming Tagline
-                  Text(
-                    'Welcome to PreNest',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF0F172A),
-                      letterSpacing: -0.6,
-                      fontSize: 28,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Your warm, clinical companion for cycle health, fertility, pregnancy milestones, and postpartum recovery.',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF64748B),
-                      fontSize: 14.5,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 36),
-
-                  // Card 1: "For myself"
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      side: const BorderSide(
-                        color: Color(0xFFCCFBF1),
-                        width: 1.5,
-                      ),
-                    ),
-                    color: Colors.white,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(24),
-                      onTap: () {
-                        ref.read(entryProvider.notifier).selectForMyself();
-                        context.go('/onboarding/mode');
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(22),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 58,
-                              height: 58,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFCCFBF1),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: const Color(0xFF99F6E4),
-                                  width: 1.2,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.person_rounded,
-                                color: Color(0xFF0F766E),
-                                size: 28,
+                      Positioned(
+                        right: -85,
+                        bottom: -45,
+                        width: 310,
+                        child: AnimatedBuilder(
+                          animation: _sway,
+                          child: IgnorePointer(
+                            child: Opacity(
+                              opacity: 0.62,
+                              child: Image.asset(
+                                'lib/features/onboarding/'
+                                'Kağıt_Mürekkep_Baskı_Toner_Boya__boya__sıçrama__'
+                                'Yaprak__Metin_png-removebg-preview.png',
+                                fit: BoxFit.contain,
+                                color: const Color(0xFF6D1D32),
+                                colorBlendMode: BlendMode.srcIn,
+                                excludeFromSemantics: true,
                               ),
                             ),
-                            const SizedBox(width: 18),
-                            Expanded(
+                          ),
+                          builder: (context, child) => Transform.rotate(
+                            angle: -_sway.value * 0.7,
+                            alignment: Alignment.bottomCenter,
+                            child: child,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: -18,
+                        bottom: -12,
+                        width: 155,
+                        child: AnimatedBuilder(
+                          animation: _sway,
+                          child: IgnorePointer(
+                            child: Opacity(
+                              opacity: 0.82,
+                              child: Image.asset(
+                                'lib/features/onboarding/'
+                                'Aesthetic_green_leaf_wallpaper-removebg-preview.png',
+                                fit: BoxFit.contain,
+                                color: const Color(0xFFE07A94),
+                                colorBlendMode: BlendMode.srcIn,
+                                excludeFromSemantics: true,
+                              ),
+                            ),
+                          ),
+                          builder: (context, child) => Transform.rotate(
+                            angle: _sway.value,
+                            alignment: Alignment.bottomCenter,
+                            child: child,
+                          ),
+                        ),
+                      ),
+                      Positioned.fill(
+                        child: SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                compact ? 25 : 31,
+                                20,
+                                compact ? 25 : 31,
+                                24,
+                              ),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Row(
-                                    children: [
-                                      const Text(
-                                        'For myself',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 18,
-                                          color: Color(0xFF0F172A),
-                                          letterSpacing: -0.3,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFE6FFFA),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: const Text(
-                                          'Her Setup',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFF0F766E),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  const Text(
-                                    'Set up your personal journey, select your active health stage, and track key dates.',
+                                  const Center(child: _PrenestLogo()),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Welcome to PreNest',
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xFF64748B),
-                                      height: 1.4,
+                                      color: _light,
+                                      fontSize: compact ? 25 : 28,
+                                      height: 1.2,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: -0.7,
                                     ),
+                                  ),
+                                  SizedBox(height: compact ? 14 : 17),
+                                  Text(
+                                    'Your warm, clinical companion for cycle health, '
+                                    'fertility, pregnancy milestones, and postpartum '
+                                    'recovery.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: _light,
+                                      fontSize: compact ? 14 : 15.5,
+                                      height: 1.55,
+                                    ),
+                                  ),
+                                  SizedBox(height: compact ? 24 : 29),
+                                  _ChoiceCard(
+                                    badge: 'Her Setup',
+                                    symbolAlignment: Alignment.centerRight,
+                                    symbolOffset: 3.5,
+                                    symbolColor: const Color(0xFFE07A94),
+                                    description:
+                                        'Set up your personal journey, select '
+                                        'your active health stage, and track '
+                                        'key dates.',
+                                    onTap: () {
+                                      ref
+                                          .read(entryProvider.notifier)
+                                          .selectForMyself();
+                                      context.go('/onboarding/mode');
+                                    },
+                                  ),
+                                  SizedBox(height: compact ? 18 : 22),
+                                  _ChoiceCard(
+                                    badge: 'His Setup',
+                                    symbolAlignment: Alignment.centerLeft,
+                                    symbolOffset: -3.5,
+                                    symbolColor: _light,
+                                    description:
+                                        'Connect to your partner’s profile '
+                                        'with their 6-character code and join '
+                                        'the shared care circle.',
+                                    onTap: () {
+                                      context.go('/onboarding/partner-intake');
+                                    },
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            const Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 16,
-                              color: Color(0xFF0F766E),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // Card 2: "I have a partner code"
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      side: const BorderSide(
-                        color: Color(0xFFFFE4E6),
-                        width: 1.5,
-                      ),
-                    ),
-                    color: Colors.white,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(24),
-                      onTap: () {
-                        context.go('/onboarding/partner-intake');
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(22),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 58,
-                              height: 58,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFE4E6),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: const Color(0xFFFECDD3),
-                                  width: 1.2,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.favorite_rounded,
-                                color: Color(0xFFE11D48),
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 18),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Text(
-                                        'I have a partner code',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 18,
-                                          color: Color(0xFF0F172A),
-                                          letterSpacing: -0.3,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFFFF1F2),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: const Text(
-                                          'Partner Link',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFFE11D48),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  const Text(
-                                    'Connect to her profile with her 6-character code to join the shared care circle.',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xFF64748B),
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 16,
-                              color: Color(0xFFE11D48),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 36),
-
-                  // Privacy & Security Trust Banner
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.shield_outlined,
-                          size: 16,
-                          color: Color(0xFF0F766E),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          '100% On-Device Data Storage • Private & Clinically Safe',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF475569),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _PrenestLogo extends StatelessWidget {
+  const _PrenestLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'lib/features/onboarding/SmallSquareLogoJpg-removebg-preview.png',
+      width: 160,
+      height: 120,
+      fit: BoxFit.cover,
+      alignment: Alignment.topCenter,
+      excludeFromSemantics: true,
+    );
+  }
+}
+
+class _ChoiceCard extends StatelessWidget {
+  const _ChoiceCard({
+    required this.badge,
+    required this.symbolAlignment,
+    required this.symbolOffset,
+    required this.symbolColor,
+    required this.description,
+    required this.onTap,
+  });
+
+  final String badge;
+  final Alignment symbolAlignment;
+  final double symbolOffset;
+  final Color symbolColor;
+  final String description;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xBFF7D6DC),
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 136),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          child: Row(
+            children: [
+              Container(
+                width: 55,
+                height: 55,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF4B0F1E),
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  // The source image's two figures are slightly off-center.
+                  child: Transform.translate(
+                    offset: Offset(symbolOffset, 0),
+                    child: Transform.scale(
+                      alignment: symbolAlignment,
+                      scale: 2,
+                      child: Image.asset(
+                        'lib/features/onboarding/'
+                        'Male_and_female_symbols____AFF___pink_blue_white_isolated__'
+                        'Ad-removebg-preview.png',
+                        width: 55,
+                        height: 55,
+                        fit: BoxFit.contain,
+                        color: symbolColor,
+                        colorBlendMode: BlendMode.srcIn,
+                        excludeFromSemantics: true,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE07A94),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        badge,
+                        style: const TextStyle(
+                          color: Color(0xFF6D1D32),
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        color: Color(0xFF6D1D32),
+                        fontSize: 13.5,
+                        height: 1.48,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 18,
+                color: Color(0xFF6D1D32),
+              ),
+            ],
           ),
         ),
       ),
